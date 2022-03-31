@@ -15,16 +15,7 @@ macro bind(def, element)
 end
 
 # ╔═╡ 87e78056-fecc-4b15-a723-16f51fa19353
-using Statistics
-
-# ╔═╡ ce8ccbe5-2637-43df-906a-ce6a71e9b918
-using DataFrames
-
-# ╔═╡ 7ffa98bf-633f-4307-8da3-c529febde4aa
-using HypertextLiteral
-
-# ╔═╡ 25fcbb57-f3ec-4cce-b22c-2503c9bb36e5
-using PlutoUI
+using DataFrames, PlutoUI,HypertextLiteral, Statistics
 
 # ╔═╡ 0ebe3384-97aa-11ec-17b5-cbf23568df03
 md" # 2 Mathematical characterization of systems
@@ -167,18 +158,6 @@ values_animals_3=DataFrame("Species" => ["A", "B", "C",  "D",  "E", "F", "G", "H
 # ╔═╡ 8a2c17b6-3f5c-4f9f-9714-09df2944dd50
 values_animals_4=DataFrame("Species" => ["A", "B", "C",  "D",  "E", "F", "G", "H", "I", "J"],"Frequency" => [33,33, 34, 0, 0, 0, 0, 0,0,0])
 
-# ╔═╡ 02c540f7-cdf8-428d-88c0-64ae6cb905c5
-fuji_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Mount_Fuji_and_Shinkansen_100_from_Fuji_River.jpg/1200px-Mount_Fuji_and_Shinkansen_100_from_Fuji_River.jpg"
-
-# ╔═╡ 6be4813b-fb90-4fcb-bc93-314971a7b50d
-ireland_url = "https://images.ireland.com/media/Images/Down/3e656c481c7a49a2b366d4f8696b17b2.jpg"
-
-# ╔═╡ e25205ff-a4fa-4a54-8a6c-1f94c9dd9ac3
-discrete_url = "https://reference.wolfram.com/language/ref/Files/DiscretePlot3D.en/O_3.png"
-
-# ╔═╡ 52f9023e-fb67-43ca-8548-46dfeeb7fb86
-continuum_url = "https://i.stack.imgur.com/jGmh5.png"
-
 # ╔═╡ b20cdd19-08c4-4837-947f-97594b8822d2
 md" ## 2.2 Graph Theory 
 As we mentioned, the important feature of the system comes from the interactions between the parts. Now we will see some tools to study how the parts of a system are interacting and connected.
@@ -276,6 +255,28 @@ D=\frac{E-(N-1)}{E_{max}-(N-1)}
 # ╔═╡ 477ba0d8-1dd9-46c8-bff0-72e4bfa89238
 md"Exercise, draw two networks (one directed and one undirected) and calculate the density, which one is mode dense? "
 
+# ╔═╡ b5174a24-428e-4a41-9b85-fccc7bcf8d32
+path_url = "https://cdncontribute.geeksforgeeks.org/wp-content/uploads/exampleFigure-1.png"
+
+# ╔═╡ 6551021e-e6d4-4d34-af80-efd8a7b3010d
+md" ### - Average shortest path
+
+In a real network like the Internet, a short average path length facilitates the quick transfer of information and reduces costs 
+
+- $(Resource(path_url))
+
+Input: source node = $0$ and destination node is = $7$.
+
+Output: Shortest path length is:$2$ -> [0 3 7]
+
+        
+
+
+Input: source vertex is = $2$ and destination vertex is = $6$ 
+
+Output: Shortest path length is:$5$ -> [2 1 0 3 4 6] 
+"
+
 # ╔═╡ 7fd4ffe4-6143-43f6-b75c-c76eb831108e
 @htl("""
 
@@ -367,10 +368,7 @@ currentScript.previousElementSibling.innerText = "Exercise: Calculate the averag
 Distance_to_0=DataFrame("Species" => ["0->2", "0->1", "0->3",  "0->7",  "0->4", "0->5", "0->6"],"Distance" => [2,1,1,2,2,3,3])
 
 # ╔═╡ 9c2a3452-8c7f-4f59-877f-a1c585107e0c
-md"The average shortest distance to node 2 is $(mean(Distance_to_0.Distance))"
-
-# ╔═╡ 2688137a-c208-4515-a68b-447f03596746
-md" Central nodes have a shortest distance to everyone else in teh network than nodes in the boundaries. It is likely that information travels through them."
+md"The average shortest distance to node 2 is $(mean(Distance_to_0.Distance)). Central nodes have a shortest distance to everyone else in teh network than nodes in the boundaries. It is likely that information travels through them."
 
 # ╔═╡ 76ece02b-8170-487b-8e0b-8e32b579b131
 md"## Adjacency Matrix: Matrix Representation of Networks
@@ -537,6 +535,9 @@ k_{1}^{in}=\sum_{j=1}^{N} A_{ij}
 ```
 "
 
+# ╔═╡ 979d1f55-870f-424c-a488-71a369c1fd8b
+degree_distribution_url = "https://www.researchgate.net/profile/Daniele-Condorelli/publication/242112667/figure/fig3/AS:669311584710678@1536587725639/An-important-graph-property-is-the-degree-distribution-function-P-k-that-describes_W640.jpg"
+
 # ╔═╡ b41588c9-c52c-4e85-ad1d-2775d143bd06
 md" ## Average degree
 
@@ -600,8 +601,11 @@ currentScript.previousElementSibling.innerText = "Exercise: obtain the Adjacency
 """)
 
 
-# ╔═╡ 979d1f55-870f-424c-a488-71a369c1fd8b
-degree_distribution_url = "https://www.researchgate.net/profile/Daniele-Condorelli/publication/242112667/figure/fig3/AS:669311584710678@1536587725639/An-important-graph-property-is-the-degree-distribution-function-P-k-that-describes_W640.jpg"
+# ╔═╡ a44b48e7-5497-4d49-a4d7-64508ecb5c3a
+adjacency_url="https://www.ebi.ac.uk/training/online/courses/network-analysis-of-protein-interaction-data-an-introduction/wp-content/uploads/sites/64/2020/08/new-fig-4.png"
+
+# ╔═╡ f938eda7-cefc-4ea3-991a-094b918d0430
+md" $(Resource(adjacency_url))"
 
 # ╔═╡ f9f7a01d-fbcf-4e5d-9cab-152eff279e5a
 types_of_networks_url="https://www.researchgate.net/publication/343839881/figure/fig2/AS:928266965774337@1598327499590/Four-types-of-networks-in-the-scale-free-network-the-white-and-striped-nodes-represent_W640.jpg"
@@ -680,34 +684,6 @@ Both social networks and GRN have these two properties.
 
 "
 
-# ╔═╡ b5174a24-428e-4a41-9b85-fccc7bcf8d32
-path_url = "https://cdncontribute.geeksforgeeks.org/wp-content/uploads/exampleFigure-1.png"
-
-# ╔═╡ 6551021e-e6d4-4d34-af80-efd8a7b3010d
-md" ### - Average shortest path
-
-In a real network like the Internet, a short average path length facilitates the quick transfer of information and reduces costs 
-
-- $(Resource(path_url))
-
-Input: source node = $0$ and destination node is = $7$.
-
-Output: Shortest path length is:$2$ -> [0 3 7]
-
-        
-
-
-Input: source vertex is = $2$ and destination vertex is = $6$ 
-
-Output: Shortest path length is:$5$ -> [2 1 0 3 4 6] 
-"
-
-# ╔═╡ a44b48e7-5497-4d49-a4d7-64508ecb5c3a
-adjacency_url="https://www.ebi.ac.uk/training/online/courses/network-analysis-of-protein-interaction-data-an-introduction/wp-content/uploads/sites/64/2020/08/new-fig-4.png"
-
-# ╔═╡ f938eda7-cefc-4ea3-991a-094b918d0430
-md" $(Resource(adjacency_url))"
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -719,7 +695,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 [compat]
 DataFrames = "~1.3.2"
 HypertextLiteral = "~0.9.3"
-PlutoUI = "~0.7.35"
+PlutoUI = "~0.7.38"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -752,9 +728,9 @@ version = "0.11.0"
 
 [[deps.Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "44c37b4636bc54afac5c574d2d02b625349d6582"
+git-tree-sha1 = "96b0bc6c52df76506efc8a441c6cf1adcb1babc4"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.41.0"
+version = "3.42.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -916,9 +892,9 @@ version = "1.4.1"
 
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "13468f237353112a01b2d6b32f3d0f80219944aa"
+git-tree-sha1 = "85b5da0fa43588c75bb1ff986493443f821c70b7"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.2.2"
+version = "2.2.3"
 
 [[deps.Pkg]]
 deps = ["Artifacts", "Dates", "Downloads", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
@@ -926,15 +902,15 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "85bf3e4bd279e405f91489ce518dedb1e32119cb"
+git-tree-sha1 = "670e559e5c8e191ded66fa9ea89c97f10376bb4c"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.35"
+version = "0.7.38"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
-git-tree-sha1 = "db3a23166af8aebf4db5ef87ac5b00d36eb771e2"
+git-tree-sha1 = "28ef6c7ce353f0b35d0df0d5930e0d072c1f5b9b"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.0"
+version = "1.4.1"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
@@ -997,10 +973,10 @@ uuid = "3783bdb8-4a98-5b6b-af9a-565f29a5fe9c"
 version = "1.0.1"
 
 [[deps.Tables]]
-deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "bb1064c9a84c52e277f1096cf41434b675cd368b"
+deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "OrderedCollections", "TableTraits", "Test"]
+git-tree-sha1 = "5ce79ce186cc678bbb5c5681ca3379d1ddae11a1"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.6.1"
+version = "1.7.0"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
@@ -1035,10 +1011,9 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 """
 
 # ╔═╡ Cell order:
-# ╠═87e78056-fecc-4b15-a723-16f51fa19353
 # ╟─0ebe3384-97aa-11ec-17b5-cbf23568df03
 # ╟─943c55a4-00d2-4cb7-bba0-a6c46b30e0fa
-# ╠═ce8ccbe5-2637-43df-906a-ce6a71e9b918
+# ╠═87e78056-fecc-4b15-a723-16f51fa19353
 # ╟─8ad237fa-8a09-4bae-80f4-ba1298c09581
 # ╟─bee1dd58-c8e6-4fa6-8eae-7cd4cca0a466
 # ╟─68713a25-a962-47e2-8830-c5e5c0511b43
@@ -1053,14 +1028,10 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═7bfac697-d85b-4a60-b90a-2a69c1155f5c
 # ╟─c71435ea-4bca-4bf7-ba90-576563385b33
 # ╠═8f31e31d-1080-4b22-b508-b71bf30c2ec0
-# ╟─aa33422d-a8cb-46ed-8e11-d70cfd7caf36
-# ╠═721ad120-8999-4f9f-9bd3-b9d966246436
-# ╠═8de6461d-e9ba-46df-a347-a7648b6f6e6a
-# ╠═8a2c17b6-3f5c-4f9f-9714-09df2944dd50
-# ╠═02c540f7-cdf8-428d-88c0-64ae6cb905c5
-# ╠═6be4813b-fb90-4fcb-bc93-314971a7b50d
-# ╠═e25205ff-a4fa-4a54-8a6c-1f94c9dd9ac3
-# ╠═52f9023e-fb67-43ca-8548-46dfeeb7fb86
+# ╠═aa33422d-a8cb-46ed-8e11-d70cfd7caf36
+# ╟─721ad120-8999-4f9f-9bd3-b9d966246436
+# ╟─8de6461d-e9ba-46df-a347-a7648b6f6e6a
+# ╟─8a2c17b6-3f5c-4f9f-9714-09df2944dd50
 # ╟─b20cdd19-08c4-4837-947f-97594b8822d2
 # ╟─73f4fd5b-4611-4d90-8f05-af7b279dd86a
 # ╟─40f52fcb-4be1-40c1-8720-ee48433473f3
@@ -1068,29 +1039,26 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─af0276a5-322a-4a7f-9457-7e58524c5cbd
 # ╟─d4c87e16-8dff-4818-9bfc-df89c372a498
 # ╟─477ba0d8-1dd9-46c8-bff0-72e4bfa89238
+# ╟─b5174a24-428e-4a41-9b85-fccc7bcf8d32
 # ╟─6551021e-e6d4-4d34-af80-efd8a7b3010d
 # ╟─7fd4ffe4-6143-43f6-b75c-c76eb831108e
-# ╠═ac539912-861a-4779-bac6-79c001177faa
-# ╠═f11db50b-6aa9-4b38-a1c5-7fc217c55e95
+# ╟─ac539912-861a-4779-bac6-79c001177faa
+# ╟─f11db50b-6aa9-4b38-a1c5-7fc217c55e95
 # ╟─f5673e80-8f26-4e1b-adfc-e9ec84f18c5b
-# ╠═4ace57bb-d9be-4681-8f7e-61982bb34b1c
-# ╠═d4d3ca6e-8a3b-42fd-afd3-0a6d1c40a58e
+# ╟─4ace57bb-d9be-4681-8f7e-61982bb34b1c
+# ╟─d4d3ca6e-8a3b-42fd-afd3-0a6d1c40a58e
 # ╟─45a3e3e1-53c0-4632-8eab-b67f691a0ac8
-# ╠═9179e620-b8ff-4559-b864-c9729a3a42ec
-# ╠═9c2a3452-8c7f-4f59-877f-a1c585107e0c
-# ╟─2688137a-c208-4515-a68b-447f03596746
+# ╟─9179e620-b8ff-4559-b864-c9729a3a42ec
+# ╟─9c2a3452-8c7f-4f59-877f-a1c585107e0c
 # ╟─76ece02b-8170-487b-8e0b-8e32b579b131
 # ╟─ddd62a2f-b19d-41b7-8b56-3c279f9c61ab
 # ╟─2db33033-cb6c-4e5b-b952-c9f06c98def0
+# ╟─979d1f55-870f-424c-a488-71a369c1fd8b
 # ╟─b41588c9-c52c-4e85-ad1d-2775d143bd06
 # ╟─010b6033-1546-478a-8a9f-c26cf3f194fe
-# ╠═f938eda7-cefc-4ea3-991a-094b918d0430
+# ╟─a44b48e7-5497-4d49-a4d7-64508ecb5c3a
+# ╟─f938eda7-cefc-4ea3-991a-094b918d0430
+# ╟─f9f7a01d-fbcf-4e5d-9cab-152eff279e5a
 # ╟─d580711c-2aff-404c-9aa9-84d56759eac9
-# ╠═7ffa98bf-633f-4307-8da3-c529febde4aa
-# ╠═25fcbb57-f3ec-4cce-b22c-2503c9bb36e5
-# ╟─979d1f55-870f-424c-a488-71a369c1fd8b
-# ╠═f9f7a01d-fbcf-4e5d-9cab-152eff279e5a
-# ╠═b5174a24-428e-4a41-9b85-fccc7bcf8d32
-# ╠═a44b48e7-5497-4d49-a4d7-64508ecb5c3a
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

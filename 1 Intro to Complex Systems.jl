@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.18.0
+# v0.17.7
 
 using Markdown
 using InteractiveUtils
@@ -15,19 +15,72 @@ macro bind(def, element)
 end
 
 # ╔═╡ aa80872c-900b-4eb8-96e2-3b212f8f0b6b
-using PlutoUI 
+using Plots,HypertextLiteral, PlutoUI ,DifferentialEquations, ParameterizedFunctions
 
-# ╔═╡ 86511f8a-5a7c-4360-8711-908111426c04
-using HypertextLiteral
+# ╔═╡ 779fd3ac-d189-4c3e-9393-26e11d788a53
+brain_url = "https://www.gannett-cdn.com/presto/2019/04/19/PMJS/db74c4f9-522d-4585-8728-fefe33b37d3a-Header_Image_-_GettyImages-955545246.jpg?crop=5399,3054,x0,y500&width=3200&height=1680&fit=bounds"
 
-# ╔═╡ 508790fe-c4ba-455d-8d35-a3a87e60bada
-using Plots
+# ╔═╡ 36a1fbff-3e5c-413c-85ec-eb91ecf44968
+WaterMolecules_url = "https://fthmb.tqn.com/XUQcP0XcIlpNpqG8uAX95xNm8uc=/768x0/filters:no_upscale()/H20-58e1ef103df78c5162595632.jpg"
 
-# ╔═╡ bf75045c-cad7-4515-9c75-32a226bedeae
-using DifferentialEquations
+# ╔═╡ 7600f9d6-1aad-4d19-92e3-b999c3a06f4b
+SolarSystem_url = "https://media.wired.com/photos/5934776af061de0423ccdf98/191:100/pass/solar_system.jpg"
 
-# ╔═╡ 8b71a186-d27c-441b-8313-83113b5b6e2e
-using ParameterizedFunctions
+# ╔═╡ 8bb55c26-014a-464e-b611-a4e80a357b7f
+pathway_url = "https://www.spandidos-publications.com/article_images/or/29/1/OR-29-01-0003-g01.jpg"
+
+# ╔═╡ 37367e24-963e-11ec-0d47-ff893b72b17b
+md" # 1. Complex Systems
+
+## 1.1 What is a Complex System?
+
+Before defining what do we understand by __complex system__, let’s define first what do we understand as a __system__.
+
+ $(Resource(SolarSystem_url)) The Solar System.
+
+*System*: A group of interacting, interrelated, or interdependent elements forming a complex whole.
+
+The parts that form a system do not need to be equivalent. i. e. , it can be diverse.
+
+ $(Resource(WaterMolecules_url)) a set of water molecules is not diverse
+
+
+ $(Resource(pathway_url)) a set of of inteeracting proteins in a signaling pathway is diverse
+
+Now that we know what is a system, we are ready to define what is a __Complex System__
+
+__Complex System__: are a specific type of systems that behave in a way that cannot be inferred from the properties of their individual pants. 
+
+ $(Resource(brain_url)) The brain is a perfect example of a complex system, For instance, conciusness cannot be inferred from the behaviors of isolated neurons
+
+"
+
+# ╔═╡ e88440ca-db76-4882-9a79-c5a688be3d29
+clock_url = "https://www.newhope.com/sites/newhope360.com/files/styles/article_featured_retina/public/Clockwork.jpg?itok=Ow5XBoJe"
+
+# ╔═╡ 1c107775-c064-4be0-a683-8410cd290086
+md" In this sence, it is quite dificuly to define what makes a system __complex__. 
+Lets start by clarifying the difference between Complicated and complex: a machine can be complicated, but its function and properties can be fully predicted by the properties of their parts:
+
+- It has been rationally designed and built to do a particular task. 
+- It is not robust, if one part fails the system fails. 
+- It does not adapt to changes. it is not __fluid__.
+
+ $(Resource(clock_url)) A clock is not complex, it is complicated
+"
+
+# ╔═╡ 626baccc-19cc-407e-a4db-d5e08afdeea1
+dices_url = "http://www.publicdomainpictures.net/pictures/50000/velka/two-dices.jpg"
+
+# ╔═╡ 8b5e6428-736a-4c59-8df7-538b8c4e6ec2
+md" ## 1.2 Characteristics of complex systems
+
+### i). A complex system is _not normal_: 
+
+In the sense that they do not fit normal gaussian distributions. 
+
+Lets illustrate this concept of normal, versus not-normal system. Let's for instance, play a game where we throw two dices and compute the sum. Repeat the experiments an number of times and plot the results in a histogram, 
+ $(Resource(dices_url)) "
 
 # ╔═╡ 499cdd4a-7e24-4120-be8c-a40956b7de4d
 begin
@@ -125,13 +178,13 @@ begin
 prob2 = ODEProblem(NoFeedback!,u₀,tspan,p)
 
 sol1 = solve(prob1)
-P1=plot(sol1,label=["mRNA","Protein"],ylims = (0,12))
+P1=plot(sol1,label=["mRNA" "Protein"],ylims = (0,12))
 title!("Positive feedback")
 xlabel!("Time [s]")
 ylabel!("Concentration [M]")
 
 sol2 = solve(prob2)
-P2=plot(sol2,label=["mRNA","Protein"],ylims = (0,12))
+P2=plot(sol2,label=["mRNA" "Protein"],ylims = (0,12))
 title!("Linear")
 xlabel!("Time [s]")
 ylabel!("Concentration [M]")
@@ -170,7 +223,7 @@ prob5 = ODEProblem(FeedForward2!,[0.01,0.00001,0.01,0.00001],tspan,[α_M,γ_M,�
 # ╔═╡ afcbb8d7-30b6-4229-8c58-b5a321e818db
 begin
 	sol5 = solve(prob5)
-	P5=plot(sol5,label=["mRNA","Protein"],ylims = (0,12))
+	P5=plot(sol5,label=["mRNA1" "Protein1" "mRNA2" "Protein2"],ylims = (0,12))
 	title!("Linear")
 	xlabel!("Time [s]")
 	ylabel!("Concentration [M]")
@@ -189,20 +242,6 @@ html"""
 <iframe width="700" height="400" src="https://www.youtube.com/embed/V4f_1_r80RY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 """
 
-# ╔═╡ e88440ca-db76-4882-9a79-c5a688be3d29
-clock_url = "https://www.newhope.com/sites/newhope360.com/files/styles/article_featured_retina/public/Clockwork.jpg?itok=Ow5XBoJe"
-
-# ╔═╡ 1c107775-c064-4be0-a683-8410cd290086
-md" In this sence, it is quite dificuly to define what makes a system __complex__. 
-Lets start by clarifying the difference between Complicated and complex: a machine can be complicated, but its function and properties can be fully predicted by the properties of their parts:
-
-- It has been rationally designed and built to do a particular task. 
-- It is not robust, if one part fails the system fails. 
-- It does not adapt to changes. it is not __fluid__.
-
- $(Resource(clock_url)) A clock is not complex, it is complicated
-"
-
 # ╔═╡ d207fd8f-518f-4921-a36b-5d2b16de587d
 plant_url = "https://churchgrowth.org.uk/wp-content/uploads/2018/12/Growth-plant-growing.jpg"
 
@@ -211,7 +250,7 @@ md" ### v) A complex system is characterized by __emergence__ of properties
 
 The basic idea of emergence is that there are properties at the upper hierarchical levels of nature that are not derivable from or reducible to the properties and laws of the lower levels. Emergence is the opposte concept or approach to Reductionism, that by contrast, argues that everything can be explained by (reduced to) the basic laws of physics. 
 
-For instance, information is neither matter nor energy, although it needs matter to be embodied and energy to be communicated. How information travels inside a system is key to understantd the system. But you cannot study how information propagartes by looking at a part of a system in isolation. So, you need to study the interactions. And from the interactions emerge new properties. One of teh manin ontributors to thsi idea of emergence is Illa Progogine (recipient of the Nobel Price in 1977)
+For instance, information is neither matter nor energy, although it needs matter to be embodied and energy to be communicated. How information travels inside a system is key to understantd the system. But you cannot study how information propagartes by looking at a part of a system in isolation. So, you need to study the interactions. And from the interactions emerge new properties. One of teh manin ontributors to thsi idea of emergence is Illa Prigogine (recipient of the Nobel Price in 1977)
 
 ```math
 \begin{align*}
@@ -227,59 +266,7 @@ System = \sum_{i} part_i +  interactions \tag{17} \\
 ```
 
 A System is more than the sum of the parts, a system is parts + interactions 
-
  $(Resource(plant_url)) Life is a good example of a emerging property"
-
-# ╔═╡ 626baccc-19cc-407e-a4db-d5e08afdeea1
-dices_url = "http://www.publicdomainpictures.net/pictures/50000/velka/two-dices.jpg"
-
-# ╔═╡ 8b5e6428-736a-4c59-8df7-538b8c4e6ec2
-md" ## 1.2 Characteristics of complex systems
-
-### i). A complex system is _not normal_: 
-
-In the sense that they do not fit normal gaussian distributions. 
-
-Lets illustrate this concept of normal, versus not-normal system. Let's for instance, play a game where we throw two dices and compute the sum. Repeat the experiments an number of times and plot the results in a histogram, 
- $(Resource(dices_url)) "
-
-# ╔═╡ 7600f9d6-1aad-4d19-92e3-b999c3a06f4b
-SolarSystem_url = "https://en.wikipedia.org/wiki/Phase_portrait#/media/File:Pendulum_phase_portrait.svg"
-
-# ╔═╡ 36a1fbff-3e5c-413c-85ec-eb91ecf44968
-WaterMolecules_url = "https://fthmb.tqn.com/XUQcP0XcIlpNpqG8uAX95xNm8uc=/768x0/filters:no_upscale()/H20-58e1ef103df78c5162595632.jpg"
-
-# ╔═╡ 8bb55c26-014a-464e-b611-a4e80a357b7f
-pathway_url = "https://www.spandidos-publications.com/article_images/or/29/1/OR-29-01-0003-g01.jpg"
-
-# ╔═╡ 779fd3ac-d189-4c3e-9393-26e11d788a53
-brain_url = "https://www.gannett-cdn.com/presto/2019/04/19/PMJS/db74c4f9-522d-4585-8728-fefe33b37d3a-Header_Image_-_GettyImages-955545246.jpg?crop=5399,3054,x0,y500&width=3200&height=1680&fit=bounds"
-
-# ╔═╡ 37367e24-963e-11ec-0d47-ff893b72b17b
-md" # 1. Complex Systems
-
-## 1.1 What is a Complex System?
-
-Before defining what do we understand by __complex system__, let’s define first what do we understand as a __system__.
-
- $(Resource(SolarSystem_url)) The Solar System.
-
-*System*: A group of interacting, interrelated, or interdependent elements forming a complex whole.
-
-The parts that form a system do not need to be equivalent. i. e. , it can be diverse.
-
- $(Resource(WaterMolecules_url)) a set of water molecules is not diverse
-
-
- $(Resource(pathway_url)) a set of of inteeracting proteins in a signaling pathway is diverse
-
-Now that we know what is a system, we are ready to define what is a __Complex System__
-
-__Complex System__: are a specific type of systems that behave in a way that cannot be inferred from the properties of their individual pants. 
-
- $(Resource(brain_url)) The brain is a perfect example of a complex system, For instance, conciusness cannot be inferred from the behaviors of isolated neurons
-
-"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -302,7 +289,7 @@ PlutoUI = "~0.7.35"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.2"
+julia_version = "1.7.1"
 manifest_format = "2.0"
 
 [[deps.AbstractPlutoDingetjes]]
@@ -1995,23 +1982,25 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╟─37367e24-963e-11ec-0d47-ff893b72b17b
 # ╠═aa80872c-900b-4eb8-96e2-3b212f8f0b6b
-# ╠═86511f8a-5a7c-4360-8711-908111426c04
+# ╟─779fd3ac-d189-4c3e-9393-26e11d788a53
+# ╟─36a1fbff-3e5c-413c-85ec-eb91ecf44968
+# ╟─7600f9d6-1aad-4d19-92e3-b999c3a06f4b
+# ╟─8bb55c26-014a-464e-b611-a4e80a357b7f
+# ╟─37367e24-963e-11ec-0d47-ff893b72b17b
+# ╟─e88440ca-db76-4882-9a79-c5a688be3d29
 # ╟─1c107775-c064-4be0-a683-8410cd290086
+# ╟─626baccc-19cc-407e-a4db-d5e08afdeea1
 # ╟─8b5e6428-736a-4c59-8df7-538b8c4e6ec2
 # ╠═499cdd4a-7e24-4120-be8c-a40956b7de4d
-# ╠═508790fe-c4ba-455d-8d35-a3a87e60bada
 # ╠═e0e2382f-fbfc-4aad-87cc-89617531381e
 # ╟─41c92a9a-0cd3-45d0-8c0e-4b64578f621a
 # ╠═a2057b67-3e43-4ef8-81e2-fe89f2b7c57c
 # ╠═8fab198c-496b-41a9-95fc-d2a886679f54
 # ╟─f9cba1c0-ced9-406f-a9d2-1e43097e58c0
-# ╠═bf75045c-cad7-4515-9c75-32a226bedeae
-# ╠═8b71a186-d27c-441b-8313-83113b5b6e2e
 # ╠═a68b0146-6bcf-4b1b-9804-2c5dbefdcf0a
 # ╠═010f87b7-a625-466c-b11f-bd11e4454f6a
-# ╠═06f53c91-8e22-4f73-a6ae-1d44de7c9308
+# ╟─06f53c91-8e22-4f73-a6ae-1d44de7c9308
 # ╠═aa37be5e-507f-4269-8235-accd44e55093
 # ╟─6a3a5f82-df35-4d53-b0bd-1d6c45798ef4
 # ╠═19aa372b-52ef-430e-9ee5-f03e0ce63cf0
@@ -2021,13 +2010,7 @@ version = "0.9.1+5"
 # ╟─76340e6c-a438-4c2e-b536-0e9f3da22193
 # ╟─f2503077-3550-472d-a58f-84d2ee4a5f09
 # ╟─2b5d86fa-2c9a-4ef3-a3d6-24f2fb59c213
-# ╟─f111e935-b711-439c-bec4-5e53d224b571
-# ╟─e88440ca-db76-4882-9a79-c5a688be3d29
 # ╟─d207fd8f-518f-4921-a36b-5d2b16de587d
-# ╟─626baccc-19cc-407e-a4db-d5e08afdeea1
-# ╟─7600f9d6-1aad-4d19-92e3-b999c3a06f4b
-# ╟─36a1fbff-3e5c-413c-85ec-eb91ecf44968
-# ╟─8bb55c26-014a-464e-b611-a4e80a357b7f
-# ╟─779fd3ac-d189-4c3e-9393-26e11d788a53
+# ╟─f111e935-b711-439c-bec4-5e53d224b571
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

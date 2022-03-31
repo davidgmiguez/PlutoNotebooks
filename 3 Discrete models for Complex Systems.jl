@@ -176,11 +176,37 @@ end
 # ╔═╡ 8510e3df-ea93-4c25-ac3d-1069b067a62d
 scatter([1:100],constrained_growth_3(1, r; dt=0.01),ylims = (0,55),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$r"))
 
-# ╔═╡ 4c484027-8c3f-4d8a-bf50-a6422e9f634f
-md" ## Exercise: 
-Suppose the population of cells in a tumour grows according to the logistic differential, where time interval is one week:
+# ╔═╡ 9c41706c-462e-4a63-b910-76c5bbf67a25
+@htl("""
 
-equation 
+<div class='blue-background'>
+Exercises: 
+
+</div>
+
+<script>
+// more about selecting elements later!
+currentScript.previousElementSibling.innerText = "Exercises:Logistic Growth :"
+
+</script>
+
+<style>
+.blue-background {
+	padding: .5em;
+	background: lightblue;
+	color: black;
+}
+</style>
+
+1. Suppose the population of cells in a tumour grows according to the logistic differential, where time interval is one week:
+
+""")
+
+# ╔═╡ 4c484027-8c3f-4d8a-bf50-a6422e9f634f
+md" 
+
+
+ 
 ```math
 P_{t+1}= 5 P_t - (0.002  P_{t}^{2})
 ```
@@ -201,11 +227,9 @@ md"Solutions
 "
 
 # ╔═╡ c5a658da-7953-4131-ad6f-d2ce50294982
-md" ## Exercise
+md" 
 
-a) Write the logistic discrete equation for an initial population of bacteria of 1e2 cells that is dividing every hour in a flask with limited resources for 1e6 cells. 
-
-b) Update the previous equation to include the fact that one cell dies every two hours. 
+2) Write the logistic discrete equation for an initial population of bacteria of 1e2 cells that is dividing every hour in a flask with limited resources for 1e6 cells. Next, update the previous equation to include the fact that one cell dies every two hours. 
 
 Solution: 
 
@@ -230,81 +254,35 @@ end
 
 # ╔═╡ 00fc2cbf-9961-4001-9ece-e52dadacadc0
 md" ## Normalization of the logistic growth
-Again, lets put the equation in a way that the next value is the previous value plus something:
+
+A more common way of finding the equation for the logistic growth model is its dimensionless form, 
+
 
 ```math
-p_{t+1} =  p_{t} -  p_{t} + p_{t} (1.1 -2 \cdot 10^{-3} p_{t})  =
+p_{t+1} =   p_{t} \cdot r (1 - p_{t}) 
 ```
 
-```math
-p_{t+1} =  p_{t} +  p_{t} ((1.1 -2 \cdot 10^{-3} p_{t}) -1) 
-```
-
-This is an instance of discrete logistic growth. 
 "
 
-# ╔═╡ 3bf32078-b75e-4062-9ed5-fafb0ec236e5
-function constrained_growth_4(p, r; dt=0.1)
+# ╔═╡ 3abe473c-67c7-4897-9345-1c39b5a2077c
+function logistic_growth(p, r; dt=0.01)
 traj = []
-for t in 1:1000 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	#p = p * (1.10 - 0.002 * p)
-	p += dt * (p * ((1.10 - 0.002 * p) - 1))
-	#p = p * r; #p = p * r; 
+for t in 1:100 # arbitrary, just leave enough for it to reach a steady state given the dt
+#p =  p * 1.10 * (1 - 0.002 /1.1 * p)
+#p =  p * 2 * (1 -  p)
+p = p * r * (1. - p)
 push!(traj,p)
 end
 return traj#[end-20:end] # this is sampling from the steady state
 end
-
-# ╔═╡ 753586ff-1721-48e3-befd-bce8f72ae285
-plot([1:1000],constrained_growth_4(1, r; dt=0.1),ylims = (0,55),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$r"))
 
 # ╔═╡ 08f78285-2d82-41e1-b4ec-4f4ade562f82
 md" if we reorganize the equation to give it a form more simple"
-
-# ╔═╡ 232c99d0-e026-45ee-b6ee-eff80e588467
-function constrained_growth_5(p, r; dt=0.01)
-traj = []
-for t in 1:100 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = 1.10 * p * (1 - 0.002 /1.1 * p)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
 
 # ╔═╡ 5804425f-c3bd-44b5-a96c-239a1ac463d3
 md"now we perform a change in variable, to normalize
 
 "
-
-# ╔═╡ 6fc7c43e-e64d-4056-b3aa-66d18e354c8b
-function constrained_growth_6(p, r; dt=0.01)
-traj = []
-for t in 1:100 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = 1.10 * p * (1 - 0.002 /1.1 * p)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 7fb080cc-08b7-49b9-9f06-e432079e3a55
-plot([1:100],constrained_growth_6(1, r; dt=0.1),ylims = (0,55),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$r"))
-
-# ╔═╡ 3abe473c-67c7-4897-9345-1c39b5a2077c
-function logistic_growth(p, rr; dt=0.01)
-traj = []
-for t in 1:100 # arbitrary, just leave enough for it to reach a steady state given the dt
-#p =  p * 1.10 * (1 - 0.002 /1.1 * p)
-#p =  p * 2 * (1 -  p)
-p = p * rr * (1. - p)
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
 
 # ╔═╡ 831a828f-166e-4467-a94e-3cc7981a3e16
 begin
@@ -321,16 +299,6 @@ end
 # ╔═╡ 8e2e2fec-f264-45df-95fa-556ac631a8f2
 plot(logistic_growth(0.01, rr; dt=0.01),xlabel=("Time"),ylims = (0,1),ylabel=("Number of cells"),title=("Constrained growth, r=$rr"))
 
-# ╔═╡ 1dc48319-02d1-44d8-9873-2ebd28b358a8
-function logistic_growth2(n, rr; dt=0.01)
-traj = []
-for t in 1:500 # arbitrary, just leave enough for it to reach a steady state given the dt
-n += dt * n * rr * (1. - n) 
-push!(traj,n)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
 # ╔═╡ 07c0a101-b423-493f-aafd-0af702d00870
 logistic_url="http://www.kierandkelly.com/wp-content/uploads/2015/04/X-Next-5-1024x666.jpg"
 
@@ -345,7 +313,7 @@ To show this more clearly, let’s run the logistic model again, this time for 2
 
 # ╔═╡ 14950100-d137-478a-a746-6a3ee6fadb1b
 md"
-- $(Resource(logistic_url))
+$(Resource(logistic_url))
 
 We see that for certain values of μ such as 1, 3, and 1 + sqrt(6) , the behavior of the logistic map changes. These three quantities are called bifurcation values of the logistic map. Bifurcation values result from a qualitative change in the behavior of the recursion.
 
@@ -412,422 +380,6 @@ begin
 	plot(x_1, rrr .^2  .* (1 .− x_1) .* x_1 .* (1 .- (rrr .* x_1) .+ (rrr .* x_1 .^2) ),xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrr"))
 	plot!(x_1, x_1,xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrr"))
 end
-
-# ╔═╡ 88a8aeee-8b5c-4ef8-8f40-685fa3ae2712
-md" # Differentiation dynamics
-
-what happens when we analyze the dynamcis of a population of cells that not only proliferates, but also differentiates into another type of cell? For instance, a population of stem cells, in a developing organ. We assume a developing organ as a population of cycling progenitors 'P' that cycle with an average cell cycle $T$. Some of these cells terminally differentiate, exit the cell cycle and acquire a given specialized phenotype 'D'. We start from a initial population of progenitors $P_0$ and differentiated $D_0$ cells. A common approac is top characterize the dynamics of the population focusing on the outcome of the cell division of the progenitors. In principle, each division of a 'P' cell can give two progenitors ('pp' division), two differentiated cells ('dd' division) and also an assymetric mode of divisin where a progenitor and a differentiated cell is generated ('pd' division). If we calculate the average amount of 'P' and 'D' generated after a single cell cycle (n=1) we can write the number of progenitor and differentiated cells as:
-"
-
-# ╔═╡ 7f30ad4d-9964-4140-8003-051653d5f1e4
-md" # Differentiation dynamics
-
-what happens when we analyze the dynamcis of a population of cells that not only proliferates, but also differentiates into another type of cell? For instance, a population of stem cells, in a developing organ. We assume a developing organ as a population of cycling progenitors 'P' that cycle with an average cell cycle $T$. Some of these cells terminally differentiate, exit the cell cycle and acquire a given specialized phenotype 'D'. We start from a initial population of progenitors $P_0$ and differentiated $D_0$ cells. A common approac is top characterize the dynamics of the population focusing on the outcome of the cell division of the progenitors. In principle, each division of a 'P' cell can give two progenitors ('pp' division), two differentiated cells ('dd' division) and also an assymetric mode of divisin where a progenitor and a differentiated cell is generated ('pd' division). If we calculate the average amount of 'P' and 'D' generated after a single cell cycle (n=1) we can write the number of progenitor and differentiated cells as:
-
-```math
-\begin{eqnarray}
-P_1&=&P_{0}(2pp+pd) \tag{35}\\
-D_1&=&D_{0}+P_{0}(2dd+pd)\tag{36}
-\end{eqnarray}
-```
-
-where using the condition $pp+pd+dd=1$, 
-
-```math
-\begin{eqnarray}
-P_1&=&P_{0} (1+pp-dd)\tag{37}\\
-D_1&=&D_{0}+P_{0}(1+dd-pp)\tag{38}
-\end{eqnarray}
-```
-
-Therfore, for n=2,
-
-```math
-\begin{eqnarray}
-P_2&=&P_{1} (1+pp-dd)\tag{39}\\
-D_2&=&D_{1}+P_{1}(1+dd-pp)\tag{40}
-\end{eqnarray}
-```
-
-applying eqs. 37 and 38, we obtain
-
-```math
-\begin{eqnarray}
-P_2&=&P_{0}(1+pp-dd)(1+pp-dd)=P_{0} (1+pp-dd)^2\tag{41}\\
-D_2&=&D_{0}+P_{0}(1+dd-pp)+P_{0}(1+pp-dd)(1+dd-pp)\tag{42}
-\end{eqnarray}
-```
-
-and rearranging terms in eq. 42:
-
-
-```math
-\begin{eqnarray}
-D_2&=&D_{0}+P_{0}(1+dd-pp)(1+(1+pp-dd))\tag{43}\\
-\end{eqnarray}
-```
-
-Subsequently, for n=3
-
-```math
-\begin{eqnarray}
-P_3&=&P_{2} (1+pp-dd)\tag{44}\\
-D_3&=&D_{2}+P_{2}(1+dd-pp) \tag{45}
-\end{eqnarray}
-```
-
-
-applying eqs. 41 and 42, we obtain
-
-```math
-\begin{eqnarray}
-P_3&=&P_{0} (1+pp-dd)^2 (1+pp-dd)= P_{0} (1+pp-dd)^3 \tag{46}\\
-D_3&=&D_{0}+P_{0}(1+dd-pp)(1+(1+pp-dd) + (1+pp-dd)^2) \tag{47}
-\end{eqnarray}
-```
-
-therefore, for $n$ steps, we obtain, 
-
-```math
-\begin{eqnarray}
-P_n&=&P_{0} (1+pp-dd)^n \tag{48}\\
-D_n&=&D_{0}+P_{0}(1+dd-pp)(1+(1+pp-dd)+(1+pp-dd)^2+...+(1+pp-dd)^{n-1})\tag{49}
-\end{eqnarray}
-```
-
-where the second term in eq. 49 can be written as
-
-```math
-\begin{eqnarray}
-1+(1+pp-dd)+(1+pp-dd)^2+...+(pp-dd)^{n-1}=\displaystyle\sum_{i=0}^{n-1} (1+pp-dd)^i\tag{50}
-\end{eqnarray}
-```
-
-which renaming $r=1+pp-dd$ is equivalent to 
-
-```math
-\begin{eqnarray}
-\displaystyle\sum_{i=0}^{n-1} r^i=\frac{1-r^n}{1-r}\tag{51}
-\end{eqnarray}
-```
-
-therefore, eq. 50 can be written as
-
-```math
-\begin{eqnarray}
-D_n&=&D_{0}+P_{0}(1+dd-pp)\frac{1-(1+pp-dd))^n}{1-(1+pp-dd)} \tag{51}
-\end{eqnarray}
-```
-
-which, after simplifying terms, can be rewritten as
-
-```math
-\begin{eqnarray}
-D_n&=&D_{0}+P_{0}(1-(1+pp-dd)^n)\frac{1+dd-pp}{dd-pp}\tag{52}
-\end{eqnarray}
-```
-
-and taking into account eq. 48, we obtain the final equation for the number of progenitors 'P' and differentiated 'D' cells in a stem cell population that is growing and differentiating:
-
-```math
-\begin{eqnarray}
-D_n&=&D_{0}+(P_{0}-P_{n})\frac{1+dd-pp}{dd-pp}=D_{0}+(P_{n}-P_{0})\frac{1+dd-pp}{pp-dd} \tag{53}
-\end{eqnarray}
-```
-
-Interestingly, both equations depend on the iteration step $n$ only via the number of progenitors at a given time in the system $P_n$. 
-
-"
-
-
-# ╔═╡ fffe908a-a8ff-404b-9138-bb23210a5fae
-begin
-	pp_slide = @bind pp_ html"<input type=range min=0.0 max=1.0 step=0.1>"
-	dd_slide = @bind dd_ html"<input type=range min=0.0 max=1.0 step=0.1>"
-	
-	md"""
-	**Set the proliferation and differentiation dynamics**
-	
-	value of pp: $(pp_slide)
-	
-	value of dd: $(dd_slide)
-	
-	"""
-end
-
-# ╔═╡ 470fe58c-4020-4333-861f-a6afe54a9e53
-begin
-		P₀_=100
-		D₀_=50
-		#T=24
-		nn=collect(0:10)
-		plot(nn,nn->P₀_*(1+pp_-dd_)^nn,label="P",seriestype=:line,ylims = (0,4300))
-		plot!(nn,nn->D₀_+P₀_*(((1+pp_-dd_)^nn)-1)*((1-pp_+dd_)/(pp_-dd_)),label="D",seriestype=:line,ylims = (0,400))
-		plot!(nn,nn->P₀_*(1+pp_-dd_)^nn+D₀_+P₀_*(((1+pp_-dd_)^nn)-1)*((1-pp_+dd_)/(pp_-dd_)),label="T",seriestype=:line,ylims = (0,400))
-end
-
-# ╔═╡ ede201b5-8f82-4cb0-be2a-be03b9140c50
-md"For simplicity, the system of equations has been derived for a situation of discrete $n=\Delta t/T$, (n=1,2,3...), i.e., with the time step equal to the average cell cycle $\Delta t=T$. If we instead consider the time step as half of the cell cycle ($\Delta t=T/2$), then $n=2 \Delta t/T$, (n=1,2,3...), and eq. 37 is now:
-
-```math
-\begin{eqnarray}
-P_1&=&P_{0} (1+pp-dd)^{\frac{1}{2}}\tag{54}
-\end{eqnarray}
-```
-
-and following identical iteration steps we arrive at
-
-```math
-\begin{eqnarray}
-P_n&=&P_{0} (1+pp-dd)^{\frac{n}{2}}\tag{55}
-\end{eqnarray}
-```
-
-while eqs. for 'D' cells remain the same, since it does not depend explicitly on the iteration step. This way, for $\delta t=1$, and following the same process we obtain
-
-```math
-\begin{eqnarray}
-P_n&=&P_{0} (1+pp-dd)^{\frac{n}{T}}\tag{56}
-\end{eqnarray}
-```
-
-which can be generalize for the continuum limit $n=t$,
-
-```math
-\begin{eqnarray}
-P_{t}&=&P_0 (1+pp-dd)^{\frac{t}{T}}\tag{57}\\
-D_{t}&=&D_{0}+(P_{t}-P_{0})\frac{1+dd-pp}{pp-dd}\tag{58}
-\end{eqnarray}
-```
-
-Finally, f we rewrite  $\Delta$$P=P_{t}-P_{0}$, we obtain the expression. 
-
-```math
-\begin{eqnarray}
-P_{t}&=&P_0 (1+pp-dd)^{\frac{t}{T}}\tag{59}\\
-D_{t}&=&D_{0}+\Delta P\frac{1+dd-pp}{pp-dd}\tag{60}
-\end{eqnarray}
-```
-"
-
-# ╔═╡ 435e892c-e56d-4f20-be01-cbf462194882
-begin
-	pp=0.6
-	dd=0.2
-	P₀=100
-	D₀=50
-	T=24
-	t=collect(0:0.1:100)
-	P1=plot(t,t->P₀*(1+pp-dd)^(t/T),label="P",seriestype=:line,ylims = (0,4300))
-	plot!(t,t->D₀+P₀*(((1+pp-dd)^(t/T))-1)*((1-pp+dd)/(pp-dd)),label="D",seriestype=:line,ylims = (0,400))
-	plot!(t,t->P₀*(1+pp-dd)^(t/T)+D₀+P₀*(((1+pp-dd)^(t/T))-1)*((1-pp+dd)/(pp-dd)),label="T",seriestype=:line,ylims = (0,400))
-	
-	pp=0.0001
-	dd=0.00001
-	P2=plot(t,t->P₀*(1+pp-dd)^(t/T),label="P",seriestype=:line,ylims = (0,4300))
-	plot!(t,t->D₀+P₀*(((1+pp-dd)^(t/T))-1)*((1-pp+dd)/(pp-dd)),label="D",seriestype=:line,ylims = (0,400))
-	plot!(t,t->P₀*(1+pp-dd)^(t/T)+D₀+P₀*(((1+pp-dd)^(t/T))-1)*((1-pp+dd)/(pp-dd)),label="T",seriestype=:line,ylims = (0,400))
-	
-	pp=0.0001
-	dd=0.3
-	P3=plot(t,t->P₀*(1+pp-dd)^(t/T),label="P",seriestype=:line,ylims = (0,4300))
-	plot!(t,t->D₀+P₀*(((1+pp-dd)^(t/T))-1)*((1-pp+dd)/(pp-dd)),label="D",seriestype=:line,ylims = (0,400))
-	plot!(t,t->P₀*(1+pp-dd)^(t/T)+D₀+P₀*(((1+pp-dd)^(t/T))-1)*((1-pp+dd)/(pp-dd)),label="T",seriestype=:line,ylims = (0,400))
-	
-	plot(P1,P2,P3,layout=(1,3),legend=true,size = (800, 500))
-end
-
-# ╔═╡ ae184b0d-f61d-4aea-853b-17cb597d1087
-md"
-to do:
-    
-    it will be cool to include a term of saturations as the logistic equation does. 
-    
-"
-
-# ╔═╡ aecc1472-9167-4b09-a08c-9e701def7d54
-md"The true power of these equatiosn is that they are analytical, in the sense that now we turn the equations down to see if we can predict the correct value of pp-dd and T"
-
-# ╔═╡ 8e867da7-e8bc-4dca-8fe4-644f5277cb67
-pp=0.6
-dd=0.2
-P₀=100
-D₀=50
-T_true=24
-t=collect(0:0.1:100)
-
-P=P₀.*(1+pp-dd).^(t./T_true)
-D=D₀.+P₀.*(((1 .+pp-dd).^(t./T_true)).-1).*((1-pp+dd)/(pp-dd))
-
-P1=plot(t,P,label="P",seriestype=:line,ylims = (0,4300))
-plot!(t,D,label="D",seriestype=:line,ylims = (0,400))
-
-P_=P[2:end]
-D_=D[2:end]
-t_=t[2:end]
-P__=P[1:end-1]
-D__=D[1:end-1];
-t__=t[1:end-1];
-gamma=1
-pp_dd=(P_ .-P__) ./(P_ .-P__ .+D_ .-D__);
-T=(t_ .-t__) .* log.(1 .+(gamma.*(abs.(pp_dd)))) ./ abs.(log.(P_ ./P__));
-P2=plot(t_,pp_dd, ylims = (-1,1))
-hline!([pp-dd])
-P3=plot(t_,T,ylims = (23,25))
-hline!([T_true])
-
-plot(P1,P2,P3,layout=(1,3),legend=true,size = (800, 500))
-
-# ╔═╡ d46dfe3b-f178-4d18-b95f-c961bc207466
-pp=0.1
-dd=0.101
-P₀=100
-D₀=50
-T_true=20
-t=collect(0:0.1:100)
-
-P=P₀.*(1+pp-dd).^(t./T_true)
-D=D₀.+P₀.*(((1 .+pp-dd).^(t./T_true)).-1).*((1-pp+dd)/(pp-dd))
-
-P1=plot(t,P,label="P",seriestype=:line)
-plot!(t,D,label="D",seriestype=:line)
-
-P_=P[2:end]
-D_=D[2:end]
-t_=t[2:end]
-P__=P[1:end-1]
-D__=D[1:end-1];
-t__=t[1:end-1];
-gamma=1
-pp_dd=(P_ .-P__) ./(P_ .-P__ .+D_ .-D__);
-T=(t_ .-t__) .* log.(1 .+(gamma.*(abs.(pp_dd)))) ./ abs.(log.(P_ ./P__));
-P2=plot(t_,pp_dd, ylims = (-1,1))
-hline!([pp-dd])
-P3=plot(t_,T,ylims = (0,25))
-hline!([T_true])
-
-plot(P1,P2,P3,layout=(1,3),legend=true,size = (800, 500))
-
-# ╔═╡ ca6a3577-ac75-4993-b2e5-4975ef4aaf9f
-md"The equations for the cell cycle start to fail whene we go to values lower than pp-dd=0"
-
-# ╔═╡ 349b1edf-3956-4b47-9d2f-760df409d40e
-pp=-0.1
-dd=0.0
-P₀=100
-D₀=50
-T_true=20
-t=collect(0:0.1:100)
-
-P=P₀.*(1+pp-dd).^(t./T_true)
-D=D₀.+P₀.*(((1 .+pp-dd).^(t./T_true)).-1).*((1-pp+dd)/(pp-dd))
-
-P1=plot(t,P,label="P",seriestype=:line)
-plot!(t,D,label="D",seriestype=:line)
-
-P_=P[2:end]
-D_=D[2:end]
-t_=t[2:end]
-P__=P[1:end-1]
-D__=D[1:end-1];
-t__=t[1:end-1];
-gamma=1
-pp_dd=(P_ .-P__) ./(P_ .-P__ .+D_ .-D__);
-T=(t_ .-t__) .* log.(1 .+(gamma.*(abs.(pp_dd)))) ./ abs.(log.(P_ ./P__));
-P2=plot(t_,pp_dd, ylims = (-1,1),label="pp-dd predicted",line = (:blue, 1))
-hline!([pp-dd],label="pp-dd true",line = (:red,:dash, 1))
-P3=plot(t_,T,ylims = (0,25),label="T predicted",line = (:blue, 1))
-hline!([T_true],label="T true",line = (:red,:dash, 1))
-
-plot(P1,P2,P3,layout=(1,3),legend=true,size = (800, 500))
-
-# ╔═╡ 3e8066bd-d8dc-47d9-98e5-0b8b0759e179
-md" ### Including Apoptosis
-
-what if we include apoptosis"
-
-# ╔═╡ 2e9621c6-50c4-4d30-84f5-f26ea707a808
-pp=0.6
-dd=0.2
-ø=0.1
-P₀=100
-D₀=50
-T=24
-t=collect(0:0.1:100)
-P1=plot(t,t->P₀*(1+pp-dd-ø)^(t/T),label="P",seriestype=:line,ylims = (0,4300))
-plot!(t,t->D₀+P₀*(((1+pp-dd-ø)^(t/T))-1)*((1-pp+dd-ø)/(pp-dd-ø)),label="D",seriestype=:line,ylims = (0,400))
-plot!(t,t->P₀*(((1+pp-dd-ø)^(t/T))-1)*(ø/(pp-dd-ø)),label="ø",seriestype=:line,ylims = (0,400))
-
-
-
-pp=0.0001
-dd=0.00001
-ø=0.1
-P2=plot(t,t->P₀*(1+pp-dd-ø)^(t/T),label="P",seriestype=:line,ylims = (0,4300))
-plot!(t,t->D₀+P₀*(((1+pp-dd-ø)^(t/T))-1)*((1-pp+dd-ø)/(pp-dd-ø)),label="D",seriestype=:line,ylims = (0,400))
-plot!(t,t->P₀*(((1+pp-dd-ø)^(t/T))-1)*(ø/(pp-dd-ø)),label="ø",seriestype=:line,ylims = (0,400))
-
-
-pp=0.0001
-dd=0.3
-ø=0.1
-P3=plot(t,t->P₀*(1+pp-dd-ø)^(t/T),label="P",seriestype=:line,ylims = (0,4300))
-plot!(t,t->D₀+P₀*(((1+pp-dd-ø)^(t/T))-1)*((1-pp+dd-ø)/(pp-dd-ø)),label="D",seriestype=:line,ylims = (0,400))
-plot!(t,t->P₀*(((1+pp-dd-ø)^(t/T))-1)*(ø/(pp-dd-ø)),label="ø",seriestype=:line,ylims = (0,400))
-
-plot(P1,P2,P3,layout=(1,3),legend=true,size = (800, 500))
-
-# ╔═╡ 5220090a-c8ef-4b9b-ae17-6692fc4b19e3
-
-
-# ╔═╡ 99d88df8-e6c8-4fe7-a9ab-61f908912e92
-function unconstrained_growth_1(p, r; dt=0.01)
-traj = []
-for t in 1:10 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * (r - 1))	
-	#n = n + (n * (r - 1))	
-	p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 04bb79a4-5a72-4439-a3cd-b2b5ff985300
-scatter([1:10],unconstrained_growth_1(1, r; dt=0.01),ylims = (0,10),xlabel=("Time"),ylabel=("Number of cells"),title=("Unconstrained growth, r=$r"))
-
-# ╔═╡ 06cbef49-b654-41dd-ac10-13474ef316a7
-md" If we organize the equation to have a form such that the next time point corresponds to teh previous value plus something:
-```math
-\begin{align} 
-p_{t+1}= r \cdot p_{t} = r \cdot p_{t} + p_{t} - p_{t} \\
-p_{t+1}= p_{t} + (r \cdot p_{t} - p_{t})\\
-p_{t+1}= p_{t} + p_{t} (r  - 1)
-\end{align}
-```
-The we can introduce a time step, so we can have more temporal resolution
-```math
-\begin{align} 
-p_{t+1}= p_{t} + \delta t * p_{t} (r  - 1)
-\end{align}
-```
-
-
-"
-
-# ╔═╡ 9a68d323-e13d-42bb-970a-0ab5630155d5
-function unconstrained_growth_2(p, r; dt=0.01)
-traj = []
-for t in 1:1000 # arbitrary, just leave enough for it to reach a steady state given the dt
-	p += dt * (p * (r - 1))	
-	#n = n + (n * (r - 1))	
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 13aae8fd-f633-4073-a5ab-1e89f99e8568
-plot(time,unconstrained_growth_2(1, r; dt=0.01),ylims = (0,10),xlabel=("Time"),ylabel=("Number of cells"),title=("Unconstrained growth, r=$r"))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2327,6 +1879,10 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
+# ╠═d096a6be-65a1-428d-9bfb-da7fe89f4c19
+# ╠═f0413f68-1eb4-4a3d-bdcf-61e8aa96c0e7
+# ╠═6d9759c3-63d9-4166-8884-cfaa99ee33c4
+# ╠═54dd5337-c76f-4a23-8bec-a0cd57b433dd
 # ╟─ff1f143a-77d0-43e9-8975-b7b28c6f9ae4
 # ╟─081daad5-b960-4c64-bdec-c0ecb0d6896b
 # ╟─4e2cead3-1c4f-48b4-8f5a-f78c4efaee2c
@@ -2339,22 +1895,17 @@ version = "0.9.1+5"
 # ╠═842e2c41-72a3-443c-82db-ab1ff3612a12
 # ╠═86804a6f-9178-40f3-ae82-cc6723412ae8
 # ╠═8510e3df-ea93-4c25-ac3d-1069b067a62d
+# ╠═9c41706c-462e-4a63-b910-76c5bbf67a25
 # ╟─4c484027-8c3f-4d8a-bf50-a6422e9f634f
 # ╟─2958fbbc-86e9-47fd-8097-9a8675610998
 # ╟─c5a658da-7953-4131-ad6f-d2ce50294982
 # ╠═7915360f-4bd5-40d6-9cb8-0b278c3944d6
 # ╟─00fc2cbf-9961-4001-9ece-e52dadacadc0
-# ╟─3bf32078-b75e-4062-9ed5-fafb0ec236e5
-# ╠═753586ff-1721-48e3-befd-bce8f72ae285
-# ╟─08f78285-2d82-41e1-b4ec-4f4ade562f82
-# ╠═232c99d0-e026-45ee-b6ee-eff80e588467
-# ╠═5804425f-c3bd-44b5-a96c-239a1ac463d3
-# ╠═6fc7c43e-e64d-4056-b3aa-66d18e354c8b
-# ╠═7fb080cc-08b7-49b9-9f06-e432079e3a55
 # ╠═3abe473c-67c7-4897-9345-1c39b5a2077c
+# ╟─08f78285-2d82-41e1-b4ec-4f4ade562f82
+# ╟─5804425f-c3bd-44b5-a96c-239a1ac463d3
 # ╟─831a828f-166e-4467-a94e-3cc7981a3e16
 # ╠═8e2e2fec-f264-45df-95fa-556ac631a8f2
-# ╠═1dc48319-02d1-44d8-9873-2ebd28b358a8
 # ╠═07c0a101-b423-493f-aafd-0af702d00870
 # ╟─71d581e7-b988-48d2-8b4f-7f92f8b546e4
 # ╟─14950100-d137-478a-a746-6a3ee6fadb1b
@@ -2363,29 +1914,5 @@ version = "0.9.1+5"
 # ╟─248a2470-60e3-4abf-8c25-e2b1c059c5ed
 # ╠═7f608559-6b37-4246-afa6-60cfda53d321
 # ╠═85933840-47a3-4afc-9a6e-fd22417df0e5
-# ╟─88a8aeee-8b5c-4ef8-8f40-685fa3ae2712
-# ╟─7f30ad4d-9964-4140-8003-051653d5f1e4
-# ╟─fffe908a-a8ff-404b-9138-bb23210a5fae
-# ╠═470fe58c-4020-4333-861f-a6afe54a9e53
-# ╟─ede201b5-8f82-4cb0-be2a-be03b9140c50
-# ╠═435e892c-e56d-4f20-be01-cbf462194882
-# ╠═ae184b0d-f61d-4aea-853b-17cb597d1087
-# ╠═aecc1472-9167-4b09-a08c-9e701def7d54
-# ╠═8e867da7-e8bc-4dca-8fe4-644f5277cb67
-# ╠═d46dfe3b-f178-4d18-b95f-c961bc207466
-# ╠═ca6a3577-ac75-4993-b2e5-4975ef4aaf9f
-# ╠═349b1edf-3956-4b47-9d2f-760df409d40e
-# ╠═3e8066bd-d8dc-47d9-98e5-0b8b0759e179
-# ╠═2e9621c6-50c4-4d30-84f5-f26ea707a808
-# ╠═d096a6be-65a1-428d-9bfb-da7fe89f4c19
-# ╠═f0413f68-1eb4-4a3d-bdcf-61e8aa96c0e7
-# ╠═6d9759c3-63d9-4166-8884-cfaa99ee33c4
-# ╠═54dd5337-c76f-4a23-8bec-a0cd57b433dd
-# ╠═5220090a-c8ef-4b9b-ae17-6692fc4b19e3
-# ╠═99d88df8-e6c8-4fe7-a9ab-61f908912e92
-# ╠═04bb79a4-5a72-4439-a3cd-b2b5ff985300
-# ╟─06cbef49-b654-41dd-ac10-13474ef316a7
-# ╠═9a68d323-e13d-42bb-970a-0ab5630155d5
-# ╠═13aae8fd-f633-4073-a5ab-1e89f99e8568
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

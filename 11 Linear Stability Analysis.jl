@@ -14,631 +14,920 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ d096a6be-65a1-428d-9bfb-da7fe89f4c19
-using Plots 
-
-# ╔═╡ f0413f68-1eb4-4a3d-bdcf-61e8aa96c0e7
+# ╔═╡ 8c3e21c9-6514-4f14-8b1f-325d124681f5
 using DifferentialEquations
 
-# ╔═╡ 6e728cf8-72e7-4567-90e9-a97f5f6a1f28
+# ╔═╡ ac95a2ae-5b1b-4399-8265-4b0bfb21162e
 using ParameterizedFunctions
 
-# ╔═╡ 481d6298-106a-4f6a-b822-7fda0a24bbe0
-using PlutoUI
+# ╔═╡ 2e6401b9-9c89-4b4b-8492-d0a83003579b
+using PlutoUI,Plots, HypertextLiteral
 
-# ╔═╡ 6d9759c3-63d9-4166-8884-cfaa99ee33c4
-using HypertextLiteral
+# ╔═╡ 279eaa4f-41ca-4168-b492-f36543bb8204
+md" ## Equilibrium And Stability 
 
-# ╔═╡ 65983c74-85d8-11ec-0c78-c9585d7356d8
-md" # 3. Computational Models of systems of interactions
+The model for Logistic Growth is simple enough that it can be solved analytically. Other more complex models cannot be solved, and therefore we have to use other tools to study them. The most common is the Linear Stability Analysis. 
 
-How to make a numerical model of a complex system. Because complex systems are basically composed of parts that are interacting, there is a clear analogy with  chemical reactions (composed of molecules that are reacting). Therefore, we can borrow many concepts from this field and applied them directly to the study of Complex Systems, such as: 
+Linear stability analysis is a method that allows us to study how a system behaves near an equilibrium point. It will help us to know if equilibrium is stable or unstable, and the bifurcations that occur in these equilibrium points, based only on a simplified linearized version of the system of study:
 
-- Mass action Law
-- Mass conservation law
-- Chemical Equilibrium
-- Stoichimestry 
 
-## 3.1 Basics of Chemical Dynamics
+Let's illustrate how linear stability analysis works this with the logistioc model,.
 
-Biological systems are composed of multiple entities (cell, molecuels, genes, organisms...) that interact at multiple time and spatial scales. We will study first how to deal mathematically with systems. Although not limited to chemistry, this is what the field of Chemical Dynamics has been perfecting for many years. Therefore, we will first borrow some ideas from Chemistry that will sound quite familar to some of the students of this course (but not to others). As a start, let's assume a system of interacting species (chemicals, cells, genes, proteins, organisms...) `A`, `B`, `C` and `D` that interact between them, so the amount of each one is allowed to change over time: "
-
-# ╔═╡ 547db9e8-8de9-408d-80d4-48947b4aa1c2
-md"Some possible schemes of interaction are, for instance:
 ```math
 \begin{align*}
-A + B  &\overset{k_1}{\longrightarrow} C  \tag{1} \\
-2A + B  &\overset{k_2}{\longrightarrow} C  \tag{2} \\ 
-C  &\overset{k_3}{\longrightarrow} A + B   \tag{3} \\ 
-AB + C  &\overset{k_4}{\longrightarrow} AC + B   \tag{4} \\ 
-AB + CD  &\overset{k_5}{\longrightarrow} AC + BD   \tag{5} \\ 
+\frac{\mathrm{d} N}{\mathrm{d} t}=\mu N(1 -\frac{N}{K}) \tag{17}
+\end{align*}
+```
+
+The main equation can be written in the following generic form:
+
+```math
+\begin{eqnarray}
+\frac{\partial N}{\partial t} = f(N) 
+\end{eqnarray}
+```
+
+where N is a variable and $f(N)$  is a functions which governs its temporal evolution. 
+
+The first step is to calculate the fixed points of Eq. \ref{base1}. In continuous systems, the steady states occur when there is no change in the amount of our quantity $N$
+
+```math
+\begin{eqnarray}
+\frac{\partial \overline{N}}{\partial t} = 0 = f(\overline{N})
+\end{eqnarray}
+```
+
+Where we denote $\overline{N}$ as the value of our variable in steady state."
+
+# ╔═╡ 00037d0a-8be0-4c75-94bc-23c2c639e6e8
+md" 
+
+Let's find the equilibrium points of our logistic model. 
+
+```math
+\begin{align*}
+\frac{\mathrm{d} N}{\mathrm{d} t}= \mu N(1 -\frac{N}{K}) \tag{17}
+\end{align*}
+```
+By taking the derivate to zero:
+
+```math
+\begin{align*}
+\frac{\mathrm{d} \overline{N}}{\mathrm{d} t}=0= \mu \overline{N}(1 -\frac{\overline{N}}{K}) \tag{17}
+\end{align*}
+```
+
+ we can easily see that we have two equilibrium states: 
+```math
+\begin{align*}
+\overline{N}=0\\
+1 -\frac{\overline{N}}{K} = 0 \Rightarrow \overline{N} = K
+\end{align*}
+```
+
+
+"
+
+# ╔═╡ 64dc539b-b268-43b6-a96e-2c4fa7b48474
+md" The next step after finding the equilibrium points is to check if they are stable or unstable, or what type of equilibrium we have. We do that by introducing small perturbations.
+
+Let’s take a fixed point $\overline{N}$ and perturb it by an infinitesimal amount n. We are interested in the dynamics of N = $\overline{N}$ + n and whether N will move away away or towards $\overline{N}$ as time progresses. 
+
+```math
+\begin{align*}
+\frac{\mathrm{d} N}{\mathrm{d} t}= \frac{\mathrm{d} \overline{N} + n}{\mathrm{d} t}= \frac{\mathrm{d} \overline{N} }{\mathrm{d} t} + \frac{\mathrm{d} n}{\mathrm{d} t}
+\end{align*}
+```
+
+and since 
+
+```math
+\begin{align*}
+\frac{\mathrm{d} \overline{N} }{\mathrm{d} t} = 0 
+\end{align*}
+```
+by definition, we have that the change in time of the population is equivalent to the change in the time of the small perturbation. 
+
+```math
+\begin{align*}
+\frac{\mathrm{d} N}{\mathrm{d} t}= \frac{\mathrm{d} n}{\mathrm{d} t}
+\end{align*}
+```
+
+Since $n$ is very small by definition, we can linearize the dynamics around the ficxed points $\overline{N}$, using a Taylor expansion
+. 
+
+```math
+\begin{align*}
+\frac{\mathrm{d} N}{\mathrm{d} t}= \frac{\mathrm{d} n}{\mathrm{d} t} = f(\overline{N}+n)= f(\overline{N})+ f'(\overline{N})·n +···
+\end{align*}
+```
+
+being $f'(\overline{N})$ the value of derivative of function $f(N)$ in the point of equilibrium $\overline{N}$
+
+Since $f(\overline{N})$ = 0 by definition, we get  
+
+```math
+\begin{align*}
+ \frac{\mathrm{d} n}{\mathrm{d} t} = f'(\overline{N})·n +···
 \end{align*}
 ```
 "
 
-# ╔═╡ 845a5477-29aa-4ebd-89a0-53ddeed9343d
-md" which is the typycal notation of a chemical reaction, but it can be extrapolated to any other system where some entities interact. We know from chemistry that the speed of a chemical reaction (i.e., the change in the amount of a given species) is proportional to the amount of collisions (i.e., the amount of times that two given reactants collide into each other in the solution). It is easy to realize that this rate of collisions has to be proportional to the amount of reactants in the solution. For instance, let's illustrate this situation for the the first reaction:"
-
-# ╔═╡ 5d00ba37-89a4-44a1-b8dc-c47394890b1f
-begin
-	dog_slide = @bind 🐶 html"<input type=range min=1 max=50 step=1>"
-	cat_slide = @bind 🐱 html"<input type=range min=1 max=50 step=1>"
-	
-	md"""
-	**How many molecules do you have?**
-	
-	Molecules of type A: $(dog_slide)
-	
-	Molecules of type B: $(cat_slide)
-	"""
-end
-
-# ╔═╡ c4bb7c6a-1165-44d6-8c1e-ea6798297c72
-begin
-	p1 =scatter(fill(rand(🐶),1), fill(rand(🐶),1), fill(rand(🐶),1), m=(10, 0.8, :blues),framestyle=:box, title="Collisions",label="A")
-	p1 =scatter!(fill(rand(🐱),1), fill(rand(🐱),1), fill(rand(🐱),1), m=(10, 0.8, :reds),framestyle=:box,label="B")
-
-end
-
-# ╔═╡ d4e5e672-4759-47ed-9a69-4d92efd85b05
-md"It is clear that there will be more collisions in the situation on the right, so the reaction will take place faster. So, not only you will end up with more [C], you will also obtain [C] faster. Based on these basic facts, the speed of each reaction above can be matematically written as:
-
-```math
-\begin{align*}
-speed~of~reaction~1~&\propto A \cdot B \tag{6} \\ 
-speed~of~reaction~2~ &\propto A \cdot A \cdot B \tag{7} \\ 
-speed~of~reaction~3 ~ &\propto C \tag{8} \\ 
-speed ~of ~reaction~4 ~&\propto AB \cdot B    \tag{9} \\ 
-speed ~of ~reaction~5 ~&\propto AB \cdot CD  \tag{10} \\ 
-\end{align*}
-```
-
-
-and the proportionality constant is simply the value of the reaction rates $k_i$, which is a measure of how many of the collisions are effective, so:
-
-```math
-\begin{align*}
-speed~of~reaction~1~&= k_1 \cdot A \cdot B \tag{11} \\ 
-speed~of~reaction~2~ &= k_2 \cdot A \cdot A \cdot B \tag{12} \\ 
-speed~of~reaction~3 ~ &= k_3 \cdot C \tag{13} \\ 
-speed ~of ~reaction~4 ~&= k_4 \cdot AB \cdot B    \tag{14} \\ 
-speed ~of ~reaction~5 ~&= k_5 \cdot AB \cdot CD  \tag{15} 
-\end{align*}
-```
-"
-
-# ╔═╡ 6b25dc03-352b-4351-b387-2c3d0dd80106
-md" ### 1.1. Equilibrium 
-
-In these system, the equilibrium (defined as the condition of no change in the amount of the species interacting) corresponds to the situation when the speed of the reaction is zero. In these type of __irreversible__ reactions, equilibrium occurs when the reaction is finished because one of the reactants (the limitant) has been fully consumed. On the contrary, in __reversible__ reactions, the equilibrium can be dynamic and does not mean explicitely that the reaction is stopped. For instance, let's asumme a very simple equilibrium between two species:
-
-```math
-\begin{align*}
-2 NO_2   &\overset{k_1}{\underset{k_2}{\longleftrightarrow}} N_{2}O_4 \tag{16} \\
-\end{align*}
-```
-
-This system is actually composed of two (not so) different reactions, 
-
-```math
-\begin{align*}
-2 NO_2   &\overset{k_1}{\longrightarrow}  N_{2}O_4 \tag{17} \\
-N_{2}O_4  &\overset{k_2}{\longrightarrow} 2 NO_2 \tag{18}
-\end{align*}
-```
-and the speed of each reaction is:
-
-```math
-\begin{align*}
-speed~of~reaction~16~&= k_1 \cdot NO_2 \cdot NO_2 = k_1 \cdot NO_{2}^{2} \tag{19} \\ 
-speed~of~reaction~17~ &= k_2 \cdot N_{2}O_4 \tag{20}
-\end{align*}
-```
-
-"
-
-# ╔═╡ eb9eb1de-7b0f-4045-b438-ab7930243e5c
+# ╔═╡ f5faefd6-f496-40fb-8043-ef6b9d172ae0
 md"
 
-For this reversible reaction, it is impossible to have pure $NO_2$ or  $N_{2}O_4$, (i.e., as soon as the amount of one species is approaching zero, the force towards the other direction in the reaction approaches infinite). In other words, the less of a molecule exists in solution, the faster will be generated. Therefore, equilibrium cannot be defined as the point where the reaction is finished (because it never finishes), or the point where one of the species has been fully consumed. In these conditions, the equilibrium is better defined as the situation when the speed of the two reactions is equal. 
+If the perturbation $n$ is very small, then linear and nonlinear evolution are in fact approximately the same. But as $n$ increases in size the nonlinear effects become increasingly more important and evolving y with the linearized dynamics or the full nonlinear dynamics is no longer equivalent. So, this means that if perturbations $n$ are small, we can forget about higher order terms and simply assume that this has a form of $\dot{n}= \lambda \cdot n$, so if we integrate we have a solution that is an exponential fucntion. 
+
 
 ```math
 \begin{align*}
-k_1 \cdot [NO_{2}]^{2}_{eq} = k_2 \cdot [N_{2}O_4]_{eq}  \tag{21} 
+n(t)=n(0) e^{\lambda t}
 \end{align*}
 ```
 
-In other words, equilibrium occurs when the concentration of the reactants do not change overtime. In our example, it means that you reach a value of $[N_{2}O_4]$ and $[NO_2]^2$ that is constant. As a consequence, in reversible reactions at equilibrium, the ratio $\frac{[N_{2}O_4]_{eq}}{[NO_2]^2_{_{eq}}}$ is a constant value that is proportional to the ratio between the reaction rates $k_1$ and $k_2$. 
-
-```math
-\frac{k_1}{k_2} = \frac{[N_{2}O_4]_{eq}}{[NO_{2}]^{2}_{eq}} \tag{23}\\
-```
-
-In consequence, that the ratio between the concentrations of reactants at equilibrium ($\frac{[N_{2}O_4]_{eq}}{[NO_2]^2_{eq}}$ in our example) does not depend on how much $[N_{2}O_4]$ or $[NO_2]^2$ you put intially in the system. This means that if does not matter if you start with zero concetration of one the reactants and tons of molecules of the other: at qeuilibrium the ratio between teh concentrations only depends on the ratio between the rates of the two reversible equations. 
-"
-
-# ╔═╡ 07735905-642b-4141-87fe-c9bc20ae04c2
-md"Now let's practice with another example of chemical reaction: 
-
-```math
-Na_{2}CO_3 + CaCl_2 \overset{k_1}{\underset{k_2}{\longleftrightarrow}} CaCO_3 + 2 \cdot NaCl \tag{22}
-```
-
-Following the rationale of the previous chemical reaction, we can write the same correspondence between 
-
-```math
-\frac{k_1}{k_2}
-= \frac{[CaCO_3][NaCl]^2}{[Na_{2}CO_3][CaCl_2]} \tag{23}\\
-```
-"
-
-# ╔═╡ 76691838-7086-4ca0-91d1-b5ef2c3e3b24
-md"### 1.2 Order of reactions and Equilibrium Constant 
-
-The order of a reaction refers to the power dependence of the rate on the concentration of each reactant. In brief, the order of the reaction indicates the correlation of its velocity with the amount of reactants.
-
-- For a zero-order reaction, the rate does not depend on the concentration of any species.
-- For a first-order reaction, the rate is dependent on the concentration of a single species.
-- For a second-order reaction, the rate is dependent on the square of the concentration of a single reactant, or two reactants.
-
-This way, the units of the rate constants will depend on the type of reaction taking place. 
-
-A common characterization of a system of interacting species is the equilibrium constant $K_{eq}$, i.e, the ratio between the two reversible reaction rates. 
+So, depending on the sign of $\lambda$, this perturbation $n$ may increase ($\lambda >0$) or decrease ($\lambda <0$). As an example, let's test this for the logistic system. 
 
 ```math
 \begin{align*}
-K_{eq}=\frac{k_1}{k_2} \tag{22} 
+\frac{\mathrm{d} N}{\mathrm{d} t}=\mu N(1 -\frac{N}{K}) = \frac{\mathrm{d} (\mu \overline{N}(1 -\frac{\overline{N}}{K})}{\mathrm{d} t} n \tag{17}
 \end{align*}
 ```
+For simplicity, we will decompose the fucntion in to two terms:
+```math
+\begin{align*}
+\mu N(1 -\frac{N}{K}) = g(N) \cdot h(N)
+\end{align*}
+```
+being 
 
-Here, we can ask ourselves what are the units of the equilibrium constant. From the equation above, since it is defined as the ratio between two kinetic constants of a reversible reaction, we can conclude that it has no dimensions. The correct aswer is that, since the units of the kinetic constants depend on the order of the reaction taking place, and that the two reactions that form a reversible reaction can have different orders, the units of the equilibrium constant will depend on each particular system.  
-
-In this direction, we cannot compare the dynamics and the equilibrium state of two reactions simply based on the value of their kinetic constant. To illustrate this, we run below the numerical simulation of two different reactions that have the same value the kinetic constant. Since the two reversible reactions are formed by reactions of different order, the units of the kinetic constants are different, therefore, they cannot be compared.
-"
-
-# ╔═╡ 23c143d3-29a3-4824-877e-1f13d0818ab6
-simpleODE1! = @ode_def abetterway begin
-  da = -k1 * a + k2 * c 
-  dc =  k1 * a - k2 * c 
-    end k1 k2
-
-# ╔═╡ 71777cd5-eedb-4dbf-a3a0-84ebe31ef602
-simpleODE2! = @ode_def abetterway2 begin
-  da = -k1 * a * b + k2 * c
-  dc = k1 * a * b - k2 * c 
-  db = -k1 * a * b + k2 * c 
-    end k1 k2
-
-# ╔═╡ aed09f8b-eb07-4a34-a0bf-dc9ac987e85f
-begin
-	b_slide = @bind b₀ html"<input type=range min=0.0 max=2 step=0.1>"
-
-	md"""
-	**Move the silder to change the initial concentration of b?**
-	
-	Concentracion inicial de b: $(b_slide)
-	
-	"""
-end
-
-# ╔═╡ 0c575ced-ef89-4bf8-8f8c-c784d7f2d33a
-begin
-		k1=2.3e-1;  # units 1/(Ms)
-		k2=2.5e-1;  # units 1/(M M s)
-		tspan = (0.0,10.0)
-		p = (k1,k2)
-		a₀=0.05; # units (M)
-		#b₀=0.05; # units (M)
-		c₀=0.00; # units (M)
-		u₀=[a₀,c₀];
-	
-	prob = ODEProblem(simpleODE1!,u₀,tspan,p)
-	sol1 = solve(prob);
-	p3=plot(sol1,xlabel="Time [s]",ylabel="Concentration [M]",title="a <-> c",ylims = (0,0.05));
-	
-	u₀=[a₀,c₀,b₀];
-	
-	prob = ODEProblem(simpleODE2!,u₀,tspan,p)
-	sol2 = solve(prob);
-	p4=plot(sol2,xlabel="Time [s]",ylabel="Concentration [M]",title="a + b <-> c, b₀ = $b₀",ylims = (0,0.05));
-	
-	
-	plot(p3,p4,layout=(1,2),legend=true)
-end
-
-# ╔═╡ 7b95dbaf-dc9d-45eb-9a0a-f2f75daf8765
-md" 
-You can see above two examples with the same value of the equilibrium constant, but completely different dynamics. The left one corresponds to a chemical reaction where forward and backward reaction have the same order, and therefore $K_{eq}$ is a nondimensional parameter. The right one corresponds to a chemical reaction where forward and backward reaction have different order, and the units of $K_{eq}$ is now [M]. You can move the slider to change the intial concentration of b to find a value where the two reactions have a similar dynamics. 
-
-
-
-
-
-"
-
-# ╔═╡ 2e15f653-b17b-4724-8fa9-a10606093c5d
-md" 
-## 2. General Formulation for a system of interacting entities
-Let's now introduce a general notation for any interaction scheme between species. Let's define a system where species `A` and `B` react reversibly to give species `C` and `D`:
 
 ```math
 \begin{align*}
-aA + bB  &\overset{k_1}{\underset{k_2}{\longleftrightarrow}} cC + dD \tag{26} \\ 
+g(N) &= \mu N \\
+h(N) &= 1 -\frac{N}{K}
 \end{align*}
 ```
 
-where `a`, `b`, `c`, `d` correspond to the stoichiometric coefficients for a balanced interaction. At any instant in time, we can define a ratio between the amounts of each species, such as:
-
+now we need the detivative 
 ```math
-Q= \frac{[C]^c[D]^d}{[A]^a[B]^b} \tag{27}
+\begin{align*}
+\frac{\mathrm{d} [g(N) \cdot h(N)]}{\mathrm{d} t}= \frac{\mathrm{d} g(N) }{\mathrm{d} t}  h(N) + g(N) \frac{\mathrm{d} h(N) }{\mathrm{d} t} 
+\end{align*}
 ```
 
-where `Q` is defined in chemistry as the reaction quotient, and measures the relative amounts of the interacting species present during a reaction at a particular point in time. As the time evolves, the system moves towards its equilibrium, and the value of `Q` gradually approaches to the equilibrium constant $K_{eq}$. The general expression of this equilibrium constant is:
+since 
+```math
+\begin{align*}
+\frac{\mathrm{d} g(N) }{\mathrm{d} t} &=\mu\\
+\frac{\mathrm{d} h(N) }{\mathrm{d} t} &= -\frac{1}{K}
+\end{align*}
+```
+
+so,
 
 ```math
-K_{eq}= \frac{[C]^c[D]^d}{[A]^a[B]^b} \tag{28}
+\begin{align*}
+\frac{\mathrm{d} (\mu N(1 -\frac{N}{K})}{\mathrm{d} t} =\mu (1 -\frac{N}{K}) - \frac{\mu \cdot N}{K}
+\end{align*}
 ```
 
 "
 
-
-# ╔═╡ cd434441-2358-4d50-8744-98af4fc99176
-md"### 3. Independence of ratio between equilibrium concentrations on initial conditions: 
-
-We have seen how, in reversible reactions, the ratio between the concentrations of the reactants at equilibrium depends only on the ratio between the kinetic constants, and therefore it is __independent on the initial concentrations__ of the reactants. This apparent simple result has important implications, and therefore, it is important to think a bit about this feature. To illustrate that, we will show the solution of the system for two different initial conditions, and compare the dynamics and the value of ``Q(t)``."
-
-# ╔═╡ 7a252b5a-13f1-489c-8dfd-ef325adeee56
-simpleODE3! = @ode_def abetterway3 begin
-  da = -k1 * a * b + k2 * c * d^2
-  db = -k1 * a * b + k2 * c * d^2
-  dc = k1 * a * b - k2 * c * d^2
-  dd = 2 * k1 * a * b - 2 * k2 * c * d^2
-    end k1 k2
-
-# ╔═╡ 0a62b4ce-861b-44b2-bb56-c6f4cfce5fef
-begin
-	intial_a = @bind aa₀ html"<input type=range min=0.01 max=0.1 step=0.01>"
-	
-	intial_b = @bind bb₀ html"<input type=range min=0.01 max=0.1 step=0.01>"
-	intial_c = @bind cc₀ html"<input type=range min=0.01 max=0.1 step=0.01>"
-	intial_d = @bind dd₀ html"<input type=range min=0.01 max=0.1 step=0.01>"
-	
-	md"""
-	**How many molecules do you have?**
-	
-	Initial concetration of a: $(intial_a)
-	
-	Initial concetration of b: $(intial_b)
-	
-	Initial concetration of c: $(intial_c)
-	
-	Initial concetration of d: $(intial_d)
-	
-	"""
-end
-
-# ╔═╡ e48547d5-f638-4885-8d2d-a8f70ad67dd5
-begin
-
-	prob3 = ODEProblem(simpleODE3!,[aa₀,bb₀,cc₀,dd₀],(0.0,50.0),(1.3e0,2.5e0))
-	sol3 = solve(prob3);
-
-	p6=plot(sol3,xlabel="Time [s]",ylabel="Concentration [M]",title="Dynamics",ylims = (0,0.2));
-
-	Q1=(sol3[3,:].*sol3[4,:].^2)./(sol3[1,:].*sol3[2,:])
-	p7=plot(sol3.t,Q1,title= "Quotient coefficient",xlabel="Time [s]",ylabel="Q [M]",ylims = (0,0.6))
-
-	plot(p6,p7,layout=(1,2),legend=true)
-end
-
-# ╔═╡ ea66ecaf-96c5-4b54-92eb-55d0eda5a001
-md"We see that the value of $Q$ does not change, and always aproaches the same final value at the end of the reaction, and this value is $K_{eq}$.
-
-This apparently peculiar relationship between the amounts of reactants and products in an equilibrium (no matter how many reactants you start with) is based on the previous notion of dynamic equilibrium (two opposite reactions with the same speed). The values of `[A]`, `[B]`, `[C]` and `[D]` represent the amount of each species at equilibrium. If this amount is given as a concentration, lets say in moles/volume, `M`, the units of the equilibrium constant $K_{eq}$ are:
-
-
-
-```math
-[K_{eq}]=M^{c+d-a-b} \tag{29}
-```
-"
-
-# ╔═╡ 442944b8-8f11-484e-988c-6b1bcbd13c8e
-@htl("""
-
-<div class='blue-background'>
-Hello!
-</div>
-
-<script>
-// more about selecting elements later!
-currentScript.previousElementSibling.innerText = "Computer Task 1: Working with functions"
-
-</script>
-
-<style>
-.blue-background {
-	padding: .5em;
-	background: lightblue;
-	color: black;
-}
-</style>
-
-""")
-
-# ╔═╡ 10d1f8cc-1a72-420b-b5cc-0286105850b3
-md"A good way to write code to solve numerical models is to pack the scripts in separate functions that can be called with a single sentence. Modern programming languages are optimized to work with functions, resulting in much more efficient code. 
-
-As a first task, write a simple computer program with two functions that take as input arguments, a vector of concentrations at equilibirum of two reactions reaction 16 and 22 and return their value $K_{eq}$ with the correct units"
-
-# ╔═╡ 6f8ff973-6845-4517-8bca-1bec97fa4edf
-@htl("""
-
-<div class='red-background'>
-Hello!
-</div>
-
-<script>
-// more about selecting elements later!
-currentScript.previousElementSibling.innerText = "Solution Computer Task 1"
-
-</script>
-
-<style>
-.red-background {
-	padding: .5em;
-	background: lightgreen;
-	color: black;
-}
-</style>
-
-""")
-
-# ╔═╡ 313f484e-bea2-437d-ba91-d766d36dd248
-function Calculate_Keq1(a)
-	NO2=a[1]
-	N2O4=a[2]
-	NO2/N2O4^2
-end
-
-# ╔═╡ f8ebbcd7-61e6-46bd-91fd-546ba931f76c
-function Calculate_Keq2(a)
-	Na2CO3=a[1]
-	CaCl2=a[2]
-	CaCO3=a[3]
-	NaCl=a[4]
-	(CaCO3*NaCl^2)/(Na2CO3*CaCl2)
-end
-
-# ╔═╡ 7c053891-043a-4c0d-9afd-d03012d102c8
-NO2=2; N2O4=3;
-
-# ╔═╡ 5959c966-ff6e-4172-9fad-c05258050ff4
-Calculate_Keq1([NO2,N2O4]) 
-
-# ╔═╡ 29001c0e-9f2e-4fbb-ba8f-3b34de1d2a4b
-Na2CO3=2;CaCl2=0.5;CaCO3=2;NaCl=1.2;
-
-# ╔═╡ 10e57e8a-bc19-4abe-9b62-ba7b65c69c9d
-Calculate_Keq2([Na2CO3,CaCl2,CaCO3,NaCl])
-
-# ╔═╡ 6de3e149-e3e4-4c24-975b-e1e2259392f3
-md"For reaction 16 we have:
-
-For reaction 21 we have:
-
-```math
-[K_{eq}]=M^{1+0-2-0}=M^{-1}  \tag{32}\\
-```
-
-while for reaction 21 we have:
-
-```math
-[K_{eq}]=M^{1+2-1-1}=M  \tag{33}\\
-```
-
-
-"
-
-# ╔═╡ 1525b27e-2613-4f27-9f13-171e24cd574e
-md" ### 1.3 Effect of temperature 
-
-We have seen that the speed of a reaction is proportional to the concentration of reactants, and to the kinetic rate constant. Another way to increase or decrease the speed of a given reaction is via changes in the _temperature_. At the molecular level, temperature is related to the random motions of the particles in matter. In other words, temperature in a solution is a measure of the average kinetic energy of the molecules involved, and therefore, changes in the temperature will result in changes in the number of collisions in a chemical reaction. 
-
-The dependence between temperature and reaction rate constant is set by the The Arrhenius Equation:
-```math
-k = A e^{-E_a/RT} 
-```
-The parameter of $E_a$ is the activation energy, and $A$ is a parameter that relates to the frequency of collisions and the orientation of a favorable collision probability
-
-The activation energy is the energy required for two molecules to interact, it is like a barrier of Energy. Lets plot below the dependence of the rate constant with the temperature. 
-
-"
-
-# ╔═╡ f55ef39d-192e-4e97-acf5-a5fad4c6bae8
-begin
-	E_slide = @bind E_a html"<input type=range min=1.0 max=20 step=1>"
-
-	
-	md"""
-	**Move the silder to change the Activation Energy**
-	
-	Ea: $(E_slide)
-	
-	"""
-end
-
-# ╔═╡ c589178d-8b4b-488c-8d63-c7cc487848ec
-begin
-	A=1
-	T= LinRange(100,300,100)
-	plot(T,A.*exp.(-E_a./(0.082.*T)),ylims = (0,1))
-	title!("Rate constant change with temperature")
-	ylabel!("k")
-	xlabel!("Temperature [K]")
-end
-
-# ╔═╡ 59fd13d8-e3bd-4756-a77f-a571876670a3
-md"we can see that the kinetic rate constant increases with the temperature (more kinetic energy of the particles, will mean more efficient collisions). Also, as we increase $E_a$, the rate decreases, suggesting that the number of efficient collisions is reduced. Another way of looking at this is using the typical energy diagrams for chemical reactions. "
-
-# ╔═╡ 2495b700-916f-4103-a822-1c085c357153
+# ╔═╡ 32b3bc77-c4f4-40ab-a5a9-e035022189ac
 md"
-
-Of course, in a reversible reaction, if the forward reaction is exothermic, the backward reaction is endothermic, and vice-versa. And the energy of activation is smaller for the exothermic than for the endothermic direction.  Lets see teh consequences of this difference.  To do that, lets play with the Arrienous equation, to get a straigh line
+now we substitute our steady state values, for $\overline{N}=0$, we have 
 
 ```math
-\begin{align}  
-\ln k &= \ln \left(Ae^{-E_a/RT} \right) \\
-&= \ln A + \ln \left(e^{-E_a/RT}\right) \\
-&= \left(\dfrac{-E_a}{R}\right) \left(\dfrac{1}{T}\right) + \ln A \\
-&=\ln A - \dfrac{E_{a}}{RT}
+\begin{align*}
+\frac{\mathrm{d} (\mu \overline{N}(1 -\frac{\overline{N}}{K})}{\mathrm{d} t}\Biggr\rvert_{\overline{N}=0} =\mu (1 -\frac{0}{K}) - \frac{\mu \cdot 0}{K} = \mu
+\end{align*}
+```
+
+So, as long as $\mu > 0$ this fixed point is unestable. If we have $N=0$, the systems remains there. As soon as we perturb the number (and we can only perturb by slightly increasing, these perturbations grow exponentially. For the second steady state. 
+
+```math
+\begin{align*}
+\frac{\mathrm{d} (\mu \overline{N}(1 -\frac{\overline{N}}{K})}{\mathrm{d} t}\Biggr\rvert_{\overline{N}=K} =\mu (1 -\frac{K}{K}) - \frac{\mu \cdot K}{K} = - \mu
+\end{align*}
+```
+
+So, as long as $\mu > 0$ this fixed point is stable. Perturbations will allways decrease exponentially. 
+
+To observe this grafically, lets plot the function [$\mu N(1 -\frac{N}{K}$]
+
+
+"
+
+# ╔═╡ c70c7a06-d1aa-40a9-902b-4bd4b23a6392
+begin
+	T_slide = @bind T html"<input type=range min=5 max=15 step=1>"
+	K_slide = @bind K html"<input type=range min=100 max=500 step=10>"
+	md"""
+	**Set the Cell Cycle Length and the carrying capacity**
+	
+	value of T: $(T_slide)
+
+	value of K: $(K_slide)
+	
+	"""
+end
+
+# ╔═╡ 10ba443a-d7bc-40f2-b4f6-540328ce6e4b
+N=collect(0:0.1:K);
+
+# ╔═╡ 2cfd31c4-803a-4880-b2a4-5af6594c0975
+plot(N, log(2)/T .* N .* (1 .- (N ./ K)),label="T= $T, K= $K",seriestype=:line,xlabel=("N"),ylabel=("f(N)"),ylims = (0,20),xlims = (0,500))
+
+# ╔═╡ 2170f883-1b01-4d16-907e-49c72118e224
+md"
+Equilibrium points are the values where the function is zero. We see the two of them, the unsable $\overline{N}=0$ and the stable $\overline{N}=K$. In this system, every perturbation moves away from $\overline{N}=0$ towards $\overline{N}=K$, which is the carrying capacity of the system.
+
+The slope represents how fast the change occurs, so increasing $T$, means that we reach the carrying capacity of the system faster. 
+
+So, this is a liner model, and we can solve it analitically, so performinng a perturbation analysis does not provide extra information (we now the full dynamics because we have an analitical solution). The advantage of this perturbation analysis (or linear stabilty analysis) is when we work with systems that cannot be solved anallyically, such as systems with multiple variables, and systems with nonlinearities. 
+
+"
+
+# ╔═╡ 6c87979a-690a-400b-9ab8-7ef26b829195
+md"### Stability analysis of nonlinear systems: Lotka-Volterra model
+
+The Lotka-Volterra model, also known as Predator-Prey model describes the inteactions between two populations of species where one feeds into the other.  One can think of rabbits $x$ and foxes $y$, such that rabits multiply where there is no foxes (assuming an infinite amount of food for the rabbits). This is basically a first order production of rabbits, an autocalalitic system that results in exponetial growth of rabbits.
+
+Next, foxes $y$ feed on the rabbits and multiply due to the good food conditions. Then also foxes die at a constant rate (rabbits also die, but the mdoel assumes that their rate of birth is much higher than the rate of death). The scheme of interactions for this very simple system is the following:
+
+```math
+\begin{align}
+ x &\overset{k_1}{\longrightarrow} 2 x   \\
+ x + y &\overset{k_2}{\longrightarrow} 2 y \\
+ y &\overset{k_3}{\longrightarrow} 0 
+ \end{align}
+```
+
+First, we find the differential equations that govern the dynamcis of the following system, and the steady state values. we start by writting the matrices of stoichiometric coefficients:
+
+```math
+A=\begin{bmatrix}
+  1 & 0  \\  
+  1 & 1   \\
+  0 & 1       \end{bmatrix} ;
+B=\begin{bmatrix}
+  2 & 0   \\ 
+  0 & 2   \\
+  0 & 0       \end{bmatrix}; \tag{8}
+```
+
+"
+
+# ╔═╡ 04c14475-24cd-49c3-8a7b-83a9425664be
+A = [1 0;1 1;0 1];B = [2 0;0 2;0 0];(B-A)'
+
+# ╔═╡ 919bf3e4-6aa0-440b-b76f-34a4812c6752
+md"in this particular case
+
+```math
+K=\begin{pmatrix}
+ k_1 & 0 & 0  \tag{9}\\ 
+ 0 &  k_2 & 0  \\ 
+ 0 &  0 & k_3 
+\end{pmatrix}
+```
+
+and 
+
+
+```math
+X^A=\begin{pmatrix}
+X_1^1\cdot X_2^0  \\
+X_1^1\cdot X_2^1  \\
+X_1^0\cdot X_2^1   
+\end{pmatrix} = \begin{pmatrix}
+ X_1 \\
+ X_1 \cdot X_2\\
+ X_2
+\end{pmatrix} \tag{10}
+```
+
+so, the equations that define the system are
+
+```math
+\begin{align}
+ \begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \end{bmatrix}& 
+=  \begin{bmatrix} 1 & -1 & 0  \\ 0 & 1 &  -1  \end{bmatrix}
+\begin{pmatrix}
+ k_1 & 0 & 0  \tag{9}\\ 
+ 0 &  k_2 & 0  \\ 
+ 0 &  0 & k_3 
+\end{pmatrix}
+ \begin{pmatrix}
+ X_1 \\
+ X_1 \cdot X_2\\
+ X_2
+\end{pmatrix} 
+\end{align}
+```
+and after multiplying the matrices
+```math
+\begin{align}
+ \begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \end{bmatrix}& 
+=  \begin{bmatrix} 1 & -1 & 0  \\ 0 & 1 &  -1  \end{bmatrix}
+ \begin{pmatrix}
+ k_1 \cdot X_1 \\
+ k_2 \cdot X_1 \cdot X_2\\
+ k_3 \cdot X_2
+\end{pmatrix} 
 \end{align}
 ```
 
-
-Now let's plot the two kinetic rate constants for a reversible reaction. 
- "
-
-# ╔═╡ c2cc318b-933a-43d4-be76-59a629d900c3
-begin
-	p5=plot(1 ./ T,log(A).-(E_a./2 ./ (0.082.*T)),ylims = (-2,0),label = "k1, Exothermic")
-	p5=plot!(1 ./ T,log(A).-(E_a./(0.082.*T)),ylims = (-2,0),label = "k2, Endothermic")
-	title!("Rate constant change with T in reversible reactions")
-	ylabel!("log (k)")
-	xlabel!("1/Temperature [1/K]")
-end
-
-# ╔═╡ d30be1ba-5658-4307-a69d-c6c6c97365b0
-md"We can see that, both k1 and k2 increase with the temperature, but the dependence is stronger for the endothermic. Therefore, increasing the temperature  will result in an shift of the equilibirum towards the endothermic reaction (the reaction that consumes heat). On other words, more heat is available, the reaction that uses heat is favored). On the contrary a decrease in temperature, favors the reaction that increases the temperature.
-
-As a conclusion: since the temperature affects differently both $ks$ of a reversible reaction, and their rate is the equilibrium constant, a change in the temperature will allways affect the equilibrium of a reversible reaction. 
-
-For instance, lets look at the following reaction: 
-
+so finally, 
 
 ```math
-H_2+ I_2 \overset{k_1}{\underset{k_2}{\longleftrightarrow}} 2IH \tag{24}
+\begin{align}
+ \begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} 
+\end{bmatrix}&= 
+ \begin{pmatrix}
+   k_1 \cdot X_1 - k_2 \cdot X_1 \cdot X_2 \\
+  k_2 \cdot X_1 \cdot X_2 - k_3 \cdot X_2
+\end{pmatrix} \tag{11}
+\end{align}
 ```
 
-The equilibrium constant is $K_{eq} = \frac{[IH]^2}{[H_2][I_2]}$. If [$HI$]=0.75 M and [$H2$]= 0.20 M at equilibrium, then the concentration of [$I_2$] at equilibrium depends on the value of $K_{eq}$
+Therefore, the  equations for the evolution of `[x]` and `[y]` are as follows:
 
 ```math
-[I_2] = \frac{[0.75]^2}{[0.2][K_{eq}]} \tag{25}
+\begin{align}       
+            \frac{ dx }{dt} &=  k_1 \cdot x - k_2 \cdot x \cdot y  \tag{5}\\ 
+            \frac{ dy }{dt} &= k_2 \cdot x \cdot y - k_3 \cdot y  \tag{6} 
+            \end{align} 
+```
+
+
+"
+
+# ╔═╡ 855b8530-861e-427e-b6cc-c1b0283568ca
+md" 
+
+which in general form, we can write as:
+
+```math
+\begin{eqnarray}
+\frac{\partial x}{\partial t} = f(x, y) \\
+\frac{\partial y}{\partial t} = g(x, y) 
+\end{eqnarray}
+```
+
+where $f(x, y)$ and $g(x, y)$ are nonlinear equations that govern the temporal evolution and couple the behavior of the two variables $x$ and $y$:
+
+Next, we need to calculate the fixed points:
+
+```math
+\begin{eqnarray}
+\frac{\partial \overline{x}}{\partial t} =0= f(\overline{x},\overline{y})  \\
+\frac{\partial \overline{y}}{\partial t}= 0 = g(\overline{x},\overline{y})
+\end{eqnarray}
+```
+
+For the particular case of the Lotcka-Volterra, we just set eqs. 5 and 6 to zero
+
+
+
+```math
+\begin{align}       
+            k_1 \cdot \overline{x} - k_2 \cdot \overline{x} \cdot \overline{y}  \tag{5} &= 0\\ 
+            k_2 \cdot \overline{x} \cdot \overline{y} - k_3 \cdot \overline{y}  \tag{6} &= 0
+            \end{align} 
+```
+
+and solve for `x` and `y`. We obtain two solutions,  $\overline{x}=\overline{y}=0$ and 
+
+
+```math
+\begin{align}       
+            \overline{x} &= \frac{k_3}{k_2}\tag{5} \\ 
+            \overline{y} &= \frac{k_1}{k_2} \tag{6}   
+            \end{align}    
+```
+
+
+	"
+
+# ╔═╡ c112e62c-9c38-48dc-8294-42911b02ccc5
+md" The next step is to find the characteristics of the steady states. We do that by following the same rationalle of the logistic model, i.e., to expand our equations as Taylor series around the steady state $(\overline{x},\overline{y})$., but now for multi-variable equations. 
+
+```math
+\begin{eqnarray}
+\frac{\partial x}{\partial t} = M_{11} \cdot x + M_{12} \cdot y + ... \\
+\frac{\partial y}{\partial t} = M_{21} \cdot x + M_{22} \cdot y + ... 
+\end{eqnarray}
+```
+            
+Where $M_{ij}$ are the components of the Jacobian matrix, evaluated at the steady state $(\overline{x},\overline{y})$. 
+
+```math
+\begin{align}
+ J=\begin{bmatrix} 
+ M_{11} & M_{12} \\ 
+ M_{21} & M_{22}
+ \end{bmatrix}_{\overline{x},\overline{y}}= \begin{bmatrix} 
+\frac{\partial  f(x,y)}{\partial x}\Biggr\rvert_{\overline{x},\overline{y}} & \frac{\partial  f(x,y)}{\partial y}\Biggr\rvert_{\overline{x},\overline{y}} \\ 
+\frac{\partial  g(x,y)}{\partial x}\Biggr\rvert_{\overline{x},\overline{y}} & \frac{\partial  g(x,y)}{\partial y}\Biggr\rvert_{\overline{x},\overline{y}}
+ \end{bmatrix} 
+ \end{align} 
+```
+
+which for the particular case of the Lotka-Volterra is 
+
+
+```math
+\begin{align}
+ J=\begin{bmatrix} 
+ M_{11} & M_{12} \\ 
+ M_{21} & M_{22}
+ \end{bmatrix}_{\overline{x},\overline{y}} = \begin{bmatrix} 
+ k_1 - k_2 \cdot \overline{y}  &  - k_2 \cdot \overline{x}   \\ 
+k_2  \cdot \overline{y}  & k_2 \cdot \overline{x}  - k_3 
+ \end{bmatrix}
+ \end{align} 
+```
+
+Next, to investigate the stability, we check solutions in the form of small perturbations as follows:
+
+```math
+\begin{eqnarray}
+(x,y) = (X_0,Y_0) e^{\lambda t}  
+\end{eqnarray}
+```
+Here, $\lambda$ is the growth rate of the perturbations, also refered as eigenvalue. Each steady state will behave differently in terms of the dynamcis of the perturbations. Therefore, each steady state will have an associated eigenvalue. To find the eigen values, we solve the characteristic polynomial $det[J-\lambda I]=0$. 
+
+```math
+\begin{eqnarray}
+Det \left(\begin{array}{cc}M_{11}-\lambda & M_{12} \\M_{21}& M_{22}-\lambda \end{array}\right) =0 
+\end{eqnarray}
+```
+which gives us the corresponding equation:
+```math
+\begin{eqnarray}
+\lambda^{2} -\lambda Tr(M) + Det(M)=0
+\end{eqnarray}
+```
+where:
+```math
+\begin{eqnarray}
+Tr(M)= M_{11}+M_{22} \\
+Det(M)= M_{11}M_{22}-M_{12}M_{21} 
+\end{eqnarray}
 ```
 
 "
 
-# ╔═╡ 4409d520-1aae-4036-892c-27f2bfaec571
-begin
-	
-	K_eq= LinRange(0.1,1,100)
-	HI=0.75
-	H2=0.2
-	plot(K_eq,(HI^2)./(K_eq.*H2))
-	title!("Equilibrium concentration of the reactant ")
-	ylabel!("I_2 [M]")
-	xlabel!("Equilibrium constant")
-end
-
-# ╔═╡ cb5bbeb3-1c07-4a20-ba2c-d4ea706609e0
-md"As as general conclusion, __changes in the temperature of the system that result in an increase in $K_{eq}$ shift the equilibrium towards the products__, while a reduction in $K_{eq}$ shifts the concentrations at equilibrium favoring the reactants.  
-"
-
-# ╔═╡ 6aa8f4b5-c26e-476e-b00c-0b0b040bbd18
-md" ### 1.4 Aplication to systems of interactions
-
-Next, we can use these concepts from chemical systems to study any type of system. For instance, let's set a system of interactions where we can study the balance between single people and the formation of marriage couples
-
+# ╔═╡ 6c96da07-b5ea-4096-a14c-5cd8f0f47c04
+md"for the lotka-volterra case:
 
 ```math
-2  a \overset{k_1}{\underset{k_2}{\longleftrightarrow}} b \tag{24}
+\begin{eqnarray}
+Tr(M)= k_{1} + k_2 (\overline{x}-\overline{y}) - k_3  \\
+Det(M)= (k_1- k_2 \cdot \overline{y})(k_2 \cdot \overline{x} - k_3) - (k_2 \cdot\overline{y})(-k_2 \cdot \overline{x})  )
+\end{eqnarray}
 ```
-In this very simple analogy, $k_1$ is the rate of marriages, $k_2$ is the rate of divorces. At any point, mariaages and divorces are taking place, but at a population level, the equilibrium can be reached. 
+
+calculating 
+
+```math
+\begin{eqnarray}
+Tr(M)= k_{1} + k_2 (\overline{x}-\overline{y}) - k_3  \\
+Det(M)= - k_1 \cdot k_3 - k_2^2 \cdot \overline{y} \cdot \overline{x} + k_2  \cdot k_3 \cdot \overline{y} + k_1 \cdot k_2 \cdot \overline{x}+ k_2^2 \cdot\overline{y} \cdot \overline{x} 
+\end{eqnarray}
+```
+and 
+
+```math
+\begin{eqnarray}
+Tr(M)= k_{1} + k_2 (\overline{x}-\overline{y}) - k_3  \\
+Det(M)= k_2  \cdot k_3 \cdot \overline{y} + k_1 \cdot k_2 \cdot \overline{x} - k_1 \cdot k_3 
+\end{eqnarray}
+```
+
+so the chracteristic equation becomes:
+```math
+\begin{eqnarray}
+\lambda^{2} -\lambda (k_{1} + k_2 (\overline{x}-\overline{y}) - k_3) + k_2  \cdot k_3 \cdot \overline{y} + k_1 \cdot k_2 \cdot \overline{x} - k_1 \cdot k_3=0
+\end{eqnarray}
+```
+
+So, the polynomium for the fixed point $\overline{x},\overline{y}=[0,0]$ is 
+
+```math
+\begin{eqnarray}
+\lambda^{2} +\lambda (k_3 - k_{1})  - k_1 \cdot k_3=0
+\end{eqnarray}
+```
+
 
 "
 
-# ╔═╡ d385fd9c-b3a5-41a8-b03c-5c780f54d6d8
-simpleODE4! = @ode_def abetterway4 begin
-  da = - 2* k_1 * a^2 + 2 * k_2 * b 
-  db =  k_1 * a^2- k_2 * b 
-end k_1 k_2
+# ╔═╡ 906a0931-e86f-48f3-be11-eb692639e8cc
+md" Again, since $\lambda$ is the exponent that sets the dynamcis of the perturbations, depending on its value, the steady state is stable or unstable. 
 
-# ╔═╡ 65ed9079-07bf-4722-bf4d-bd872d4de4ac
+For our Locka Volterra case, we can evaluate first the eigenvalues for the first steady state  , 
+
+
+"
+
+# ╔═╡ c374e1bd-ec3d-4cf7-aff1-072d6ba60b27
+function quadratic(a, b, c)
+          discr = b^2 - 4*a*c
+          discr >= 0 ?   ( (-b + sqrt(discr))/(2a), (-b - sqrt(discr))/(2a) ) : error("Only complex roots")
+        end
+
+# ╔═╡ 2b91a06c-3803-4877-ac9a-1669fbe58d30
 begin
-	dimerization_slide = @bind 👍 html"<input type=range min=0.3e-1 max=5.3e-1 step=0.01>"
-	release_slide = @bind 👎 html"<input type=range min=2.3e-1 max=8.3e-1 step=0.01>"
-	
+	k1_slide = @bind k1 html"<input type=range min=1 max=5 step=.1>"
+	k2_slide = @bind k2 html"<input type=range min=1 max=5 step=.1>"
+	k3_slide = @bind k3 html"<input type=range min=1 max=5 step=.1>"
 	md"""
-	**Set the rates of marriage and divorce?**
+	**Set the values of the kinetic constants**
 	
-	Rate of marriage: $(dimerization_slide)
+	value of k1: $(k1_slide)
+
+	value of k2: $(k2_slide)
+
+	value of k3: $(k3_slide)
 	
-	Rate of divorce: $(release_slide)
 	"""
 end
 
-# ╔═╡ 86576d8a-8726-4125-b533-48b5d15ba021
+# ╔═╡ e8ca5682-cce0-4b2c-ba18-47f2e38192c7
 begin
-			p_ = (👍,👎)
-			a_₀=0.5; # units (M)
-			#b₀=0.05; # units (M)
-			b_₀=0.00; # units (M)
-			u₀2=[a_₀,b_₀];
-	        prob4 = ODEProblem(simpleODE4!,u₀2,tspan,p_)
-	        sol4 = solve(prob4);
-	plot(sol4,xlabel="Time [s]",ylabel="Concentration [M]",title="2a <-> b");
+	a= 1
+	b= k3 - k1 
+	c= - k1 * k3
+	quadratic(a,b,c)
 end
 
-# ╔═╡ e8b5f56e-7f44-46d6-9962-cec32eb237be
-md"At equilibrium we can see the proportions by using the value of $K_{eq}$
+# ╔═╡ 17e34ce6-a1fa-4193-9201-3e61a188b48f
+md" For this steady state and for any combination of parameters, one eigen value is positive and the other is negative. It means that perturbations in one variable grow while perturbations in the other variable decay.  
+
+The stability of this fixed point [0,0] is of importance. If it both ewigenvalues are negative, the point will be stable, and non-zero populations might be attracted towards it, and as such the dynamics of the system might lead towards the extinction of both species for many cases of initial population levels.
+
+
+However, as the steady state at the origin is unstable in one of the variables, we find that the extinction of both species is difficult in the model. In fact, in teh absence of foxes and rabits, a small increase in the foxes will lead to extintion (no food), while a small increase in the amount of rabbits will read to exponential increase (the unstable branch). 
+ 
+These type of points are called a saddle node (a minimum in one variabel and a maximum in the other). 
+
+For the other solution $[\overline{x},\overline{y}]=[\frac{k_3}{k_2},\frac{k_1}{k_2}]$
+
+so the chracteristic equation becomes:
 ```math
-\begin{align*}
-K_{eq}=\frac{k_1}{k_2} = \frac{[b_{eq}]}{[a_{eq}]^2}
-\end{align*}
+\begin{eqnarray}
+\lambda^{2} -\lambda (k_{1} + k_2 (\frac{k_3}{k_2}-\frac{k_1}{k_2}) - k_3) + k_2  \cdot k_3 \cdot \frac{k_1}{k_2} + k_1 \cdot k_2 \cdot \frac{k_3}{k_2} - k_1 \cdot k_3=0
+\end{eqnarray}
 ```
-The value of $K_{eq}$= $(👍/👎)
+
+```math
+\begin{eqnarray}
+\lambda^{2}  + \cdot k_3 \cdot k_1 =0
+\end{eqnarray}
+```
+
 "
 
-# ╔═╡ 33730b5a-eab3-4d88-a96e-84bf7fa510ef
-md"Now we use the Arrhenius Equation to see what sets the rates of marriage and divorce. :
-```math
-k_1 = A e^{-E_a/RT} 
-```
-In this analogy, we can see that, to perform a marriage, the activation energy can be identified as some sort of cost, perharps the cost of the wedding. While for the backwards reaction can be identified as the cost of a divorce. 
+# ╔═╡ 87df7c88-7e16-4c50-bd80-df5bfea26ee8
+begin
+	
+	aa=1
+	bb= 0
+	cc=- k1  + k2 *( k1 * k3)
+	quadratic(aa,bb,cc)
+end
+
+# ╔═╡ 9433f4d1-3abf-4dea-8107-1070ee5feb2e
+md"The two values are purely imaginary so we cannot say much about the stability. A small perturbation will not experience repulsion or atraction towards this steady state. There is no stable state (no atractor), and trajectories circulate about the fixed point in a stable orbit. This is called a _center_. 
+
+The solutions travel periodically around the level sets in the counterclockwise direction
+
+To test this, we solve numerically the system 
+
+We assume as initial conditions:
 
 ```math
-k_2 = A e^{-E_a/RT} 
+\begin{align}       
+            x (0) &= 1 \tag{7} \\ 
+            y (0) &= 1   \tag{8}   
+\end{align}            
 ```
-What is the temperature? It can be assumed as the wealth of the society. More wealth, more movement (easier to cross the energy barriers). 
-
-Question, is this an exothermic or endothermic reaction ? Marriage consumes heat or releases heat. Depends on what is more expensive, to get married or to get divorce. Anoter way to see that is to explore what happens if the society gains wealth. If the amount of money avaliable increases, usually, the rate of divorce in a socienty increases.  
-
-So, we are in the same situation as above, the rate of $k_2$ and $k_1$ both increase, but $k_2$ increases more rapidly. 
+       
 "
 
+# ╔═╡ e6f51a60-9701-4ba6-a6e6-9703f7c9ebf9
+https://cs.carleton.edu/faculty/awb/cs111/f19/worksheets/lotka-volterra/Lotka-Volterra%20equation.pdf
 
-# ╔═╡ 0f5fd289-5f7b-4312-8610-337170f3e09c
-plot(p5)
+# ╔═╡ 2b9e43fd-d00d-40f1-ac98-07d48c53d861
+md" Similarly to what we did in the previous case, we would try to see the fixed points graphically. To do that in two dimensional systems, we find the functions where $\dot{x} = 0$ and $\dot{y} = 0$. These lines will represent the boundaries  between increase and decrease in $x$ and $y$. 
 
-# ╔═╡ b7d6ee7d-8049-4e22-9ecf-307b939f040f
-md"In conclusion, based on this, divorce is more expensive than marriage, becasue increasing wealth moves the equilibrium towards more single people. We can argue if this is true or not true, but it ios clear that probably teh model is too simple and we need to add more interactions (such as religious believes, divorce laws... )"
+These curves are called the  nullclines. The method of nullclines is a technique for determining the global behavior of solutions of competing species models. This method provides an effective means of finding trapping regions for some differential equations. In a competition model, if a species population x is above a certain level, the fact of limited resources will cause x to decrease. 
 
-# ╔═╡ 4e711021-eddf-4cb2-a420-e6f17dad5542
-md"Then the equilibrium constant can be calculated as:"
+Let's illustrate this again with the Lotka-Volterra. The functions that satisfy that the defivatives of $x$ and $y$ are zero are:
 
-# ╔═╡ 54dd5337-c76f-4a23-8bec-a0cd57b433dd
-exothermic_url = "https://cdn.kastatic.org/ka-perseus-images/dd9737ed130c0a9965efa9476715cd9084bc5a1d.svg"
+```math
+\begin{align}       
+            k_1 \cdot \overline{x} - k_2 \cdot \overline{x} \cdot \overline{y}  \tag{5} &= 0\\ 
+            k_2 \cdot \overline{x} \cdot \overline{y} - k_3 \cdot \overline{y}  \tag{6} &= 0
+            \end{align} 
+```
+In this particuular case, the lines are very simple, just constant values. 
 
-# ╔═╡ e58e3af7-6b70-4e0b-964e-a670ac6923a2
-md"""Another interesting graph is the progress in reaction energy for __exotermic reactions__ (reactions that release heat, as the reaction takes place). Despite being energetically favorable, we also have a Activation energy, $(Resource(exothermic_url))""" 
+```math
+\begin{align}       
+            \overline{x} &= \frac{k_3}{k_2}\tag{5} \\ 
+            \overline{y} &= \frac{k_1}{k_2} \tag{6}   
+            \end{align}    
+```
 
-# ╔═╡ 5220090a-c8ef-4b9b-ae17-6692fc4b19e3
-endothermic_url = "https://cdn.kastatic.org/ka-perseus-images/fad604021c159260b16946b55b2b3ae106c7f05f.svg"
+"
 
-# ╔═╡ 24e616ee-3312-411e-a214-a0ec39f7da9d
-md"""  We can directly see in this type of energy diagrams that the $E_a$ represents the energy barrier of the transition state. In this case, the plot  represents an __endothermic reaction__ (energy of products is higher than energy of reactans, and a supply of energy in the form of temperature is required, which usually means that will be taken from the surroundings as the reaction takes place). 
+# ╔═╡ a5b38e90-cdbe-442f-a078-dd8598a0a4c2
 
-In this type of reactions, if $E_a$ increases, more energy will be required to transit from reactants to products. These type of plots will be important later in the course, in the context of biochemical reactions (reactions that involve proteins and other biological molecules). $(Resource(endothermic_url))"""
+
+md"
+
+More concretely, if $Re(\lambda) < 0$, the perturbation decays in time and the steady state ($\overline{x},\overline{y}$) is stable. 
+
+On the contrary, when $Re(\lambda) > 0$, the perturbation grows exponentially and the steady sate is unstable. 
+
+More concretely, the steady state is stable if the following conditions are fulfilled:
+```math
+\begin{eqnarray}
+Tr(M) < 0 \\
+Det(M) >0
+\end{eqnarray}
+```
+
+We can write the eigenvalue expression separating real and imaginary part:
+```math
+\begin{eqnarray}
+\lambda=\mu \pm i \omega  
+\end{eqnarray}
+```
+where
+
+```math
+\begin{eqnarray}
+\mu=\frac{1}{2} Tr(M)\\
+\omega=\sqrt{-\frac{1}{4} Tr(M)^2 + Det(M)}
+\end{eqnarray}
+```
+
+The Hopf bifurcation takes place when $Det(M) > (1 / 4) Tr(M)^2 $ and $Tr(M) > 0$. In this case the eigenvalue has nonzero imaginary part and the solution of the system is oscillatory. In the Hopf threshold ($M_{11}=-M_{22}$) the complex part of the eigenvalue becomes:
+
+```math
+\begin{eqnarray}
+\omega^2= \omega_{c}^{2}=-M_{11}^{2}-M_{12}M_{21}>0 \\
+M_{12}M_{21}>M_{11}^{2}  (>0) 
+\end{eqnarray}
+```
+One of the values must be positive, and the other negative. We choose $M_{11}>0$ $\longrightarrow$ $M_{22}<0$ and $M_{12}>0$ $\longrightarrow$ $M_{21}<0$. This way, we can write Eq. \ref{lineal1} and  Eq. \ref{lineal2} as follows:
+
+```math
+\begin{eqnarray}
+\frac{\partial x}{\partial t} = M_{11} x - |M_{12}| y + ... \\
+\frac{\partial y}{\partial t} = M_{21} x - |M_{22}| y + ... 
+\end{eqnarray}
+```
+"
+
+# ╔═╡ 3349c942-15a8-4b1e-8b4a-7f5154f48b12
+lv! = @ode_def LotkaVolterra begin
+  dx = k1*x - k2*x*y
+  dy =  k2*x*y - k3*y 
+    end k1 k2 k3
+
+# ╔═╡ c3828c90-0559-4686-9f56-41b5b6d48176
+begin
+	x₀=1
+	y₀=1
+	t₀=0.0
+	final_time=10.0;
+	prob = ODEProblem(lv!,[x₀,y₀],(t₀,final_time),(k1,k2,k3))
+	sol = solve(prob)
+	plot(sol,ylims = (0, 5))
+
+	title!("Lotka-Volterra ")
+	xlabel!("time [a.u.]")
+    ylabel!("Amplitude [a.u.]")
+	
+end
+
+# ╔═╡ ff0c4a06-de7b-4cf2-b920-cd84ac9927ea
+[u[1] for (u,t) in tuples(sol)]
+
+
+# ╔═╡ f8238a6e-1e5e-4629-ac20-2c9cb964c53e
+tuples(sol)
+
+# ╔═╡ df81eb5c-16ef-4bf6-9ad0-2cc899c44cb6
+begin
+	vline([k3/k2],ylims = (0, 5),xlims = (0, 10));
+	hline!([k1/k2],ylims = (0, 5),xlims = (0, 10));
+	title!("Null-Clines of the Lotka Volterra ")
+	xlabel!("x [a.u.]")
+    ylabel!("y [a.u.]")
+	plot!([u[1] for (u,t) in tuples(sol)],[u[2] for (u,t) in tuples(sol)],ylims = (0, 15))
+
+prob2 = ODEProblem(lv!,[x₀*2,y₀*2],(0.0,10.0),(k1,k2,k3))
+	sol2 = solve(prob2)
+	plot!([u[1] for (u,t) in tuples(sol2)],[u[2] for (u,t) in tuples(sol2)],ylims = (0, 15))
+	
+end
+
+# ╔═╡ cf72446a-a512-11ec-2b47-ef706c91c6a0
+md" ## Linear stability analysis
+
+To study the behavior of nonlinear systems, a set of mathematical tools is  commonly used. Here, we will outline its main aspects from a simplified point of view, trying to introduce the reader to the mathematics inside the nonlinear pattern formation field. In addition we will try to illustrate the problem using a very simple autocatalitic model: the _Cubic Autocatalor Model_.
+  
+### Stability of zero-Dimensional Systems
+
+The main equation which governs the aspects of pattern formation systems is the following nonlinear equations:
+
+```math
+\begin{eqnarray}
+\frac{\partial u}{\partial t} = f(\mu, u, v) \\
+\frac{\partial v}{\partial t} = g(\mu, u, v)
+\end{eqnarray}
+```
+
+where $u$ and $v$ correspond to the concentration of activator and inhibitor.
+Here, $f(\mu, u, v)$ and $g(\mu, u, v)$ are nonlinear functions which govern the temporal evolution of the variables. 
+
+The first step is to calculate the fixed points of Eq. \ref{base1} and \ref{base2}, i.e., the values of the variables where the null-clines are in coincidence and equal to zero. This defines the steady state for the variables in a zero dimensional system.
+
+```math
+\begin{eqnarray}
+f(\mu, u, v)=0  \\
+g(\mu, u, v)=0
+\end{eqnarray}
+```
+
+An example of the null-clines for the \textit{Cubic Autocatalor} Model can be seen in Fig. \ref{nullclines_cubic}. The equations for this specific model are:
+
+```math
+\begin{eqnarray}
+\frac{\partial u}{\partial t} = u^2 v -u \\
+\frac{\partial v}{\partial t} = \mu - u^2 v 
+\end{eqnarray}
+```
+
+The steady state for this model is ($u_0,v_0$)= ($\mu, 1/\mu$)."
+
+# ╔═╡ 67091261-3b6c-4a94-9a70-86519a1eed76
+md"
+The following step to study the evolution of the system is to linearize Eq. \ref{base1} and \ref{base2} around the steady state $(u_{0},v_{0})$. 
+
+```math
+\begin{eqnarray}
+\frac{\partial u}{\partial t} = M_{11} u + M_{12} v + f_{2}(\mu, u, v) +   f_{3}(\mu, u, v) + ... \\
+\frac{\partial v}{\partial t} = M_{21} u + M_{22} v + g_{2}(\mu, u, v) + g_{3}(\mu, u, v) + ... 
+\end{eqnarray}
+```
+where $M_{ij}$ is calculated in the steady state ($u_{0},v_{0}$) as follows:
+```math
+\begin{eqnarray}
+M_{11} = \frac{\partial  f(\mu, u, v)}{\partial u}\\
+M_{12} = \frac{\partial  f(\mu, u, v)}{\partial v} \\
+M_{21} = \frac{\partial  g(\mu, u, v)}{\partial u}\\
+M_{22} = \frac{\partial  g(\mu, u, v)}{\partial v}
+\end{eqnarray}
+```
+To investigate the stability, we check solutions in the form of small perturbations as follows:
+```math
+\begin{eqnarray}
+(u,v) = (U,V) e^{\lambda t}  
+\end{eqnarray}
+```
+Here, $\lambda$ is the growth rate of the perturbations. The next step is to solve the eigenvalue problem, resulting of the introduction of Eq. \ref{solucion1} in the linearized system:
+```math
+\begin{eqnarray}
+Det \left(\begin{array}{cc}M_{11}-\lambda & M_{12} \\M_{21}& M_{22}-\lambda \end{array}\right) =0 
+\end{eqnarray}
+```
+and the corresponding equation:
+```math
+\begin{eqnarray}
+\lambda^{2} -\lambda Tr(M) + Det(M)=0
+\end{eqnarray}
+```
+where:
+```math
+\begin{eqnarray}
+Tr(M)= M_{11}+M_{22} \\
+Det(M)= M_{11}M_{22}-M{12}M_{21} 
+\end{eqnarray}
+```
+
+Depending on the value of $\lambda$, the solution \ref{solucion1} is stable or unstable. If $Re(\lambda) < 0$,the perturbation decays in time and the steady state ($u_{0},v_{o}$) calculated from \ref{base3} and \ref{base4} is stable. More concretely, the steady state is stable if the following conditions are fulfilled:
+```math
+\begin{eqnarray}
+Tr(M) < 0 \\
+Det(M) >0
+\end{eqnarray}
+```
+On the contrary, when $Re(\lambda) > 0$, the perturbation grows exponentially and the steady sate is unstable. We can write the eigenvalue expression separating real and imaginary part:
+```math
+\begin{eqnarray}
+\lambda=\mu \pm i \omega  
+\end{eqnarray}
+```
+where
+
+```math
+\begin{eqnarray}
+\mu=\frac{1}{2} Tr(M)\\
+\omega=\sqrt{-\frac{1}{4} Tr(M)^2 + Det(M)}
+\end{eqnarray}
+```
+
+The Hopf bifurcation takes place when $Det(M) > (1 / 4) Tr(M)^2 $ and $Tr(M) > 0$. In this case the eigenvalue has nonzero imaginary part and the solution of the system is oscillatory. In the Hopf threshold ($M_{11}=-M_{22}$) the complex part of the eigenvalue becomes:
+
+```math
+\begin{eqnarray}
+\omega^2= \omega_{c}^{2}=-M_{11}^{2}-M_{12}M_{21}>0 \\
+M_{12}M_{21}>M_{11}^{2}  (>0) 
+\end{eqnarray}
+```
+One of the values must be positive, and the other negative. We choose $M_{11}>0$ $\longrightarrow$ $M_{22}<0$ and $M_{12}>0$ $\longrightarrow$ $M_{21}<0$. This way, we can write Eq. \ref{lineal1} and  Eq. \ref{lineal2} as follows:
+
+```math
+\begin{eqnarray}
+\frac{\partial u}{\partial t} = M_{11} u - |M_{12}| v + ... \\
+\frac{\partial v}{\partial t} = M_{21} u - |M_{22}| v + ... 
+\end{eqnarray}
+```
+$u$ plays the role of the activator due to the autocatalitic behavior (represented in Eq. \ref{lineal3})   and $v$ is the inhibitor, which decays by itself.
+
+### Stability of Spatial Systems
+
+The next step is to to consider the spatial dimensions of the system in Eq. \ref{base1} and Eq. \ref{base2}.
+
+```math
+\begin{eqnarray}
+\frac{\partial u}{\partial t} = f(\mu, u, v)  + D_u \frac{\partial^{2} u}{\partial \vec{r}^{2}}\\
+\frac{\partial v}{\partial t} = g(\mu, u, v) + D_v \frac{\partial^{2} v}{\partial \vec{r}^{2}}
+\end{eqnarray}
+```
+
+Here, $D_u$ and $D_v$ are the diffusion coefficients of activator and inhibitor and $ \vec{r}$ is the spatial coordinate. We will scale the diffusion coefficients in a way that we can reduce to a variable which only takes account of the ratio between the diffusion coefficients: $d=D_{v}/D_{u}$. Now we have to check solutions with the spatial part: 
+```math
+\begin{eqnarray}
+(u,v) = (U,V) e^{\lambda t + i \vec{k}\vec{r}}  
+\end{eqnarray}
+```
+The Jacobian matrix $M$ of the system is:
+```math
+\begin{eqnarray}
+M=\left(\begin{array}{cc}M_{11} - k^{2} & M_{12} \\M_{21}& M_{22} - d k^{2} \end{array}\right) 
+\end{eqnarray}
+```
+If we solve the eigenvalue problem ($Det (M-\lambda I)=0$), as in the previous case without spatial dimensions (unstable steady state) some other conditions are required to get positive eigenvalues. The equation is:
+```math
+\begin{eqnarray}
+\lambda^2+\lambda(k^2(1+d)-Tr(M))+Det(M)=0  
+\end{eqnarray}
+```
+The solution is in the form:
+```math
+\begin{eqnarray}
+\lambda=\frac{1}{2}(-k^{2}(1+d)+Tr (M) \pm 
+ \sqrt{(k^{2}(1+d)-Tr (M))^{2}-4 B} 
+ \end{eqnarray}
+```
+ where
+
+```math 
+ \begin{eqnarray}
+ d &=& \frac{D_{v}}{D_{u}} \\
+ Tr (M) &=& M_{11} + M_{22} \\
+ Det(M) &=& M_{11}  M_{22} - M_{21}  M_{12} \\
+ B &=& d k^{4} - d k^{2} M_{11} - k^{2} M_{22} + Det (M) 
+\end{eqnarray}
+```
+So, the system will be unstable if one of the following conditions is fulfilled: 
+```math
+\begin{eqnarray}
+k^2(1+d)-Tr(M) < 0 \\
+ Det(M) < 0  
+\end{eqnarray}
+```
+In addition, if the eigenvalues are positive and real, which means that $k^2(1+d)-Tr(M))^{2}> 4 Det(M)$, the system will grow exponentially (Turing bifurcation) The system, now with spatial dimensions, develops steady periodic patterns. There is a window of unstable wavelengths which the system may exhibit ($k$ with Re[$\lambda_{1,2}] > 0$). But there is one with maximum growth rate, which can be easily calculated by solving Eq. \ref{eigen1}:
+```math
+\begin{eqnarray}
+\frac{\partial \lambda}{\partial k}=0  
+\end{eqnarray}
+```
+
+
+Fig.~\ref{Re_dispersion} is a plot of the real part of one of the the eigenvalues $\lambda_{1}$ which has a region of positive growth for some wavenumbers in the  Lengyel-Epstein model (see Sec.~\ref{sec:LE_model}). This means that a perturbation with a wavenumber with positive eigenvalue will grow exponentially in time. The other eigenvalue is negative, so it does not influence the behavior of the system. In addition Fig.~\ref{Im_dispersion} shows the imaginary part of both eigenvalues. Positive imaginary values of the growth rate are outside of the regime of positive real values in Fig.~\ref{Re_dispersion}, so the periodic pattern (with wavenumber $k$) is steady in time."
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -653,8 +942,11 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 DifferentialEquations = "~7.1.0"
 HypertextLiteral = "~0.9.3"
 ParameterizedFunctions = "~5.13.1"
-Plots = "~1.25.11"
-PlutoUI = "~0.7.35"
+Plots = "~1.27.0"
+PlutoUI = "~0.7.37"
+
+[extras]
+CPUSummary = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -663,6 +955,12 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.7.1"
 manifest_format = "2.0"
+
+[[deps.AbstractAlgebra]]
+deps = ["GroupsCore", "InteractiveUtils", "LinearAlgebra", "MacroTools", "Markdown", "Random", "RandomExtensions", "SparseArrays", "Test"]
+git-tree-sha1 = "c0750f99036c12a14c93a7b10609cb892ffbd092"
+uuid = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
+version = "0.24.1"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -717,9 +1015,9 @@ version = "0.2.0"
 
 [[deps.BandedMatrices]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "ce68f8c2162062733f9b4c9e3700d5efc4a8ec47"
+git-tree-sha1 = "0a48e1230cbbf1dce4a6961e0c92615c8be20ddd"
 uuid = "aae01518-5342-5314-be14-df237901396f"
-version = "0.16.11"
+version = "0.16.12"
 
 [[deps.BangBang]]
 deps = ["Compat", "ConstructionBase", "Future", "InitialValues", "LinearAlgebra", "Requires", "Setfield", "Tables", "ZygoteRules"]
@@ -742,9 +1040,9 @@ version = "0.1.3"
 
 [[deps.BitTwiddlingConvenienceFunctions]]
 deps = ["Static"]
-git-tree-sha1 = "5e98d6a6aa92e5758c4d58501b7bf23732699fa3"
+git-tree-sha1 = "28bbdbf0354959db89358d1d79d421ff31ef0b5e"
 uuid = "62783981-4cbd-42fc-bca8-16325de8dc4b"
-version = "0.1.2"
+version = "0.1.3"
 
 [[deps.BoundaryValueDiffEq]]
 deps = ["BandedMatrices", "DiffEqBase", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "NLsolve", "Reexport", "SparseArrays"]
@@ -764,16 +1062,16 @@ uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 version = "0.4.1"
 
 [[deps.CPUSummary]]
-deps = ["Hwloc", "IfElse", "Static"]
-git-tree-sha1 = "849799453de85b55e78550fc7b0c8f442eb497ab"
+deps = ["Hwloc", "IfElse", "Preferences", "Static"]
+git-tree-sha1 = "68150205edbf60f0410ba2463b5b38eae44cad1f"
 uuid = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
-version = "0.1.8"
+version = "0.1.15"
 
 [[deps.CSTParser]]
 deps = ["Tokenize"]
-git-tree-sha1 = "6cc1759204bed5a4e2a5c2f00901fd5d90bc7a62"
+git-tree-sha1 = "b66abc140f8b90a1d6bc7bfad5c80070f8c1ddc6"
 uuid = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
-version = "3.3.1"
+version = "3.3.3"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -801,9 +1099,9 @@ version = "0.1.2"
 
 [[deps.CloseOpenIntervals]]
 deps = ["ArrayInterface", "Static"]
-git-tree-sha1 = "03dc838350fbd448fca0b99285ed4d60fc229b72"
+git-tree-sha1 = "f576084239e6bdf801007c80e27e2cc2cd963fe0"
 uuid = "fb6a15b2-703c-40df-9091-08a04967cfa9"
-version = "0.1.5"
+version = "0.1.6"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random"]
@@ -847,9 +1145,9 @@ version = "0.3.0"
 
 [[deps.Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "SHA", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
-git-tree-sha1 = "44c37b4636bc54afac5c574d2d02b625349d6582"
+git-tree-sha1 = "96b0bc6c52df76506efc8a441c6cf1adcb1babc4"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "3.41.0"
+version = "3.42.0"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -884,9 +1182,9 @@ version = "4.1.1"
 
 [[deps.DEDataArrays]]
 deps = ["ArrayInterface", "DocStringExtensions", "LinearAlgebra", "RecursiveArrayTools", "SciMLBase", "StaticArrays"]
-git-tree-sha1 = "31186e61936fbbccb41d809ad4338c9f7addf7ae"
+git-tree-sha1 = "5e5f8f363c8c9a2415ef9185c4e0ff6966c87d52"
 uuid = "754358af-613d-5f8d-9788-280bf1605d4c"
-version = "0.2.0"
+version = "0.2.2"
 
 [[deps.DataAPI]]
 git-tree-sha1 = "cc70b17275652eb47bc9e5f81635981f13cea5c8"
@@ -915,9 +1213,9 @@ version = "0.1.2"
 
 [[deps.DelayDiffEq]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "LinearAlgebra", "Logging", "NonlinearSolve", "OrdinaryDiffEq", "Printf", "RecursiveArrayTools", "Reexport", "UnPack"]
-git-tree-sha1 = "ceb3463f2913eec2f0af5f0d8e1386fb546fdd32"
+git-tree-sha1 = "52f54bd7f7bc1ce794add0ccf08f8fa21acfaed9"
 uuid = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
-version = "5.34.0"
+version = "5.35.1"
 
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
@@ -931,21 +1229,21 @@ version = "0.4.0"
 
 [[deps.DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "DEDataArrays", "DataStructures", "Distributions", "DocStringExtensions", "FastBroadcast", "ForwardDiff", "FunctionWrappers", "IterativeSolvers", "LabelledArrays", "LinearAlgebra", "Logging", "MuladdMacro", "NonlinearSolve", "Parameters", "PreallocationTools", "Printf", "RecursiveArrayTools", "RecursiveFactorization", "Reexport", "Requires", "SciMLBase", "Setfield", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "ZygoteRules"]
-git-tree-sha1 = "433291c9e63dcfc1a0e42c6aeb6bb5d3e5ab1789"
+git-tree-sha1 = "df03eb34293066d699f8a535d1ccdcff94cb9765"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.81.4"
+version = "6.82.1"
 
 [[deps.DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "NLsolve", "OrdinaryDiffEq", "Parameters", "RecipesBase", "RecursiveArrayTools", "SciMLBase", "StaticArrays"]
-git-tree-sha1 = "e57ecaf9f7875714c164ccca3c802711589127cf"
+git-tree-sha1 = "c4b99e3a199e293e7290eea94ba89364d47ee557"
 uuid = "459566f4-90b8-5000-8ac3-15dfb0a30def"
-version = "2.20.1"
+version = "2.22.0"
 
 [[deps.DiffEqJump]]
 deps = ["ArrayInterface", "Compat", "DataStructures", "DiffEqBase", "FunctionWrappers", "Graphs", "LinearAlgebra", "PoissonRandom", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "StaticArrays", "TreeViews", "UnPack"]
-git-tree-sha1 = "e30f058eb600407e3fd4ea082e2527e3a3671238"
+git-tree-sha1 = "eec5fd03c26dadc6b20f84d815309d060358e95b"
 uuid = "c894b116-72e5-5b58-be3c-e6d8d4ac2b12"
-version = "8.2.1"
+version = "8.3.0"
 
 [[deps.DiffEqNoiseProcess]]
 deps = ["DiffEqBase", "Distributions", "LinearAlgebra", "Optim", "PoissonRandom", "QuadGK", "Random", "Random123", "RandomNumbers", "RecipesBase", "RecursiveArrayTools", "Requires", "ResettableStacks", "SciMLBase", "StaticArrays", "Statistics"]
@@ -983,9 +1281,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "9d3c0c762d4666db9187f363a76b47f7346e673b"
+git-tree-sha1 = "c43e992f186abaf9965cc45e372f4693b7754b22"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.49"
+version = "0.25.52"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -1005,15 +1303,15 @@ uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[deps.DualNumbers]]
 deps = ["Calculus", "NaNMath", "SpecialFunctions"]
-git-tree-sha1 = "84f04fe68a3176a583b864e492578b9466d87f1e"
+git-tree-sha1 = "90b158083179a6ccbce2c7eb1446d5bf9d7ae571"
 uuid = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
-version = "0.6.6"
+version = "0.6.7"
 
 [[deps.DynamicPolynomials]]
 deps = ["DataStructures", "Future", "LinearAlgebra", "MultivariatePolynomials", "MutableArithmetics", "Pkg", "Reexport", "Test"]
-git-tree-sha1 = "7eb5d99577e478d23b1ba1faa9f8f6980d34d0a3"
+git-tree-sha1 = "d0fa82f39c2a5cdb3ee385ad52bc05c42cb4b9f0"
 uuid = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
-version = "0.4.4"
+version = "0.4.5"
 
 [[deps.EarCut_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1034,10 +1332,10 @@ uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.4.4+0"
 
 [[deps.ExponentialUtilities]]
-deps = ["ArrayInterface", "LinearAlgebra", "Printf", "Requires", "SparseArrays"]
-git-tree-sha1 = "3e1289d9a6a54791c1ee60da0850f4fd71188da6"
+deps = ["ArrayInterface", "LinearAlgebra", "Printf", "Requires", "SparseArrays", "libblastrampoline_jll"]
+git-tree-sha1 = "b026981973ccbe38682fbb4ccb0732fd6b1e1207"
 uuid = "d4d017d3-3776-5f7e-afef-a10c40355c18"
-version = "1.11.0"
+version = "1.13.0"
 
 [[deps.ExprTools]]
 git-tree-sha1 = "56559bbef6ca5ea0c0818fa5c90320398a6fbf8d"
@@ -1058,9 +1356,9 @@ version = "4.4.0+0"
 
 [[deps.FastBroadcast]]
 deps = ["LinearAlgebra", "Polyester", "Static"]
-git-tree-sha1 = "0f8ef5dcb040dbb9edd98b1763ac10882ee1ff03"
+git-tree-sha1 = "f39bcc05eb0dcbd2c0195762df7a5737041289b9"
 uuid = "7034ab61-46d4-4ed7-9d0f-46aef9175898"
-version = "0.1.12"
+version = "0.1.14"
 
 [[deps.FastClosures]]
 git-tree-sha1 = "acebe244d53ee1b461970f8910c235b259e772ef"
@@ -1075,9 +1373,9 @@ version = "0.12.8"
 
 [[deps.FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "ec299fdc8f49ae450807b0cb1d161c6b76fd2b60"
+git-tree-sha1 = "56956d1e4c1221000b7781104c58c34019792951"
 uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
-version = "2.10.1"
+version = "2.11.0"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1144,9 +1442,9 @@ version = "0.64.0+0"
 
 [[deps.GeometryBasics]]
 deps = ["EarCut_jll", "IterTools", "LinearAlgebra", "StaticArrays", "StructArrays", "Tables"]
-git-tree-sha1 = "58bcdf5ebc057b085e58d95c138725628dd7453c"
+git-tree-sha1 = "83ea630384a13fc4f002b77690bc0afeb4255ac9"
 uuid = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -1177,6 +1475,18 @@ git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
 
+[[deps.Groebner]]
+deps = ["AbstractAlgebra", "Combinatorics", "Logging", "MultivariatePolynomials", "Primes", "Random"]
+git-tree-sha1 = "1a13fd88bfaf0c5181da639edf4e773f756236c7"
+uuid = "0b43b601-686d-58a3-8a1c-6623616c7cd4"
+version = "0.2.0"
+
+[[deps.GroupsCore]]
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "9e1a5e9f3b81ad6a5c613d181664a0efc6fe6dd7"
+uuid = "d5909c97-4eac-4ecc-a3dc-fdd0858a4120"
+version = "0.4.0"
+
 [[deps.HTTP]]
 deps = ["Base64", "Dates", "IniFile", "Logging", "MbedTLS", "NetworkOptions", "Sockets", "URIs"]
 git-tree-sha1 = "0fa77022fe4b511826b39c894c90daf5fce3334a"
@@ -1191,9 +1501,9 @@ version = "2.8.1+1"
 
 [[deps.HostCPUFeatures]]
 deps = ["BitTwiddlingConvenienceFunctions", "IfElse", "Libdl", "Static"]
-git-tree-sha1 = "3965a3216446a6b020f0d48f1ba94ef9ec01720d"
+git-tree-sha1 = "18be5268cf415b5e27f34980ed25a7d34261aa83"
 uuid = "3e5b6fbb-0976-4d2c-9146-d79de83f2fb0"
-version = "0.1.6"
+version = "0.1.7"
 
 [[deps.Hwloc]]
 deps = ["Hwloc_jll"]
@@ -1256,15 +1566,15 @@ uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.IntervalSets]]
 deps = ["Dates", "EllipsisNotation", "Statistics"]
-git-tree-sha1 = "3cc368af3f110a767ac786560045dceddfc16758"
+git-tree-sha1 = "bcf640979ee55b652f3b01650444eb7bbe3ea837"
 uuid = "8197267c-284f-5f27-9208-e0e47529a953"
-version = "0.5.3"
+version = "0.5.4"
 
 [[deps.InverseFunctions]]
 deps = ["Test"]
-git-tree-sha1 = "a7254c0acd8e62f1ac75ad24d5db43f5f19f3c65"
+git-tree-sha1 = "91b5dcf362c5add98049e6c29ee756910b03051d"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
-version = "0.1.2"
+version = "0.1.3"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -1307,9 +1617,9 @@ version = "2.1.2+0"
 
 [[deps.JuliaFormatter]]
 deps = ["CSTParser", "CommonMark", "DataStructures", "Pkg", "Tokenize"]
-git-tree-sha1 = "fcfaddc61f766211b2c835d3eceaf999b6ea9555"
+git-tree-sha1 = "7a6717e8055dc3ee240c8d44668e5908d40efd2a"
 uuid = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
-version = "0.22.4"
+version = "0.22.7"
 
 [[deps.KLU]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse_jll"]
@@ -1319,9 +1629,9 @@ version = "0.3.0"
 
 [[deps.Krylov]]
 deps = ["LinearAlgebra", "Printf", "SparseArrays"]
-git-tree-sha1 = "6333cc5b848295895f3b23eb763d020fc8e05867"
+git-tree-sha1 = "a024280a69c49f51ba29d2deb66f07508f0b9b49"
 uuid = "ba0b0d4f-ebba-5204-a429-3ac8c609bfb7"
-version = "0.7.12"
+version = "0.7.13"
 
 [[deps.KrylovKit]]
 deps = ["LinearAlgebra", "Printf"]
@@ -1354,21 +1664,27 @@ version = "1.3.0"
 
 [[deps.LabelledArrays]]
 deps = ["ArrayInterface", "ChainRulesCore", "LinearAlgebra", "MacroTools", "StaticArrays"]
-git-tree-sha1 = "97e2adfcbe7ac07112ca79f03e34fc88cac6b9e7"
+git-tree-sha1 = "fbd884a02f8bf98fd90c53c1c9d2b21f9f30f42a"
 uuid = "2ee39098-c373-598a-b85f-a56591580800"
-version = "1.7.2"
+version = "1.8.0"
 
 [[deps.Latexify]]
 deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "Printf", "Requires"]
-git-tree-sha1 = "a6552bfeab40de157a297d84e03ade4b8177677f"
+git-tree-sha1 = "4f00cc36fede3c04b8acf9b2e2763decfdcecfa6"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.15.12"
+version = "0.15.13"
 
 [[deps.LayoutPointers]]
 deps = ["ArrayInterface", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static"]
-git-tree-sha1 = "6dd77ee76188b0365f7d882d674b95796076fa2c"
+git-tree-sha1 = "b651f573812d6c36c22c944dd66ef3ab2283dfa1"
 uuid = "10f19ff3-798f-405d-979b-55457f8fc047"
-version = "0.1.5"
+version = "0.1.6"
+
+[[deps.LevyArea]]
+deps = ["LinearAlgebra", "Random", "SpecialFunctions"]
+git-tree-sha1 = "56513a09b8e0ae6485f34401ea9e2f31357958ec"
+uuid = "2d8b4e74-eb68-11e8-0fb9-d5eb67b50637"
+version = "1.0.0"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -1449,24 +1765,24 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LinearSolve]]
 deps = ["ArrayInterface", "DocStringExtensions", "IterativeSolvers", "KLU", "Krylov", "KrylovKit", "LinearAlgebra", "RecursiveFactorization", "Reexport", "Requires", "SciMLBase", "Setfield", "SparseArrays", "SuiteSparse", "UnPack"]
-git-tree-sha1 = "f27bb8e4eabdb93ed3703c55025b111e045ffe81"
+git-tree-sha1 = "a25bc80647e44d0e1e1694b47000603497700b18"
 uuid = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-version = "1.12.0"
+version = "1.13.0"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
-git-tree-sha1 = "e5718a00af0ab9756305a0392832c8952c7426c1"
+git-tree-sha1 = "58f25e56b706f95125dcb796f39e1fb01d913a71"
 uuid = "2ab3a3ac-af41-5b50-aa03-7779005ae688"
-version = "0.3.6"
+version = "0.3.10"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoopVectorization]]
 deps = ["ArrayInterface", "CPUSummary", "ChainRulesCore", "CloseOpenIntervals", "DocStringExtensions", "ForwardDiff", "HostCPUFeatures", "IfElse", "LayoutPointers", "LinearAlgebra", "OffsetArrays", "PolyesterWeave", "SIMDDualNumbers", "SLEEFPirates", "SpecialFunctions", "Static", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "534aa24fae56f5f0956134d8789ab30d6fe2f615"
+git-tree-sha1 = "077c7c9d746cbe30ac5f001ea4c1277f64cc5dad"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.102"
+version = "0.12.103"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -1521,9 +1837,9 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[deps.ModelingToolkit]]
 deps = ["AbstractTrees", "ArrayInterface", "ConstructionBase", "DataStructures", "DiffEqBase", "DiffEqCallbacks", "DiffEqJump", "DiffRules", "Distributed", "Distributions", "DocStringExtensions", "DomainSets", "Graphs", "IfElse", "InteractiveUtils", "JuliaFormatter", "LabelledArrays", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "NaNMath", "NonlinearSolve", "RecursiveArrayTools", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SafeTestsets", "SciMLBase", "Serialization", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "Symbolics", "UnPack", "Unitful"]
-git-tree-sha1 = "6d3dd18fbb1abf01894c5d064072285c6b863a98"
+git-tree-sha1 = "cdadda283d438908ca4840c0a46ea61c4959e8a0"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "8.5.1"
+version = "8.5.3"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
@@ -1535,9 +1851,9 @@ version = "0.2.2"
 
 [[deps.MultivariatePolynomials]]
 deps = ["DataStructures", "LinearAlgebra", "MutableArithmetics"]
-git-tree-sha1 = "81b44a8cba10ff3cfb564da784bf92e5f834da0e"
+git-tree-sha1 = "13ecec3d52a409be2e8653516955ec58f1c5a847"
 uuid = "102ac46a-7ee4-5c85-9060-abc95bfdeaa3"
-version = "0.4.3"
+version = "0.4.4"
 
 [[deps.MutableArithmetics]]
 deps = ["LinearAlgebra", "SparseArrays", "Test"]
@@ -1567,9 +1883,9 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 
 [[deps.NonlinearSolve]]
 deps = ["ArrayInterface", "FiniteDiff", "ForwardDiff", "IterativeSolvers", "LinearAlgebra", "RecursiveArrayTools", "RecursiveFactorization", "Reexport", "SciMLBase", "Setfield", "StaticArrays", "UnPack"]
-git-tree-sha1 = "b61c51cd5b9d8b197dfcbbf2077a0a4e1505278d"
+git-tree-sha1 = "aeebff6a2a23506e5029fd2248a26aca98e477b3"
 uuid = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
-version = "0.3.14"
+version = "0.3.16"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
@@ -1593,9 +1909,9 @@ uuid = "05823500-19ac-5b8b-9628-191a04bc5112"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "648107615c15d4e09f7eca16307bc821c1f718d8"
+git-tree-sha1 = "ab05aa4cc89736e95915b01e7279e61b1bfe33b8"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.13+0"
+version = "1.1.14+0"
 
 [[deps.OpenSpecFun_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -1605,9 +1921,9 @@ version = "0.5.5+0"
 
 [[deps.Optim]]
 deps = ["Compat", "FillArrays", "ForwardDiff", "LineSearches", "LinearAlgebra", "NLSolversBase", "NaNMath", "Parameters", "PositiveFactorizations", "Printf", "SparseArrays", "StatsBase"]
-git-tree-sha1 = "045d10789f5daff18deb454d5923c6996017c2f3"
+git-tree-sha1 = "bc0a748740e8bc5eeb9ea6031e6f050de1fc0ba2"
 uuid = "429524aa-4258-5aef-a3af-852621145aeb"
-version = "1.6.1"
+version = "1.6.2"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1621,10 +1937,10 @@ uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.4.1"
 
 [[deps.OrdinaryDiffEq]]
-deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "ExponentialUtilities", "FastClosures", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "Logging", "LoopVectorization", "MacroTools", "MuladdMacro", "NLsolve", "NonlinearSolve", "Polyester", "PreallocationTools", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
-git-tree-sha1 = "df82fa0f9f90f669cc3cf9e3f0400e431e0704ac"
+deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "ExponentialUtilities", "FastClosures", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "Logging", "LoopVectorization", "MacroTools", "MuladdMacro", "NLsolve", "NonlinearSolve", "Polyester", "PreallocationTools", "RecursiveArrayTools", "Reexport", "SciMLBase", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
+git-tree-sha1 = "509aa6d3b2773e5109d4a4dd9a300259ac727961"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "6.6.6"
+version = "6.7.1"
 
 [[deps.PCRE_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1634,9 +1950,9 @@ version = "8.44.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "7e2166042d1698b6072352c74cfd1fca2a968253"
+git-tree-sha1 = "e8185b83b9fc56eb6456200e873ce598ebc7f262"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.6"
+version = "0.11.7"
 
 [[deps.ParameterizedFunctions]]
 deps = ["DataStructures", "DiffEqBase", "DocStringExtensions", "Latexify", "LinearAlgebra", "ModelingToolkit", "Reexport", "SciMLBase"]
@@ -1652,9 +1968,9 @@ version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates"]
-git-tree-sha1 = "13468f237353112a01b2d6b32f3d0f80219944aa"
+git-tree-sha1 = "85b5da0fa43588c75bb1ff986493443f821c70b7"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.2.2"
+version = "2.2.3"
 
 [[deps.Pixman_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1674,21 +1990,21 @@ version = "2.0.1"
 
 [[deps.PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "Printf", "Random", "Reexport", "Statistics"]
-git-tree-sha1 = "6f1b25e8ea06279b5689263cc538f51331d7ca17"
+git-tree-sha1 = "bb16469fd5224100e422f0b027d26c5a25de1200"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.1.3"
+version = "1.2.0"
 
 [[deps.Plots]]
-deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "5c907bdee5966a9adb8a106807b7c387e51e4d6c"
+deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "GeometryBasics", "JSON", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
+git-tree-sha1 = "9213b4c18b57b7020ee20f33a4ba49eb7bef85e0"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.25.11"
+version = "1.27.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "Markdown", "Random", "Reexport", "UUIDs"]
-git-tree-sha1 = "85bf3e4bd279e405f91489ce518dedb1e32119cb"
+git-tree-sha1 = "bf0a1121af131d9974241ba53f601211e9303a9e"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.35"
+version = "0.7.37"
 
 [[deps.PoissonRandom]]
 deps = ["Random", "Statistics", "Test"]
@@ -1698,15 +2014,15 @@ version = "0.4.0"
 
 [[deps.Polyester]]
 deps = ["ArrayInterface", "BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "ManualMemory", "PolyesterWeave", "Requires", "Static", "StrideArraysCore", "ThreadingUtilities"]
-git-tree-sha1 = "2232d3865bc9a098e664f69cbe340b960d48217f"
+git-tree-sha1 = "ad769d3f29cffb33380ab28318a10c1ccb19c827"
 uuid = "f517fe37-dbe3-4b94-8317-1923a5111588"
-version = "0.6.6"
+version = "0.6.7"
 
 [[deps.PolyesterWeave]]
 deps = ["BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "Static", "ThreadingUtilities"]
-git-tree-sha1 = "dc11fa882240c43a875b48e21e6423704927d12f"
+git-tree-sha1 = "7e597df97e46ffb1c8adbaddfa56908a7a20194b"
 uuid = "1d0040c9-8b98-4ee7-8388-3f51789ca0ad"
-version = "0.1.4"
+version = "0.1.5"
 
 [[deps.PositiveFactorizations]]
 deps = ["LinearAlgebra"]
@@ -1716,15 +2032,20 @@ version = "0.2.4"
 
 [[deps.PreallocationTools]]
 deps = ["Adapt", "ArrayInterface", "ForwardDiff", "LabelledArrays"]
-git-tree-sha1 = "e4cb8d4a2edf9b3804c1fb2c2de57d634ff3f36e"
+git-tree-sha1 = "6c138c8510111fa47b5d2ed8ada482d97e279bee"
 uuid = "d236fae5-4411-538c-8e31-a6e3d9e00b46"
-version = "0.2.3"
+version = "0.2.4"
 
 [[deps.Preferences]]
 deps = ["TOML"]
-git-tree-sha1 = "de893592a221142f3db370f48290e3a2ef39998f"
+git-tree-sha1 = "d3538e7f8a790dc8903519090857ef8e1283eecd"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.2.4"
+version = "1.2.5"
+
+[[deps.Primes]]
+git-tree-sha1 = "984a3ee07d47d401e0b823b7d30546792439070a"
+uuid = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+version = "0.5.1"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1751,10 +2072,16 @@ deps = ["SHA", "Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [[deps.Random123]]
-deps = ["Libdl", "Random", "RandomNumbers"]
-git-tree-sha1 = "0e8b146557ad1c6deb1367655e052276690e71a3"
+deps = ["Random", "RandomNumbers"]
+git-tree-sha1 = "afeacaecf4ed1649555a19cb2cad3c141bbc9474"
 uuid = "74087812-796a-5b5d-8853-05524746bad3"
-version = "1.4.2"
+version = "1.5.0"
+
+[[deps.RandomExtensions]]
+deps = ["Random", "SparseArrays"]
+git-tree-sha1 = "062986376ce6d394b23d5d90f01d81426113a3c9"
+uuid = "fb686558-2515-59ef-acaa-46db3789a887"
+version = "0.4.3"
 
 [[deps.RandomNumbers]]
 deps = ["Random", "Requires"]
@@ -1775,9 +2102,9 @@ version = "0.5.1"
 
 [[deps.RecursiveArrayTools]]
 deps = ["Adapt", "ArrayInterface", "ChainRulesCore", "DocStringExtensions", "FillArrays", "LinearAlgebra", "RecipesBase", "Requires", "StaticArrays", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "736699f42935a2b19b37a6c790e2355ca52a12ee"
+git-tree-sha1 = "f5dd036acee4462949cc10c55544cc2bee2545d6"
 uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
-version = "2.24.2"
+version = "2.25.1"
 
 [[deps.RecursiveFactorization]]
 deps = ["LinearAlgebra", "LoopVectorization", "Polyester", "StrideArraysCore", "TriangularSolve"]
@@ -1848,9 +2175,9 @@ version = "0.1.0"
 
 [[deps.SLEEFPirates]]
 deps = ["IfElse", "Static", "VectorizationBase"]
-git-tree-sha1 = "61a96d8b89083a53fb2b745f3b59a05359651bbe"
+git-tree-sha1 = "d4c366b135fc2e1af7a000473e08edc5afd94819"
 uuid = "476501e8-09a2-5ece-8869-fb82de89a1fa"
-version = "0.6.30"
+version = "0.6.31"
 
 [[deps.SafeTestsets]]
 deps = ["Test"]
@@ -1860,9 +2187,9 @@ version = "0.0.1"
 
 [[deps.SciMLBase]]
 deps = ["ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "RecipesBase", "RecursiveArrayTools", "StaticArrays", "Statistics", "Tables", "TreeViews"]
-git-tree-sha1 = "8ff1bf96965b3878ca5d235752ff1daf519e7a26"
+git-tree-sha1 = "c086056df381502621dc6b5f1d1a0a1c2d0185e7"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "1.26.3"
+version = "1.28.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
@@ -1934,9 +2261,9 @@ version = "0.4.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "6354dfaf95d398a1a70e0b28238321d5d17b2530"
+git-tree-sha1 = "6976fab022fea2ffea3d945159317556e5dad87c"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.4.0"
+version = "1.4.2"
 
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
@@ -1967,16 +2294,16 @@ uuid = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
 version = "1.6.6"
 
 [[deps.StochasticDiffEq]]
-deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqJump", "DiffEqNoiseProcess", "DocStringExtensions", "FillArrays", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "OrdinaryDiffEq", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
-git-tree-sha1 = "5f88440e7470baad99f559eed674a46d2b6b96f7"
+deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqJump", "DiffEqNoiseProcess", "DocStringExtensions", "FillArrays", "FiniteDiff", "ForwardDiff", "LevyArea", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "OrdinaryDiffEq", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
+git-tree-sha1 = "24d8b3ab7e91b351ccbed5e54499a1864a64a6c6"
 uuid = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
-version = "6.44.0"
+version = "6.45.0"
 
 [[deps.StrideArraysCore]]
 deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "ManualMemory", "Requires", "SIMDTypes", "Static", "ThreadingUtilities"]
-git-tree-sha1 = "e0a02838565c4600ecd1d8874db8cfe263aaa6c7"
+git-tree-sha1 = "49d616ef230fec080d02ada0ca5639e652cca06b"
 uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
-version = "0.2.12"
+version = "0.2.13"
 
 [[deps.StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
@@ -1994,9 +2321,9 @@ uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
 
 [[deps.Sundials]]
 deps = ["CEnum", "DataStructures", "DiffEqBase", "Libdl", "LinearAlgebra", "Logging", "Reexport", "SparseArrays", "Sundials_jll"]
-git-tree-sha1 = "76d881c22a2f3f879ad74b5a9018c609969149ab"
+git-tree-sha1 = "e0805213754f0d871f9333eacd77862a44acb46d"
 uuid = "c3572dad-4567-51f8-b174-8c6c989267f4"
-version = "4.9.2"
+version = "4.9.3"
 
 [[deps.Sundials_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "OpenBLAS_jll", "Pkg", "SuiteSparse_jll"]
@@ -2011,10 +2338,10 @@ uuid = "d1185830-fcd6-423d-90d6-eec64667417b"
 version = "0.19.7"
 
 [[deps.Symbolics]]
-deps = ["ArrayInterface", "ConstructionBase", "DataStructures", "DiffRules", "Distributions", "DocStringExtensions", "DomainSets", "IfElse", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "Metatheory", "NaNMath", "RecipesBase", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "TermInterface", "TreeViews"]
-git-tree-sha1 = "074e08aea1c745664da5c4b266f50b840e528b1c"
+deps = ["ArrayInterface", "ConstructionBase", "DataStructures", "DiffRules", "Distributions", "DocStringExtensions", "DomainSets", "Groebner", "IfElse", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "Metatheory", "NaNMath", "RecipesBase", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "TermInterface", "TreeViews"]
+git-tree-sha1 = "759d6102719068d95acae0b5480c157fa278ca82"
 uuid = "0c5d862f-8b57-4792-8d23-62f2024744c7"
-version = "4.3.0"
+version = "4.3.1"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -2027,10 +2354,10 @@ uuid = "3783bdb8-4a98-5b6b-af9a-565f29a5fe9c"
 version = "1.0.1"
 
 [[deps.Tables]]
-deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
-git-tree-sha1 = "bb1064c9a84c52e277f1096cf41434b675cd368b"
+deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "OrderedCollections", "TableTraits", "Test"]
+git-tree-sha1 = "5ce79ce186cc678bbb5c5681ca3379d1ddae11a1"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.6.1"
+version = "1.7.0"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
@@ -2053,15 +2380,15 @@ version = "0.5.0"
 
 [[deps.ThreadsX]]
 deps = ["ArgCheck", "BangBang", "ConstructionBase", "InitialValues", "MicroCollections", "Referenceables", "Setfield", "SplittablesBase", "Transducers"]
-git-tree-sha1 = "6dad289fe5fc1d8e907fa855135f85fb03c8fa7a"
+git-tree-sha1 = "d223de97c948636a4f34d1f84d92fd7602dc555b"
 uuid = "ac1d9e8a-700a-412c-b207-f0111f4b6c0d"
-version = "0.1.9"
+version = "0.1.10"
 
 [[deps.TimerOutputs]]
 deps = ["ExprTools", "Printf"]
-git-tree-sha1 = "97e999be94a7147d0609d0b9fc9feca4bf24d76b"
+git-tree-sha1 = "d60b0c96a16aaa42138d5d38ad386df672cb8bd8"
 uuid = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
-version = "0.5.15"
+version = "0.5.16"
 
 [[deps.Tokenize]]
 git-tree-sha1 = "0952c9cee34988092d73a5708780b3917166a0dd"
@@ -2070,9 +2397,9 @@ version = "0.5.21"
 
 [[deps.Transducers]]
 deps = ["Adapt", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "Requires", "Setfield", "SplittablesBase", "Tables"]
-git-tree-sha1 = "1cda71cc967e3ef78aa2593319f6c7379376f752"
+git-tree-sha1 = "c76399a3bbe6f5a88faa33c8f8a65aa631d95013"
 uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
-version = "0.4.72"
+version = "0.4.73"
 
 [[deps.TreeViews]]
 deps = ["Test"]
@@ -2082,9 +2409,9 @@ version = "0.3.0"
 
 [[deps.TriangularSolve]]
 deps = ["CloseOpenIntervals", "IfElse", "LayoutPointers", "LinearAlgebra", "LoopVectorization", "Polyester", "Static", "VectorizationBase"]
-git-tree-sha1 = "5cbc1a4551fcf8afe8f80bb4f1f13e3271ee2656"
+git-tree-sha1 = "b8d08f55b02625770c09615d96927b3a8396925e"
 uuid = "d5829a12-d9aa-46ab-831f-fb7c9ab06edf"
-version = "0.1.10"
+version = "0.1.11"
 
 [[deps.URIs]]
 git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"
@@ -2122,9 +2449,9 @@ version = "0.1.2"
 
 [[deps.VectorizationBase]]
 deps = ["ArrayInterface", "CPUSummary", "HostCPUFeatures", "Hwloc", "IfElse", "LayoutPointers", "Libdl", "LinearAlgebra", "SIMDTypes", "Static"]
-git-tree-sha1 = "e9a35d501b24c127af57ca5228bcfb806eda7507"
+git-tree-sha1 = "1901efb08ce6c4526ddf7fdfa9181dc3593fe6a2"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
-version = "0.21.24"
+version = "0.21.25"
 
 [[deps.VertexSafeGraphs]]
 deps = ["Graphs"]
@@ -2354,63 +2681,40 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╠═6d9759c3-63d9-4166-8884-cfaa99ee33c4
-# ╠═f0413f68-1eb4-4a3d-bdcf-61e8aa96c0e7
-# ╠═6e728cf8-72e7-4567-90e9-a97f5f6a1f28
-# ╠═d096a6be-65a1-428d-9bfb-da7fe89f4c19
-# ╟─65983c74-85d8-11ec-0c78-c9585d7356d8
-# ╟─547db9e8-8de9-408d-80d4-48947b4aa1c2
-# ╟─845a5477-29aa-4ebd-89a0-53ddeed9343d
-# ╠═c4bb7c6a-1165-44d6-8c1e-ea6798297c72
-# ╟─5d00ba37-89a4-44a1-b8dc-c47394890b1f
-# ╟─d4e5e672-4759-47ed-9a69-4d92efd85b05
-# ╟─6b25dc03-352b-4351-b387-2c3d0dd80106
-# ╟─eb9eb1de-7b0f-4045-b438-ab7930243e5c
-# ╟─07735905-642b-4141-87fe-c9bc20ae04c2
-# ╟─76691838-7086-4ca0-91d1-b5ef2c3e3b24
-# ╠═23c143d3-29a3-4824-877e-1f13d0818ab6
-# ╠═71777cd5-eedb-4dbf-a3a0-84ebe31ef602
-# ╟─aed09f8b-eb07-4a34-a0bf-dc9ac987e85f
-# ╠═0c575ced-ef89-4bf8-8f8c-c784d7f2d33a
-# ╟─7b95dbaf-dc9d-45eb-9a0a-f2f75daf8765
-# ╟─2e15f653-b17b-4724-8fa9-a10606093c5d
-# ╟─cd434441-2358-4d50-8744-98af4fc99176
-# ╠═7a252b5a-13f1-489c-8dfd-ef325adeee56
-# ╟─0a62b4ce-861b-44b2-bb56-c6f4cfce5fef
-# ╟─e48547d5-f638-4885-8d2d-a8f70ad67dd5
-# ╟─ea66ecaf-96c5-4b54-92eb-55d0eda5a001
-# ╟─442944b8-8f11-484e-988c-6b1bcbd13c8e
-# ╟─10d1f8cc-1a72-420b-b5cc-0286105850b3
-# ╟─6f8ff973-6845-4517-8bca-1bec97fa4edf
-# ╠═313f484e-bea2-437d-ba91-d766d36dd248
-# ╠═f8ebbcd7-61e6-46bd-91fd-546ba931f76c
-# ╠═7c053891-043a-4c0d-9afd-d03012d102c8
-# ╠═5959c966-ff6e-4172-9fad-c05258050ff4
-# ╠═29001c0e-9f2e-4fbb-ba8f-3b34de1d2a4b
-# ╠═10e57e8a-bc19-4abe-9b62-ba7b65c69c9d
-# ╟─6de3e149-e3e4-4c24-975b-e1e2259392f3
-# ╟─1525b27e-2613-4f27-9f13-171e24cd574e
-# ╟─f55ef39d-192e-4e97-acf5-a5fad4c6bae8
-# ╠═481d6298-106a-4f6a-b822-7fda0a24bbe0
-# ╠═c589178d-8b4b-488c-8d63-c7cc487848ec
-# ╟─59fd13d8-e3bd-4756-a77f-a571876670a3
-# ╟─24e616ee-3312-411e-a214-a0ec39f7da9d
-# ╟─e58e3af7-6b70-4e0b-964e-a670ac6923a2
-# ╟─2495b700-916f-4103-a822-1c085c357153
-# ╟─c2cc318b-933a-43d4-be76-59a629d900c3
-# ╟─d30be1ba-5658-4307-a69d-c6c6c97365b0
-# ╠═4409d520-1aae-4036-892c-27f2bfaec571
-# ╟─cb5bbeb3-1c07-4a20-ba2c-d4ea706609e0
-# ╟─6aa8f4b5-c26e-476e-b00c-0b0b040bbd18
-# ╠═d385fd9c-b3a5-41a8-b03c-5c780f54d6d8
-# ╟─65ed9079-07bf-4722-bf4d-bd872d4de4ac
-# ╠═86576d8a-8726-4125-b533-48b5d15ba021
-# ╟─e8b5f56e-7f44-46d6-9962-cec32eb237be
-# ╟─33730b5a-eab3-4d88-a96e-84bf7fa510ef
-# ╠═0f5fd289-5f7b-4312-8610-337170f3e09c
-# ╟─b7d6ee7d-8049-4e22-9ecf-307b939f040f
-# ╟─4e711021-eddf-4cb2-a420-e6f17dad5542
-# ╟─54dd5337-c76f-4a23-8bec-a0cd57b433dd
-# ╟─5220090a-c8ef-4b9b-ae17-6692fc4b19e3
+# ╟─279eaa4f-41ca-4168-b492-f36543bb8204
+# ╟─00037d0a-8be0-4c75-94bc-23c2c639e6e8
+# ╟─64dc539b-b268-43b6-a96e-2c4fa7b48474
+# ╟─f5faefd6-f496-40fb-8043-ef6b9d172ae0
+# ╟─32b3bc77-c4f4-40ab-a5a9-e035022189ac
+# ╟─c70c7a06-d1aa-40a9-902b-4bd4b23a6392
+# ╠═10ba443a-d7bc-40f2-b4f6-540328ce6e4b
+# ╠═2cfd31c4-803a-4880-b2a4-5af6594c0975
+# ╟─2170f883-1b01-4d16-907e-49c72118e224
+# ╟─6c87979a-690a-400b-9ab8-7ef26b829195
+# ╠═04c14475-24cd-49c3-8a7b-83a9425664be
+# ╟─919bf3e4-6aa0-440b-b76f-34a4812c6752
+# ╟─855b8530-861e-427e-b6cc-c1b0283568ca
+# ╟─c112e62c-9c38-48dc-8294-42911b02ccc5
+# ╟─6c96da07-b5ea-4096-a14c-5cd8f0f47c04
+# ╟─906a0931-e86f-48f3-be11-eb692639e8cc
+# ╠═c374e1bd-ec3d-4cf7-aff1-072d6ba60b27
+# ╠═2b91a06c-3803-4877-ac9a-1669fbe58d30
+# ╠═e8ca5682-cce0-4b2c-ba18-47f2e38192c7
+# ╟─17e34ce6-a1fa-4193-9201-3e61a188b48f
+# ╠═87df7c88-7e16-4c50-bd80-df5bfea26ee8
+# ╟─9433f4d1-3abf-4dea-8107-1070ee5feb2e
+# ╠═c3828c90-0559-4686-9f56-41b5b6d48176
+# ╠═e6f51a60-9701-4ba6-a6e6-9703f7c9ebf9
+# ╟─2b9e43fd-d00d-40f1-ac98-07d48c53d861
+# ╠═ff0c4a06-de7b-4cf2-b920-cd84ac9927ea
+# ╠═f8238a6e-1e5e-4629-ac20-2c9cb964c53e
+# ╠═df81eb5c-16ef-4bf6-9ad0-2cc899c44cb6
+# ╠═a5b38e90-cdbe-442f-a078-dd8598a0a4c2
+# ╠═8c3e21c9-6514-4f14-8b1f-325d124681f5
+# ╠═ac95a2ae-5b1b-4399-8265-4b0bfb21162e
+# ╠═3349c942-15a8-4b1e-8b4a-7f5154f48b12
+# ╠═cf72446a-a512-11ec-2b47-ef706c91c6a0
+# ╠═67091261-3b6c-4a94-9a70-86519a1eed76
+# ╠═2e6401b9-9c89-4b4b-8492-d0a83003579b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

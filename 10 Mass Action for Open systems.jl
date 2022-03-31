@@ -109,11 +109,6 @@ begin
 	"""
 end
 
-# ╔═╡ fea0334a-5f3f-462f-8229-aca1ad2f5598
-md"""
-X_{1}(0)= $(🐶)
-"""
-
 # ╔═╡ 5a453763-8ef6-4a73-b4e8-d3cf2385da28
 begin
 	X₀ = [🐶,0.0]
@@ -122,7 +117,7 @@ begin
 	t=collect(t₀:0.1:t_final) # time
 	k_1 = 1.
 	plot(t,t->X₀[1]*exp(-k_1*t),label="\\ X_1")
-	title!("Degradation first order")
+	title!("Degradation first order, X_1(0)= $(🐶)")
 	xaxis!("Time")
 	yaxis!("Concentration")
 end
@@ -2066,8 +2061,7 @@ version = "0.9.1+5"
 # ╠═e3316468-ad2b-418a-a430-75db4028e72d
 # ╠═d9019270-197b-4cdc-aea6-bdf19fc589c3
 # ╠═09dd8e06-8dae-4bc9-8518-5803d3f2cc04
-# ╠═715f0475-2e81-48e7-897f-09ccab6377d1
-# ╠═fea0334a-5f3f-462f-8229-aca1ad2f5598
+# ╟─715f0475-2e81-48e7-897f-09ccab6377d1
 # ╠═5a453763-8ef6-4a73-b4e8-d3cf2385da28
 # ╟─b91a0914-dbb8-4a4a-bb09-be87dcef0498
 # ╟─8877db63-8096-4bc3-b5c6-5d119c3fc3f9
