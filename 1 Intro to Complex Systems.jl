@@ -16,10 +16,10 @@ end
 # ╔═╡ 0c768bc9-4148-48e5-b6bf-637d25c57fd3
 begin
 	using Images, Plots, DifferentialEquations
-	img_water=load("/home/user/img/water.jpg");
-	img_solar = load("https://media.wired.com/photos/5934776af061de0423ccdf98/191:100/pass/solar_system.jpg");
-	img_pathway=load("https://www.spandidos-publications.com/article_images/or/29/1/OR-29-01-0003-g01.jpg");
 	img_brain=load("/home/user/img/brain.jpg");
+	img_pathway=load("/home/user/img/pathway.jpg");
+	img_water=load("/home/user/img/water.jpg");
+	img_solar = load("/home/user/img/solar_system.jpg");
 	img_clock=load("/home/user/img/Clockwork.jpg");
 	img_dices=load("/home/user/img/dices.jpg");
 	img_plant=load("/home/user/img/plant.jpg");
@@ -276,7 +276,7 @@ $img_plant Life is a good example of an emerging property"
 
 # ╔═╡ Cell order:
 # ╟─0c768bc9-4148-48e5-b6bf-637d25c57fd3
-# ╟─37367e24-963e-11ec-0d47-ff893b72b17b
+# ╠═37367e24-963e-11ec-0d47-ff893b72b17b
 # ╟─1c107775-c064-4be0-a683-8410cd290086
 # ╟─8b5e6428-736a-4c59-8df7-538b8c4e6ec2
 # ╟─881f031e-7fc8-47e5-a357-dca3db43f538
