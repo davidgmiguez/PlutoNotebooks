@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.22
+# v0.19.27
 
 using Markdown
 using InteractiveUtils
@@ -41,37 +41,48 @@ end
 md" # 1: Complex Systems"
 
 # ╔═╡ 787378ef-9cc0-4890-87a8-764aaae7849c
-Resource("https://i.ibb.co/rfM7qFD/complexity-istockphoto-687344878-612x612.jpg")
+Resource("https://i.ibb.co/rfM7qFD/complexity-istockphoto-687344878-612x612.jpg",:width => 400 )
 
 # ╔═╡ 54c6af14-7561-45aa-9e53-13de93e36977
 md" ## 1.1 What is a Complex System?
 
-Before defining what do we understand by __complex system__, let’s define first what do we understand as a __system__.
+The study of Complex systems is pivotal in various fields, from biology and ecology to economics and social sciences. In the context of living systems, the understanding of complex systems provides insights into how interactions and dynamics shape the form and function at many layers in biology: from genes, to organells, to cells, to tissues, to organisms, and even ecosystems. The study of Biology from a perspective of Complex Systems is a very interdisciplinary discipline by definition, since it involves tools from Physics and Mathematics. 
 
+But, before defining what do we understand by __complex system__, let’s define first what do we understand as a __system__.
+##
 "
 
 
-# ╔═╡ 23451075-fc6c-4db5-8e44-d74d22fca532
-Resource("https://i.ibb.co/cht5tQx/solar-system.jpg")
-
 # ╔═╡ 5bea561d-cd8e-40d5-9dd7-22b88cee3697
 
-Foldable("What is a System?", md"A group of interacting, interrelated, or interdependent elements forming a complex whole.")
+Foldable("What is a System?", md" A system is a group of interacting, interrelated, or interdependent elements forming a complex whole.")
 
+
+# ╔═╡ 0ede294c-4784-43ca-b768-51c9ec9ab172
+md" 
+##
+*The solar system is a __system__*"
+
+
+# ╔═╡ 23451075-fc6c-4db5-8e44-d74d22fca532
+Resource("https://i.ibb.co/cht5tQx/solar-system.jpg",:width => 400 )
 
 # ╔═╡ cfd35971-6d26-440f-a3cf-3116624e9490
 md" ## 1.2 Characterization of systems:
 
-We can characterize types of systems based on their composition as *diverse* or *not diverse*.
+There are many ways to characterize systems, and to define types of systems. As a first approach, we can start to characterize systems based on their composition as *diverse* or *not diverse*
+
+##
 "
 
 
-# ╔═╡ 1f853b26-de75-4872-8ab2-4482f3435867
-Resource("https://aox.com.sg/wp-content/uploads/2018/07/The-8-Truth-People-Don’t-Know-About-Alkaline-Water.jpg")
-
 # ╔═╡ 15eadd70-75ce-4577-87f6-6cfc35d0d7b2
-md"*a system composed of a set of water molecules is __not diverse__*"
+md"###
+*A system composed of a set of water molecules is __not diverse__*"
 
+
+# ╔═╡ 1f853b26-de75-4872-8ab2-4482f3435867
+Resource("https://pics.ozmo.io/is_a_water_molecule_wet.jpg",:width => 400 )
 
 # ╔═╡ 42523a2b-6306-4b36-9b97-f1c42879f1be
 md" ## 
@@ -79,26 +90,31 @@ md" ##
 *A set of of interacting proteins in a signaling pathway is __diverse__, since it is composed of many units of different elements that they are different to each other*"
 
 # ╔═╡ b723ae53-54bb-4b72-aabb-44589b1782b2
-Resource("https://i.ibb.co/r2DQRcK/pathway.jpg")
+Resource("https://i.ibb.co/r2DQRcK/pathway.jpg",:width => 300 )
 
 # ╔═╡ 37367e24-963e-11ec-0d47-ff893b72b17b
 md" ## 1.3 What is a Complex System?"
 
-# ╔═╡ 3d523e6a-38e3-4673-86f9-ad5edc2e42d6
-Resource("https://i.ibb.co/chKgc0t/brain.jpg")
-
-# ╔═╡ d2436e49-bc75-4a09-b108-6b3d4b0d118d
-md"*The brain is a good example of a Complex System*"
+# ╔═╡ 6d0618d5-68c8-47e3-ae8b-3110d7a0a6f1
+md"Now that we know what is a _System_, we can try to start to define what could be a    Complex System. Try to think a definition by yourself before revealing the answer below."
 
 # ╔═╡ 08aed102-eb3a-41f4-b837-46e469148e94
 
-Foldable("Now that we know what is a system, what is a Complex System?", md"__Complex System__: are a specific type of systems that behave in a way that cannot be inferred from the properties of their individual pants.")
+Foldable("What is a Complex System?", md"__Complex System__: are a specific type of systems that behave in a way that cannot be inferred from the properties of their individual pants.")
  
+
+# ╔═╡ d2436e49-bc75-4a09-b108-6b3d4b0d118d
+md"
+##
+*The brain is a good example of a Complex System*"
+
+# ╔═╡ 3d523e6a-38e3-4673-86f9-ad5edc2e42d6
+Resource("https://i.ibb.co/chKgc0t/brain.jpg",:width => 300 )
 
 # ╔═╡ 1c107775-c064-4be0-a683-8410cd290086
 md" ## 1.3 Not all complicated systems are complex systems
 
-In this sense, it is quite dificul to define what makes a system a __Complex System__. Lets start by clarifying the difference between __Complicated__ and __Complex__. A machine can be complicated, but its function and properties can be fully predicted by the properties of their parts:
+In this contex, it is not easy and straightforward to define what makes a system a __Complex System__ versus a __non Complex System__. Let's start by clarifying the difference between __Complicated__ and __Complex__. A machine can be complicated, but its function and properties can be fully predicted by the properties of their parts. In general, we can charcterize a system as __non complex__ if:
 
 - It has been rationally designed and built to do a particular task. 
 - It is not robust, if one part fails the system fails. 
@@ -107,23 +123,20 @@ In this sense, it is quite dificul to define what makes a system a __Complex Sys
 ## 
 "
 
-# ╔═╡ 67e5acba-79ea-4503-84b2-9ed3a2d2b337
-Resource("https://i.ibb.co/hL2dGvp/Clockwork.jpg")
-
 # ╔═╡ 129c3e82-b045-4cb8-87fb-d6c11f188df3
 md" *A clock is not a complex system, it is just a complicated system*"
+
+# ╔═╡ 67e5acba-79ea-4503-84b2-9ed3a2d2b337
+Resource("https://i.ibb.co/hL2dGvp/Clockwork.jpg",:width => 400 )
 
 # ╔═╡ 8b5e6428-736a-4c59-8df7-538b8c4e6ec2
 md" ## 1.4 Characteristics of complex systems
 
 ### i). A complex system is _not normal_: 
 
-In the sense that they do not fit normal gaussian distributions. 
+We say that a complex system is _not normal_ in the sense that it does not fit a _normal_ (gaussian) distribution. 
 
-Lets illustrate this concept of _normal_, versus _not-normal_ system. Let's, for instance, play a game where we throw two dices $🎲_1$ and $🎲_2$ and compute the sum $\sum 🎲$.  "
-
-# ╔═╡ 0a1f7f2d-c8ac-4669-aa79-2485343e7029
-Resource("https://i.ibb.co/qs648Rr/dices.jpg")
+Let's illustrate this concept of _normal_, versus _not-normal_ system. Let's, for instance, play a simple computational game with two dices $🎲_1$ and $🎲_2$.  "
 
 # ╔═╡ 881f031e-7fc8-47e5-a357-dca3db43f538
 begin
@@ -131,8 +144,7 @@ begin
 
 	
 	md""" ## 
-	
-You can move the slider below to change the number of repeats. The Plot of the results in the form of a histogram is shown below.
+On the left plot, we show an histogram of the values of the sum $\sum (🎲_1 +🎲_2$). On the right plot, we repeat the same experiment, but with a new rule: if the two 🎲 dices return the similar value ($🎲_1$=$🎲_2$), do not compute the sum, and throw the dices again. This generates a very simple feedback loop, where the output of the experimets affects the input. You can move the slider below to change the number of times the dices are thrown.
 
 	
 Number of repeats: $(🎲_slide)
@@ -140,7 +152,7 @@ Number of repeats: $(🎲_slide)
 	"""
 end
 
-# ╔═╡ e0e2382f-fbfc-4aad-87cc-89617531381e
+# ╔═╡ 8fab198c-496b-41a9-95fc-d2a886679f54
 begin
 total_normal = Array{Float64, 2}(undef, 1, 🎲)
 
@@ -155,15 +167,8 @@ total_normal = Array{Float64, 2}(undef, 1, 🎲)
 	title!("Normal")
 	xlabel!("value")
 	ylabel!("counts");
-end
 
-# ╔═╡ 41c92a9a-0cd3-45d0-8c0e-4b64578f621a
-md" ##
-You can reveal the code used to generate the previous plot by clicking on the _eye_ on the upper left corner. Lets now repeat the same experiment, but with a new rule: if the two 🎲 dices return the similar value ($🎲_1$=$🎲_2$), do not compute the sum, and throw the dices again. This generates a very simple feedback loop, where the output of the experimets affects the input. You can still change the number of attepts by moving the previous slider.
- "
-
-# ╔═╡ 8fab198c-496b-41a9-95fc-d2a886679f54
-begin
+	
 	total_not_normal = Array{Float64, 2}(undef, 1, 🎲);
 for i=1:🎲
     value1=rand((1,2,3,4,5,6))
@@ -183,47 +188,56 @@ end
 end
 
 # ╔═╡ a950343f-9e86-4ecc-8c7b-621b137b6351
-md" The two resulting distributions are clearly different, the left is gaussian, while the right one, despite having the same average value, has different tails. Due to the feedback loop introduced, the distribution becomes __not normal__."
+md" ##
+You can reveal the code used to generate the previous plots by clicking on the _eye_ on the upper left corner.
+
+The two previous distributions are clearly different. When the number of repeats is high, the left plot resembles a gaussian. On the other hand, the right plot,  despite having the same average value, has different tails. Due to the feedback loop introduced, the distribution becomes __not normal__."
 
 # ╔═╡ f9cba1c0-ced9-406f-a9d2-1e43097e58c0
 md" ## ii). Their response  can be difficult to predict 
 
-In complex systems often the final state dependens on its inital state. Linear systems such as the typical systems studied in Mechanics (springs, balls on top a hill...), thermodynamics (a gas that expands...) and electromagnetism (a circuit, condenser that is being discharged...) have the property that the final solution depens on the properties of teh system (temperature, charge, mass..) and the parameters of the system (gravity, dielectric constant...). On the other hand, the solution of a complex systems can also depend on where the system was initially (similar to histeresys loop in magnetism). 
+In complex systems often the final state dependens on its inital state. Linear systems such as the typical systems studied in Mechanics (springs, balls on top a hill...), thermodynamics (a gas that expands...) and electromagnetism (a circuit, condenser that is being discharged...) have the property that the final solution depens on the properties of the system (temperature, charge, mass...) and the parameters of the system (gravity, dielectric constant...). On the other hand, the solution of a complex systems can also depend on where the system was initially, introducing some sort of _memory_.  
+##
 
-## 
-To ilustrate this, we will solve numerically a set of linear differential equations and compare it with the same system but including a feedback loop in one of the variables.
 "
+
+# ╔═╡ c4a049ab-e615-43c2-a5e0-cc7699f3e23f
+Resource("https://eepower.com/uploads/articles/what-is-a-hysteresis-loop-fig1.jpg",:width => 200 )
+
+# ╔═╡ f7e9f953-e3fc-48bb-aed8-49539cd8fe91
+md"A typical analog to understand this concept of memory or dependence on initial conditions is the typical histeresys loop in magnetism: inside the loop, the state of magnetization depends on whether you are moving by increasing or decreasing the value of the magnetic field B along the x-axis.
+##"
 
 # ╔═╡ a68b0146-6bcf-4b1b-9804-2c5dbefdcf0a
 NoFeedback! = @ode_def ab2 begin
    dM = -γ_M*M+α_M*T^n/(K^n +T^n)
    dP =   α_P * M - γ_P * P
-    end α_M γ_M T n α_P γ_P K
+end α_M γ_M T n α_P γ_P K;
 
 # ╔═╡ 010f87b7-a625-466c-b11f-bd11e4454f6a
 PositiveFeedback! = @ode_def ab begin
    dM = -γ_M*M+α_M*P^n/(K^n +P^n)
    dP =   α_P * M - γ_P * P
-    end α_M γ_M T n α_P γ_P K
+end α_M γ_M T n α_P γ_P K;
 
 # ╔═╡ 06f53c91-8e22-4f73-a6ae-1d44de7c9308
 begin
-	🐶_slide = @bind 🐶 html"<input type=range min=0.01 max=0.5 step=0.1>"
-	🐱_slide = @bind 🐱 html"<input type=range min=0.01 max=0.5 step=0.1>"
+	🦊_slide = @bind 🦊 html"<input type=range min=0.01 max=0.5 step=0.1>"
+	🐰_slide = @bind 🐰 html"<input type=range min=0.01 max=0.5 step=0.1>"
 	
 	md"""
-	## 
-	Lets assume that these equations correspond to a system of dogs and cats interacting. You can use the sliders below to change the initial condition, i.e., how many 🐶 and 🐱 you have initially. The solution of the amount of 🐶 and 🐱 is plotted below for the two systems: 
+## 
+To ilustrate this in a more _systems_ point of view, let's assume a system of foxes 🦊 and rabbits 🐰  interacting. You can use the sliders below to change the initial condition, i.e., how many 🦊 and 🐰 you have initially. The solution of the amount of 🦊 and 🐰 is plotted below for the two systems: 
 	
-	Initial concentration of 🐶: $(🐶_slide)
+Initial concentration of 🦊: $(🦊_slide)
 	
-	Initial concentration of 🐱: $(🐱_slide)
+Initial concentration of 🐰: $(🐰_slide)
 	"""
 end
 
 # ╔═╡ aa37be5e-507f-4269-8235-accd44e55093
 begin
-	u₀ = [🐶,🐱]
+	u₀ = [🦊,🐰]
 	tspan = (0.0,50.0)
 	n=3
 	K=1
@@ -240,13 +254,13 @@ prob1 = ODEProblem(PositiveFeedback!,u₀,tspan,p)
 prob2 = ODEProblem(NoFeedback!,u₀,tspan,p)
 
 sol1 = solve(prob1)
-P1=plot(sol1,label=["Dogs" "Cats"],ylims = (0,12))
+P1=plot(sol1,label=["Foxes" "Rabbits"],ylims = (0,12))
 title!("Nonlinear ")
 xlabel!("Time [s]")
 ylabel!("Concentration [M]")
 
 sol2 = solve(prob2)
-P2=plot(sol2,label=["Dogs" "Cats"],ylims = (0,12))
+P2=plot(sol2,label=["Foxes" "Rabbits"],ylims = (0,12))
 title!("Linear")
 xlabel!("Time [s]")
 ylabel!("Concentration [M]")
@@ -260,9 +274,13 @@ Complex systems can have another important property that may play a role in biol
 ```math
 k = A e^{-E_a/RT} 
 ```
-Based on this, one should expect that flies at 40 degrees shoudl be born much faster than flies at 20 degrees. But this is not the case, a fly takes more or less the same time to develop, at 20 and 40 degreees, so there should be some sort of robustes built in the system to achieve this.
+##
 
-To illustrate this, lets solve numerically a system of equations with a nonlinearity that induces insensitivity to changes in a given parameter. This is called __adaptation__."
+Based on this, one should expect that fly embryos at 40 degrees should develop  much faster than flies at 20 degrees. But this is not the case, a fly takes more or less the same time to develop, independenlty if it develops at 20 and 40 degreees, so there should be some sort of robustes built in the system to achieve this.
+
+##
+
+"
 
 # ╔═╡ 19aa372b-52ef-430e-9ee5-f03e0ce63cf0
 FeedForward2! = @ode_def ab3 begin
@@ -270,7 +288,7 @@ FeedForward2! = @ode_def ab3 begin
    dP1 =   α_P * M1 - γ_P * P1 
    dM2 = -γ_M*M2+α_M*T^n/(K^n +T^n)*K2^n/(K2^n +P1^n)
    dP2 =   α_P * M2 - γ_P * P2 
-    end α_M γ_M T n α_P γ_P K K2
+end α_M γ_M T n α_P γ_P K K2;
 
 # ╔═╡ 04ad7a1e-e546-4c81-b65a-09ddaa85aee5
 begin
@@ -278,7 +296,7 @@ begin
 	
 	md"""
 	##
-	Again, you can move the slider to change the amount of 😺. We can see that for lower values of this variable 😺, the dynamics depends a lot on this parameter, while for higher values, the system almost becomes insensitive to changes in this parameter.
+	To illustrate this, lets solve numerically a system of equations with a nonlinearity that induces insensitivity to changes in a given parameter. This is called __adaptation__.Again, you can move the slider to change the amount of smily cats 😺. We can see that for lower values of 😺, the dynamics depends a lot on this parameter, while for higher values, the system almost becomes insensitive to changes in this parameter.
 	
 	Initial amount of 😺 : $(😺_slide)
 	
@@ -286,11 +304,9 @@ begin
 	"""
 end
 
-# ╔═╡ beb934fd-8daf-4b10-8712-a5f9e7fe8ba2
-prob5 = ODEProblem(FeedForward2!,[0.01,0.00001,0.01,0.00001],tspan,[α_M,γ_M,😺,n,α_P,γ_P,K,0.1]);
-
 # ╔═╡ afcbb8d7-30b6-4229-8c58-b5a321e818db
 begin
+	prob5 = ODEProblem(FeedForward2!,[0.01,0.00001,0.01,0.00001],tspan,[α_M,γ_M,😺,n,α_P,γ_P,K,0.1]);
 	sol5 = solve(prob5)
 	P5=plot(sol5,label=["mRNA1" "Protein1" "mRNA2" "Protein2"],ylims = (0,12))
 	title!("Linear")
@@ -306,7 +322,7 @@ A complex system, despite being formed by many interacting parts, seems to behav
 
 # ╔═╡ 2b5d86fa-2c9a-4ef3-a3d6-24f2fb59c213
 html"""
-<iframe width="700" height="400" src="https://www.youtube.com/embed/V4f_1_r80RY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="400" height="300" src="https://www.youtube.com/embed/V4f_1_r80RY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 """
 
 # ╔═╡ f0230787-40d8-436c-b9fa-9d0b350216fa
@@ -315,8 +331,8 @@ md"
 The 2021 nobel price in Physics was awarded to Giorgio Parisi, which also worken in understanding the dynamics of these systems that move coordinated without a leader: _They may seem very far from spin glasses, but there is something in common, what they share, and what is very interesting, is how complex behaviors arise. This is a theme recurrent in physics and biology, and most of the research that I have done is to get at this thing: how complex collective behavior may arise from elements that each have a simple behavior_. "
 
 # ╔═╡ 6d47d87b-3f9e-42b2-bca6-fe64ba878b82
-md" ##
-A famous example of the emergence of these type of global property is Chaos, or thee butterfly effect introduced By Eduard Lorenz, the model behing many tools for weather forecast"
+md" ## v) They can exhibit Chaos 
+Complex systems can generate exponential amplification of infinitesimal perturbations. This is more commonly known as the butterfly effect introduced by Eduard Lorenz, the model behind many tools for weather forecast"
 
 # ╔═╡ e337c585-09e8-4159-af5a-ae4f22419e5f
 begin
@@ -361,11 +377,41 @@ begin
 	end every 10
 end
 
+# ╔═╡ dfe03d5c-a32e-4d2e-ae7b-a69f44c87551
+md"## iv) They can exhibit Fractal geometry"
+
+# ╔═╡ 00d1131b-9875-4b25-87ea-709ff4779f6f
+md"Self-similarity: an object looks the same at any scale."
+
+# ╔═╡ 8df995a6-17c1-43e9-a115-9ca4d6d47bbc
+Resource("https://d32ogoqmya1dw8.cloudfront.net/images/NAGTWorkshops/complexsystems/mandelbrot_set.jpg")
+
+# ╔═╡ ab649f57-2b16-4817-9f54-0ac106748a08
+md"## vii) They can exhibit self-organization
+
+in time: Oscillations "
+
+# ╔═╡ 8a8e5d47-df2a-49f7-8378-7837479c3273
+html"""<iframe width="660" height="415" src="https://www.youtube.com/embed/_Dvk3jJzmco" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>"""
+
+# ╔═╡ 1fabf786-b9ba-47d0-9c3d-e30e3a58f47f
+md" ##
+in space: Patterns"
+
+# ╔═╡ a4dfff08-d84f-43a1-a454-ebf646dd0ea9
+Resource("https://thumbs.gfycat.com/AppropriateUntidyAruanas-mobile.mp4")
+
+# ╔═╡ 0bb62ac8-75c8-4483-b4d2-6e176e1352d9
+md"## vii) They can exhibit critical points"
+
+# ╔═╡ 2fb49862-a5e2-4956-87f3-fe8a7eb57bc6
+Resource("https://thumbs.gfycat.com/CarefreeFlusteredDavidstiger-mobile.mp4")
+
 # ╔═╡ f111e935-b711-439c-bec4-5e53d224b571
 
 
 # ╔═╡ 52a88205-c24f-4a24-8f30-c77f3872bb13
-md" ## v) A complex system is characterized by __emergence__ of properties 
+md" ## viii) They can exhibit __emergent__ properties 
 
 The basic idea of emergence is that there are properties at the upper hierarchical levels of nature that are not derivable from or reducible to the properties and laws of the lower levels. __Emergence__ is the opposite concept or approach to __Reductionism__, that by contrast, argues that everything can be explained by (reduced to) the basic laws of physics.
 
@@ -378,6 +424,7 @@ For instance, information is neither matter nor energy, although it needs matter
 System > \sum_{i} part_i \tag{16} \\
 \end{align*}
 ```
+##
 in fact 
 
 ```math
@@ -395,21 +442,6 @@ Resource("https://i.ibb.co/JKLH0BY/plant.jpg")
 
 # ╔═╡ a14ca170-733a-4a9a-9882-49e471d21e35
 md"*Life is a good example of an emerging property*"
-
-# ╔═╡ 49c057a5-0c39-4525-be8a-4575d44b9443
-
-
-# ╔═╡ 844e33a2-83f6-4b0b-a756-b162609dd847
-
-
-# ╔═╡ 04c1a2c9-5de6-4864-981a-191a378af77b
-
-
-# ╔═╡ 74bbb1b0-5235-4cff-8d5c-2700eca083bd
-
-
-# ╔═╡ 22fd8aad-b472-4a1b-8e3b-3f28956fe1aa
-Foldable("Some cool plot:", plot(0:10, x -> x^2))
 
 # ╔═╡ 522c0800-ef9d-448d-ac77-be903481fbd8
 
@@ -2693,51 +2725,55 @@ version = "1.4.1+0"
 # ╟─6e3c8f4f-b5f2-41f7-837e-b9f5aeb43d96
 # ╟─787378ef-9cc0-4890-87a8-764aaae7849c
 # ╟─54c6af14-7561-45aa-9e53-13de93e36977
-# ╟─23451075-fc6c-4db5-8e44-d74d22fca532
 # ╟─5bea561d-cd8e-40d5-9dd7-22b88cee3697
+# ╟─0ede294c-4784-43ca-b768-51c9ec9ab172
+# ╠═23451075-fc6c-4db5-8e44-d74d22fca532
 # ╟─cfd35971-6d26-440f-a3cf-3116624e9490
-# ╟─1f853b26-de75-4872-8ab2-4482f3435867
 # ╟─15eadd70-75ce-4577-87f6-6cfc35d0d7b2
+# ╟─1f853b26-de75-4872-8ab2-4482f3435867
 # ╟─42523a2b-6306-4b36-9b97-f1c42879f1be
 # ╟─b723ae53-54bb-4b72-aabb-44589b1782b2
 # ╟─37367e24-963e-11ec-0d47-ff893b72b17b
-# ╟─3d523e6a-38e3-4673-86f9-ad5edc2e42d6
-# ╟─d2436e49-bc75-4a09-b108-6b3d4b0d118d
+# ╟─6d0618d5-68c8-47e3-ae8b-3110d7a0a6f1
 # ╟─08aed102-eb3a-41f4-b837-46e469148e94
+# ╟─d2436e49-bc75-4a09-b108-6b3d4b0d118d
+# ╟─3d523e6a-38e3-4673-86f9-ad5edc2e42d6
 # ╟─1c107775-c064-4be0-a683-8410cd290086
-# ╟─67e5acba-79ea-4503-84b2-9ed3a2d2b337
 # ╟─129c3e82-b045-4cb8-87fb-d6c11f188df3
+# ╟─67e5acba-79ea-4503-84b2-9ed3a2d2b337
 # ╟─8b5e6428-736a-4c59-8df7-538b8c4e6ec2
-# ╟─0a1f7f2d-c8ac-4669-aa79-2485343e7029
 # ╟─881f031e-7fc8-47e5-a357-dca3db43f538
-# ╟─e0e2382f-fbfc-4aad-87cc-89617531381e
-# ╟─41c92a9a-0cd3-45d0-8c0e-4b64578f621a
 # ╟─8fab198c-496b-41a9-95fc-d2a886679f54
 # ╟─a950343f-9e86-4ecc-8c7b-621b137b6351
 # ╟─f9cba1c0-ced9-406f-a9d2-1e43097e58c0
-# ╠═a68b0146-6bcf-4b1b-9804-2c5dbefdcf0a
-# ╠═010f87b7-a625-466c-b11f-bd11e4454f6a
+# ╟─c4a049ab-e615-43c2-a5e0-cc7699f3e23f
+# ╟─f7e9f953-e3fc-48bb-aed8-49539cd8fe91
+# ╟─a68b0146-6bcf-4b1b-9804-2c5dbefdcf0a
+# ╟─010f87b7-a625-466c-b11f-bd11e4454f6a
 # ╟─06f53c91-8e22-4f73-a6ae-1d44de7c9308
 # ╟─aa37be5e-507f-4269-8235-accd44e55093
 # ╟─6a3a5f82-df35-4d53-b0bd-1d6c45798ef4
-# ╠═19aa372b-52ef-430e-9ee5-f03e0ce63cf0
+# ╟─19aa372b-52ef-430e-9ee5-f03e0ce63cf0
 # ╟─04ad7a1e-e546-4c81-b65a-09ddaa85aee5
-# ╠═beb934fd-8daf-4b10-8712-a5f9e7fe8ba2
 # ╟─afcbb8d7-30b6-4229-8c58-b5a321e818db
 # ╟─f2503077-3550-472d-a58f-84d2ee4a5f09
 # ╟─2b5d86fa-2c9a-4ef3-a3d6-24f2fb59c213
 # ╟─f0230787-40d8-436c-b9fa-9d0b350216fa
 # ╟─6d47d87b-3f9e-42b2-bca6-fe64ba878b82
 # ╟─e337c585-09e8-4159-af5a-ae4f22419e5f
+# ╟─dfe03d5c-a32e-4d2e-ae7b-a69f44c87551
+# ╟─00d1131b-9875-4b25-87ea-709ff4779f6f
+# ╟─8df995a6-17c1-43e9-a115-9ca4d6d47bbc
+# ╟─ab649f57-2b16-4817-9f54-0ac106748a08
+# ╟─8a8e5d47-df2a-49f7-8378-7837479c3273
+# ╟─1fabf786-b9ba-47d0-9c3d-e30e3a58f47f
+# ╟─a4dfff08-d84f-43a1-a454-ebf646dd0ea9
+# ╟─0bb62ac8-75c8-4483-b4d2-6e176e1352d9
+# ╟─2fb49862-a5e2-4956-87f3-fe8a7eb57bc6
 # ╟─f111e935-b711-439c-bec4-5e53d224b571
 # ╟─52a88205-c24f-4a24-8f30-c77f3872bb13
 # ╟─ecfe6c4f-9b59-4cff-8bfc-2dd4770d57aa
 # ╟─a14ca170-733a-4a9a-9882-49e471d21e35
-# ╠═49c057a5-0c39-4525-be8a-4575d44b9443
-# ╠═844e33a2-83f6-4b0b-a756-b162609dd847
-# ╠═04c1a2c9-5de6-4864-981a-191a378af77b
-# ╠═74bbb1b0-5235-4cff-8d5c-2700eca083bd
-# ╠═22fd8aad-b472-4a1b-8e3b-3f28956fe1aa
 # ╟─522c0800-ef9d-448d-ac77-be903481fbd8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

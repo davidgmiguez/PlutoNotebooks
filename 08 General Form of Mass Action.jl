@@ -4,21 +4,13 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
+# ╔═╡ fffc6cac-c044-4cd9-a3b7-084341878faf
+	using PlutoUI, Plots, ParameterizedFunctions ,DifferentialEquations
 
-# ╔═╡ d096a6be-65a1-428d-9bfb-da7fe89f4c19
+# ╔═╡ b57ade87-40af-4f58-b56d-7f883d5b2367
+html"<button onclick='present()'>present</button>"
 
-	using  PlutoUI,Plots, DifferentialEquations
-
-# ╔═╡ 0ca85fbd-7b68-45e6-8433-118492920050
+# ╔═╡ 336cae68-a9fd-45a0-8ba8-0fd6fab4a287
 begin
 	struct Foldable{C}
 	    title::String
@@ -32,605 +24,622 @@ begin
 	end
 end
 
-# ╔═╡ 51ea04ff-c66b-46d1-9e62-b1ec3554ee8a
-html"<button onclick='present()'>present</button>"
+# ╔═╡ dd3e39ac-8b2c-11ec-1774-7543d2573dc0
+md"# 8. The Mass Action Law
 
-# ╔═╡ ff1f143a-77d0-43e9-8975-b7b28c6f9ae4
-md" # 3. Population dynamics in complex systems
+## 8.1 Definition of the Law of Mass Action 
 
-A key aspect of complex systems is their dynamics, how they change in time. The core idea is to try to define a set of equations that capture their evolution in time. These mathematical models are abstract description of a concrete system using mathematical concepts and language. 
-
-What type of models do we want? Very realistic models with many interactions or simpified models?
-
-Simple models can be much easily analyzed and understood mathematically. Models with many variables become obscure and do not provide much information of the experiment. Our idea is to generate models that can reproduce the core properties and features of a given experiment. Simple models with few equations are therefore, much more difficult to generate than models with many interactions. 
+Now that we know how to obtain the stoichiometric matrices and the order of any given reaction, the next step is to write the differential equations that capture the dynamics, i.e., the changes in time of the amount of all the species involved.  
 ##
-So, when we try to capture the change in the state of a given system overtime, we have to include the temporal variable. This is why, our basic tool from now own will be some sort of differential equation, that camputes how the system changes between two different time points.  
-##
-*Models are useful when they are wrong*
+To illustrate this, we will use a generic scheme of interaction in vector notation:
 
-"
+$$\begin{align*}
+X_1 + X_2 \overset{k}{\longrightarrow} X_3  \tag{58}\\ 
+\end{align*}$$
+The stoichometrix matrix is: "
 
-# ╔═╡ 2b43b0c5-fe0b-419a-b2d9-ec349625d6df
-md"
-##
+# ╔═╡ 7d856c88-f52b-497d-b64c-281da39eff6f
+A1=[1 1 0]
 
-We will start with a very simple system of just one species that is proliferating and/or dying. In these type of models, the number of individuals in the population at a given time in the future will depend on the number of individuals in the past. This is the tipical situation of bacterias proliferating. 
-"
+# ╔═╡ 30a79e11-2165-4908-94a3-d020cc6d2e16
+md"The order of the reaction is $(sum(A1))"
 
-# ╔═╡ 617ce27f-57e2-4e8c-8fda-4029fc6a01e3
-Resource("https://i.ibb.co/hLbYxCg/bacteria-in-a-petri-dish-compressed.jpg")
+# ╔═╡ e11754b1-6993-403b-a0ec-e0aaf86a5dd3
+md"The Units of k are s^-1 x k^$(1-(sum(A1)))"
 
-# ╔═╡ 081daad5-b960-4c64-bdec-c0ecb0d6896b
-md"
-
-
-## 3.1 Unconstrained growth 
-
-The most basic approach to population growth is to begin with the assumption that every individual produces two offspring in its lifetime, then dies, which would double the population size each generation. The same approach is for cells that divide and produce two identical cells, such as bacteria.
-
-Stem cells also undergo a similar type of scheme: during the early stages of development, they undergo a phase of proliferation that expands the population, in a process that called proliferative divisions. Later on, they start to differentiate to produce the different types of progeny. A very important question in develpmental biology is to understand how these populations grow in time and how this growth may be affected by external stimuly. 
-
-##
-A first simplified population approach is to assume a constant relative growth rate. In a discrete model, this rate would represent growth over time intervals of some fixed length. We can do that easily in the context of discrete __Difference Equations__ , which are simply recursive relations that describe the evolution of a quantity or a population whose changes are measured over discrete time intervals (days, for instance). This difference equations allow us to calculate the next value of a quantity based on the previous value
-
-```math
-p_{t+1} = f(p_t)
-```
-
-In other words, the output that we obtain from a difference equation will become our input when we calculate the next term of the recursion. Consider as an example the growth of a population of cells with an initial number of $p(t=0)=p_0$. 
-##
-
-After a given time interval '∆t', a percentage of the population will reproduce, resulting in a number of new cells '∆p'. This number of newly produced cells has to be  proportional to the initial number of cells 'p(0)' (if a population of 20,000 cells produces 1200 new cells in 1 h, then a 4-fold bigger population of 80,000  will produce 4 times as many, i.e., 4800, new cells in 1 h). We can write this proportionality as a discrete system in the following way
-
-```math
-p_{t+1} = r \cdot p_t
-```
-
-where $p_t$ is the population at the start of hour $n$, $p_{t+1}$ is the number of cells at the end of the time interval, and $r$ is a fixed growth factor. Here, each term $p_t$ is simply multiplied by $r$ to produce the next term. Because the newly produced cells always add to the population, i.e. the number of cells in the system increases, it is straightforward to see that the number of cells in the system at succesive time intervals will be
-
-```math
-\begin{align} 
-p_0\\
-p_1 &=r \cdot p_0 \\
-p_2 &=r \cdot p_1 = r^2 \cdot p_0 \\
-p_3 &=r \cdot p_2 = r^3 \cdot p_0 \\
-···\\
-\end{align}
-```
-##
-So, in general 
-
-```math
-p_{t}=r^t \cdot p_0
-```
-
-The factor $r$ exceeds unity by the relative growth rate. For example, if the population increases by $6\%$ each hour then $r = 1.06$. In general, with a positive relative growth rate, the solution to is an exponential function with base $r > 1$
-
-"
-
-# ╔═╡ 4e2cead3-1c4f-48b4-8f5a-f78c4efaee2c
-begin
-	r_slide = @bind r html"<input type=range min=0.1 max=2 step=0.1>"
-	
-	md"""
-	##
-	**Move the slider to set the growth rate in the population**
-	
-	value of r: $(r_slide)
-	
-	"""
-end
-
-# ╔═╡ 16c39710-8f90-45c8-983a-25438019d90c
-time=collect(1:0.1:10);
-
-# ╔═╡ bd8ee393-6193-4662-b199-edbe339ffc31
-plot(time,r .^(time),ylims = (0,10),title=("Unconstrained growth, r=$r"))
-
-# ╔═╡ 7b74322b-8481-4311-a77c-1a62cfb5b15c
-md"
-
-## 3.2 Constrained growth 
-
-Although the unconstrained model might be fairly accurate in the short term, this type of exponential growth is not realistic in the long term. For instance, there will be potentially a limitation in environmental factors (size, nutrients...). A simple approximation but much more realistic, it is to assume that $r$ changes with the population size. 
-
-```math
-p_{t+1} = r(p_t) \cdot p_t
-```
-
-where the function $r(p)$ is set to decrease as the population p increases. From a mathematical standpoint, it is natural to begin an investigation of such models by considering the case of a linear function r(p).
-
-##
-
-Lets think of a population that initially grows with very little environmental constraint ($r>1$), a situation that might arise when a few members of a new species are introduced into an environment rich in nutrients and habitable area. Over time the population will increase until it approaches some maximum sustainable size, eventually reaching an equilibrium ($r=1$).
-
-As a starting point, we need to introduce the growth factor in consitions of no restrictions (the rate of generation of new individuals per unit of time with no restrictions) r(0).
-
-Next, we introduce the concept of carrying capacity _K_, which represents the maximum population size that a particular environment can support. This means that when the system reaches its carrying capacity, it stops growing, and reaches an equilibrium. In othger words, r(K) = 1
-##
-As an example, lets plot the linear dependence $r(p_t)$ for values of $r(0) = 1.1$ and $K=50$.
-"
-
-# ╔═╡ a1ce2262-da8e-496a-81d8-10ff5246c17f
-begin
-	plot([0,50],[1.1,1],line = (:line, 4))
-	title!("r for constrained growth")
-	xlabel!("Number of cells")
-	ylabel!("r")
-end
-
-# ╔═╡ 85defe33-1c87-4e81-a7d2-a363bee3e699
-md"
-##
-The slope of the previous line is:
-
-```math
-Slope=\frac{1-1.1}{50-0}=\frac{- 0.1}{50}=- 2 \cdot 10^{-3}\\
-
-```
-Therefore, the function takes $r(p)$the form
-
-```math
-r(p) = r(0) + slope \cdot p = 1.1 - 2 \cdot 10^{-3} p
-```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t} (1.1 -2 \cdot 10^{-3} p_{t})  = 
-```
-##
-"
-
-# ╔═╡ b043d65b-a214-482a-96cb-e8c075814490
-growth_factor(p) = 1.10 - 0.002 * p
-
-# ╔═╡ 842e2c41-72a3-443c-82db-ab1ff3612a12
-begin
-	plot([0,50],[growth_factor(0),growth_factor(50)],line = (:line, 4))
-	title!("r for constrained growth")
-	xlabel!("Number of cells")
-	ylabel!("r")
-end
-
-# ╔═╡ 86804a6f-9178-40f3-ae82-cc6723412ae8
-function constrained_growth_generic(p, r, K; dt=0.01)
-traj = []
-	slope= (1-r)/K
-for t in 1:100 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-#	p = p * (r + slope * p)
-p = p * r * (1 - p/K + p/(r*K)) 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 7d7ff37f-c221-4067-a74c-d50603448906
-begin
-	rrrr_slide = @bind rrrr html"<input type=range min=0.1 max=1.7 step=0.1>"
-	
-	md"""
-	##
-	**Move the slider to set the growth rate in the population**
-	
-	value of r: $(rrrr_slide)
-	
-	"""
-end
-
-# ╔═╡ 8510e3df-ea93-4c25-ac3d-1069b067a62d
-plot([1:100],constrained_growth_generic(5, rrrr,50; dt=0.01),ylims = (0,55),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 53d4538b-bcfb-46ec-ab6c-a57d97747e6b
-md"
-## 
->
-> __Task 1__: Suppose the population of cells in a tumor grows according to the logistic differential, where time interval is one week:
->
->```math
->P_{t+1}= 2 P_t - (0.002  P_{t}^{2})
->```
->
->(a) If $P_0$=100, Calculate the population after 3 weeks. find $\lim_{t \to  \infty}  P_t$. Is the solution curve increasing or decreasing? Justify your answer. Sketch the graph of $P_t$.
->
->(b) If $P_0$=300, Calculate the population after 3 weeks. find $\lim_{t \to \infty}  P_t$. Is the solution curve increasing or decreasing? Justify your answer. Sketch the graph of $P_t$.
->
->
->(c) How many cells are in the tumour when the population is growing the fastest? Justify your answer. 
-
-
-"
-
-# ╔═╡ d048e8f1-5de8-4d4f-a984-9e25d571e209
-p0=Int(100);p1 = p0 * (2 - 0.002 * p0);p2 = p1 * (2 - 0.002 * p1);p3 = p2 * (2 - 0.002 * p2);
-
-# ╔═╡ 469df604-25da-4579-9f47-5c48e91a6288
-Foldable("Solution 1a:", md"The number of cells after n=3 is $p3. The limit is the carrying capacity.
-
-So, rewriting the equation:
-
-```math
-P_{t+1}= 2 P_t - (0.002  P_{t}^{2})= P_t (2 - 0.002  P_{t}) = P_t (r(0) + \frac{1-r(0)}{K} P_t )
-```
-
-so $r(0)=2$ and 
-```math
-\frac{1-r(0)}{K}= - 0.002 \\
-```
-```math
-\frac{r(0)-1}{0.002}= K
-```
-so K = 500. The system is increasing because the number of cells after n=3 is below the carrying capacity.
-")
-
-# ╔═╡ 31b7cdd1-c2a7-49bc-a08d-9675090030b6
-function constrained_growth_1a(p, r, slope,time)
-traj = []
-for t in 1:time  
-p = p * (r + slope * p)
-push!(traj,p)
-end
-return traj
-end
-
-# ╔═╡ e02d057b-32d6-457b-b00e-f9dde43bf198
-plot([1:10],constrained_growth_1a(100, 2 ,-0.002,10),ylims = (0,500),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 9a56b78a-eec0-4f0f-b30d-6f4fa777e59a
-p00=Int(300);p11 = p00 * (2 - 0.002 * p00);p22 = p11 * (2 - 0.002 * p11);p33 = p22 * (2 - 0.002 * p22);
-
-# ╔═╡ 085747be-ed2c-435e-acbb-6bec8ea005f7
-Foldable("Solution 1b:", md"The number of cells after n=3 is $p33. Again, the system is increasing because the number of cells after n=3 is below the carrying capacity.
-")
-
-# ╔═╡ e88fb46c-3a9f-4be3-9318-3efe50e66938
-plot([1:10],constrained_growth_1a(300, 2 ,-0.002,10),ylims = (0,500),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 68f8b497-3dcd-4a4b-a4fa-8f72c85706e3
-Foldable("Solution 1c:", md"The maximum growth occurs at:
-
-```math
-P_{t+1} - P_{t}= max = P_{t} * (2 - 0.002  * P_{t}) - P_{t}
-```
-```math
-P_{t+1} - P_{t}= max =  2 P_{t} - 0.002  * P_{t}^2 - P_{t} = P_{t} - 0.002  * P_{t}^2
-```
-so, taking the derivative of this function
-
-```math
-1 - 0.004  * P_{t} = 0 => P_{t} =\frac{1}{0.004}= 250
-```
-
-which corresponds to half of the carrying capacity.
-
-")
-
-# ╔═╡ 2a518074-ea51-457a-b309-2d7650cd3463
-
-	plot([1:10],constrained_growth_1a(10, 2 ,-0.002,10),ylims = (0,600),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-
-
-# ╔═╡ c5a658da-7953-4131-ad6f-d2ce50294982
-md" 
-## 
-
-> __Task 2:__(a) Write the logistic discrete equation for an initial population of bacteria of 1e2 cells that is dividing every hour in a flask with limited to 1e6 cells. 
->
->(b) Update the previous equation to include the fact that in average, only 50% of the cells are cycling. 
->
->(c) Update the equation in (b) to include the fact that in average, cells have a probability of dying of 10%
->
->(d) Update the equation in (b) to include the fact that in average, the newborn cells have a probability of dying of 10%, and the noncycling cells have a probability of dying of 20%. 
-
-
-"
-
-# ╔═╡ f972b4da-236d-4a7c-b2d6-ba1b4dc5a7d9
-md" 
- (a) Solution: the intial r=2, and it goes to 1 when p=10^6
-
-The linear function r is thus determined to be
-
-```math
-Slope=\frac{1 - 2}{10^6-0}=\frac{- 1}{10^6}\\
-```
-Therefore, the function takes the form
-
-```math
-r(p) = 2 - \frac{p}{10^6}
-```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t}(2 - \frac{p_{t}}{10^6} )  = 
-```
-
-
-"
-
-# ╔═╡ 7915360f-4bd5-40d6-9cb8-0b278c3944d6
-begin
-	growth_factor2(p) = 2 -  p / 1E6
-	plot([0,1E6],[growth_factor2(0),growth_factor2(1E6)],line = (:line, 4))
-	title!("r for Exercise 2a")
-	xlabel!("Number of cells")
-	ylabel!("r")
-	
-end
-
-# ╔═╡ d55d1137-e6f9-45ba-a68b-377d388feac9
-function constrained_growth_4(p, r; dt=0.01)
-traj = []
-for t in 1:50 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = p * (2 - p/ 1E6)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ b7cebd3a-c4a1-48ae-99e0-5431e2b261a2
-pp1=plot([1:50],constrained_growth_4(1, r; dt=0.01),ylims = (0,50000+1E6),xlabel=("Time"),ylabel=("Number of cells"),label=("100% proliferating"),title=("Constrained growth, r=2"))
-
-# ╔═╡ d43ffd8f-1bfd-437b-81e3-0dabc6a3d081
- md"
- ## 
-(b) Solution: so, now on average, from 100 cells, only 50 cells proliferate. This is a common biological phenomena called _quiescence_, by which some cells in a population decide not to cycle and rest. Sometimes thsi rest can last years (adult stem cells). 
- 
-In our system, now after one hour, you have 50 new cells + the previous 100 cells. This means that, in unrestricted conditions $r_0$=1.5
-
-
-
- The linear function r is thus determined to be
-
-```math
-Slope=\frac{1 - 1.5}{10^6-0}=\frac{- 0.5}{10^6}=- 0.5 \cdot 10^{-6}\\
-```
-Therefore, the function takes the form
-
-```math
-r(p) = 1.5 - 0.5 \cdot 10^{-6} p
-```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t} (1.5 - 0.5 \cdot 10^{-6} p_{t})  = 
-```
-
-
-```math
-p_{t+1}= p_{t} (1.5- \frac{p_{t}}{2\cdot10^6})
-```
-"
-
-# ╔═╡ db1e527b-7fdc-45cc-8c20-d106dd347103
-begin
-	growth_factor3(p) = 1.5 -  0.5 * p / 1E6
-	plot([0,1E6],[growth_factor3(0),growth_factor3(1E6)],line = (:line, 4))
-	title!("r for Exercise 2b")
-	xlabel!("Number of cells")
-	ylabel!("r")
-	
-end
-
-# ╔═╡ bc878bca-ad29-43ca-b76c-cc710bb2aa33
-function constrained_growth_5(p, r; dt=0.01)
-traj = []
-for t in 1:50 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = p * (1.5 - p/ 2E6)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 46d6d1ea-7b07-4e65-b965-b65c8655503d
-begin
-show(pp1);
-plot!([1:50],constrained_growth_5(1, r; dt=0.01),ylims = (0,50000+1E6),xlabel=("Time"),ylabel=("Number of cells"),label=("50% proliferating"),title=("Constrained growth"));
-end
-
-# ╔═╡ 2d392e4f-8944-438a-a5c5-977ed95e258b
-md"so, you can see that you reach the same final point, but later in time, "
-
-# ╔═╡ 4a924aa1-e7f4-4664-b9e3-498d24dcffeb
-md" d)  If counting all cells, 10% died, it means that, if we start with 100, we generate 150. Then 10% of the cells die, so in the first iteration with no restrictions you produce 135, this means an r=1.35."
-
-# ╔═╡ 1ede2ba1-18d6-4385-9df1-458b572e5121
-md" d)  if from the newborn cells, only 90% survive, this means that if we start with 100 cells, and 50% proliferate, we obtain 50 new cells. Now, from these new 50 cells, only 45 cell survive. from 50 cells that are non cycling, we have to remove the 20%, so we have 40 cells. In total, from 100 cells, you have 50 mothers, 45 daugthers, and 40 noncycling, so 135 in total. this gives an r=1.35"
-
-# ╔═╡ b3171639-fd44-4aa5-8c89-7ff91ce9fc61
-md" ## 3.3 Equilibrium in the logistic map
-
-A more common way of finding the equation for the logistic growth model is its dimensionless form. 
-
-```math
-x_{t+1} =   x_{t} \cdot r (1 - x_{t}) 
-```
-
-When we find the equilibrium points of our difference equation, we can move into the study of stability analysis, which explores the behavior of solutions when the initial condition is close to the difference equation’s equilibrium point(s). If the initial term is close to an equilibrium point and the solution converges towards the equilibrium point, then the equilibrium point is considered a sink,
-
-condition for equilibrium is that the next point is equial to the previous time point
-
-```math
-x = r \cdot x (1 − x)
-```
-##
-
-Solving for $x$, we find that the
-equilibrium points are $x=0$ and 
+# ╔═╡ ab0aa754-78e2-47b5-a398-a7e1ab8d6c58
+md"##
+We will write down the differential equations that account for the dynamics of each species. 
 
 ```math
 \begin{align}
-1 &= r (1 − x) \\
-1 &= r − r x\\
-r x  &= r - 1\\
-x  &= \frac{r - 1}{r}\\
+\frac{\mathrm{d} X_1}{\mathrm{d} t}  &=&  \tag{59}\\
+\frac{\mathrm{d} X_2}{\mathrm{d} t} &=& \tag{60}\\
+\frac{\mathrm{d} X_3}{\mathrm{d} t} &=&  \tag{61}
 \end{align}
 ```
 
-where r>1.We will refer to $x = 0$ as the zero equilibrium, and $x  = \frac{r - 1}{r}$ as the positive equilibrium. Now that we established where the equilibrium points are located, we can examine what happens when we modify the constant r, and the initial value of the sequence. When 0 < r ≤ 1, we will only have one equilibrium point, x = 0. Moreover, the recursive sequence will converge to x = 0. 
+##
+The __Mass Action Law__ describes how a chemical reaction takes place under ideal and constant conditions. In brief, it is based on the fact that the speed of any reaction is proportional to the concentrations of the reactants involved, which has been discussed previously in this course (the proportionalinty constant is the kinetic rate constant). 
+##
+From here, it follows that the rate of change of any reactant is also proportional to the concetrations of the reactants involved. This velocity depends on the affinity of the reaction and the concentrations of each of the reactants (in any scheme of interactions, the ones at the left of the arrow). 
+##
+The `k` is the proportionality constant that correlates the speed fo the reaction with the concentrations of the species involved, which in this case are $X_1$ and $X_2$:
 
-Now move the slider in the
- next plot to see what happens for higher values of r:
+```math
+\begin{align}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}  &= - k X_1 X_2 \tag{62}\\
+\frac{\mathrm{d} X_2}{\mathrm{d} t} &=- k X_1 X_2 \tag{63}\\
+\frac{\mathrm{d} X_3}{\mathrm{d} t} &=  k X_1 X_2\tag{64} 
+\end{align}
+```
+##
+Lets see if the units are correct:
+
+```math
+\begin{align}
+\frac{[M]}{[s]}  &= - \frac{1}{[s][M]}[M] [M] \tag{65}\\
+\frac{[M]}{[s]}  &= - \frac{1}{[s][M]}[M] [M] \tag{66}\\
+\frac{[M]}{[s]}  &=  \frac{1}{[s][M]}[M] [M] \tag{67}\\
+\end{align}
+```
+
+
+For the case where more than one molecule of reactant is involved, we will use the reaction of formation of water. 
+"
+
+# ╔═╡ 4f218166-40d1-4ab0-adf4-e938061bf78d
+A2=[2 1 0]
+
+# ╔═╡ 0e326b5a-c8df-4c28-9ffb-4581d6dac0cb
+B2= [0 0 2]
+
+# ╔═╡ fee636f1-4944-46a4-bcbe-32b7273268c7
+md"The order of the reaction is $(sum(A2))"
+
+# ╔═╡ 56a68cf6-6e64-4875-b614-18987857bc06
+md"The Units of k are s^-1 x k^$(1-(sum(A2)))"
+
+# ╔═╡ 0d524884-afbf-4594-80ee-9fdfcdabbea0
+md"##
+we can decompose the equation as
+
+$$\begin{align*}
+X_1 +  X_1 + X_2 \overset{k}{\longrightarrow}  X_3 + X_3 \tag{68}\\ 
+\end{align*}$$
+
+We will write down the differential equations that account for the dynamics of each species. The speed of each reaction depends on the concentration of the species involved (what is before the arrow). In this case is two units of $X_1$ and one unit of $X_2$. 
+##
+In addition, since the reaction consumes 2 units of $X_1$ for each unit of $X_2$, the rate of consumption of $X_1$ is twice the rate of consumption $X_2$. 
+##
+Another more automaticic way of doing it is to use the matrix of stochoimetric coefficients $(B-A)'$. Therefore:
+
+```math
+\begin{align}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}  &= - 2k X_1^2 X_2 \tag{69}\\
+\frac{\mathrm{d} X_2}{\mathrm{d} t} &=- k X_1^2 X_2 \tag{70}\\
+\frac{\mathrm{d} X_3}{\mathrm{d} t} &=2  k X_1^2 X_2 \tag{71}
+\end{align}
+```
+##
+Lets check if units are correct:
+
+```math
+\begin{align}
+\frac{[M]}{[s]}  &= - \frac{1}{[s][M]^2} [M]^2 [M] \tag{72}\\
+\frac{[M]}{[s]}  &= - \frac{1}{[s][M]^2} [M]^2 [M] \tag{73}\\
+\frac{[M]}{[s]}  &= \frac{1}{[s][M]^2} [M]^2 [M] \tag{74}
+\end{align}
+```
 
 
 "
 
-# ╔═╡ 6ea8e4b3-1393-4675-86df-b32bd70bf587
-logimap(x, r) = r*x*(1-x)
 
-# ╔═╡ 988ee18e-1dc3-4061-9cbe-96424961fbb7
+# ╔═╡ 61a1a25f-21b1-40a6-aafa-17fddf4a848c
+md"## 8.2 General formulation of the Mass Action Law
+
+When we have to write the differenetial equations of more complex systems of interactions. To do this, we will use a general method based on the following equation: 
+```math
+\begin{align}
+\frac{\mathrm{d} X}{\mathrm{d} t}&= (B-A)^T \cdot K \cdot X^A \tag{75}\\
+\end{align}
+```
+##
+
+again,  `A` and `B` are the matrices with the stoichiometric coefficients, `X` is the state vector $X=[X_1,X_2,X_3]^T$. 
+##
+Now `K` is a matrix in the form:
+
+```math
+K=\begin{pmatrix}
+ k_1 & 0   & 0  & \dots & 0 \\ 
+ 0 &  k_2  & 0  & \dots & 0\\ 
+ 0 & 0  & k_3 &\dots  &0 \\ 
+ \vdots &  \vdots   &  \vdots  &  \vdots  &  \vdots  \tag{76}\\ 
+ 0 & 0  & 0  &  \dots & k_r 
+\end{pmatrix}
+```
+## 
+and $X^A$ is a column vector, calculated as:
+
+```math
+X^A=\begin{pmatrix}
+X_1^{A_{11}} \cdot X_2^{A_{12}} \cdot X_3^{A_{13}} \cdot  ... \cdot  X_s^{A_{1s}} \\ 
+X_1^{A_{21}} \cdot X_2^{A_{22}} \cdot X_3^{A_{23}} \cdot  ... \cdot  X_s^{A_{2s}} \\ 
+ \vdots  \,\,\,\,\,\,\,\,\,\,\,  \vdots  \,\,\,\,\,\,\,\,\,\,\,\,    \vdots \,\,\,\,\,\,\,\,\,   \vdots  \,\,\,\,\,\,\,\,   \vdots  \\ 
+X_1^{A_{r1}} \cdot X_2^{A_{r2}} \cdot X_3^{A_{r3}} \cdot  ... \cdot  X_s^{A_{rs}} \\ 
+\end{pmatrix} =\begin{pmatrix}
+ \prod_{i=1}^{s} X_{i}^{A_{1i}}\\ 
+\prod_{i=1}^{s} X_{i}^{A_{2i}}\\ 
+   \vdots  \tag{77} \\ 
+\prod_{i=1}^{s} X_{i}^{A_{ri}}\\ 
+\end{pmatrix}
+```
+
+"
+
+# ╔═╡ 2b58c174-c501-47ed-ade6-0ee9b88b76eb
+md" ## 8.3 Example of differential form of Mass Action Law
+
+As an example we will use the previous reaction for the formation of salt. 
+
+```math
+NaCO_3 + CaCl_2 \overset{k_1}{\underset{k_2}{\longleftrightarrow}} CaCO_3 + 2 \cdot NaCl \tag{78}\\  
+```
+##
+
+
+i.e., a system of two reactions $r=2$ and four species $s=4$, with the stoichiometric matrices `A` and `B` listed in Eq. 30"
+
+# ╔═╡ 6c491ea3-10b9-46b3-a3ff-2c27d029efe0
 begin
-	rrrrr_slide = @bind rrrrr html"<input type=range min=0.9 max=4.0 step=0.1>"
-	
-	md"""
-	##
-	**Move the slider to set the growth rate of the population**
-	
-	value of r: $(rrrrr_slide)
-	
-	"""
+	A3=[1 1 0 0; 0 0 1 2]
+	B3=[0 0 1 2; 1 1 0 0]
+	stoichiometric_matrix= transpose(B3-A3)
 end
 
-# ╔═╡ bbe71b50-2387-4a22-898a-8140c55121e4
-begin
-	x = 0.001;	 logi = Float64[]
-	for t in time
-		    x = logimap(x, rrrrr)
-		    push!(logi, x)
-		end
+# ╔═╡ eb79f46c-5b6d-4b36-a6e0-f92fe6938b46
+md"##
+in our case
+
+```math
+K=\begin{pmatrix}
+ k_1 & 0   \tag{79}\\ 
+ 0 &  k_2  \\ 
+\end{pmatrix}
+```
+##
+and 
+
+
+```math
+X^A=\begin{pmatrix}
+X_1\cdot X_2  \tag{80}\\ 
+X_3\cdot X_4^2  
+\end{pmatrix}
+```
+##
+therefore
+
+```math
+\begin{align}
+ \begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \\ \frac{\mathrm{d} X_3}{\mathrm{d} t} \\ \frac{\mathrm{d} X_4}{\mathrm{d} t}
+\end{bmatrix}&= \begin{bmatrix}
+ -1   &  1 \\
+    -1  &   1\\
+     1  &  -1\\
+     2  &  -2
+\end{bmatrix}\begin{bmatrix}
+k_1 & 0\\ 
+ 0& k_2
+\end{bmatrix}\begin{bmatrix}
+X_1 \cdot X_2\\ 
+X_3 \cdot X_4^2
+\end{bmatrix} \tag{81}
+\end{align}
+```
+##
+so calculating
+
+```math
+\begin{align}
+\begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \\ \frac{\mathrm{d} X_3}{\mathrm{d} t} \\ \frac{\mathrm{d} X_4}{\mathrm{d} t}
+\end{bmatrix}&= \begin{bmatrix}
+ -1   &  1 \\
+    -1  &   1\\
+     1  &  -1\\
+     2  &  -2
+\end{bmatrix}\begin{bmatrix}
+k_1 \cdot  X_1 \cdot X_2\\ 
+k_2 \cdot X_3 \cdot X_4^2
+\end{bmatrix} \tag{82}
+\end{align}
+```
+##
+In other words, the differential equations are obtained by multiplying the matrix $(B-A)'$ by a vector of speeds of the reactions involved. 
+##
+This way, the final set of equations is:
+
+```math
+\begin{align}        
+            \frac{ \mathrm{d}X_1 }{\mathrm{d}t} &= - k_1 \cdot X_1 \cdot X_2 + k_2 \cdot X_3 \cdot X_4^2  \tag{83}\\ 
+            \frac{ \mathrm{d}X_2 }{\mathrm{d}t} &= - k_1 \cdot X_1 \cdot X_2 + k_2 \cdot X_3 \cdot X_4^2   \tag{84}  \\
+             \frac{ \mathrm{d} X_3 }{\mathrm{d}t} &=  k_1 \cdot X_1 \cdot X_2 - k_2 \cdot X_3 \cdot X_4^2  \tag{85}  \\
+              \frac{ \mathrm{d} X_4 }{\mathrm{d}t} &= 2 k_1 \cdot X_1  \cdot X_2 - 2 k_2 \cdot X_3 \cdot X_4^2   \tag{86}  \\
+\end{align}
+```
+"
+
+# ╔═╡ 2c093ace-a53b-4fd8-91f9-3816e4ccdf62
+md" ## 
+> __Exercise 1__: Find the order of the reactions, the units of the kinetic rate constants, and write the differential equations that govern the dynamics of the following system:
+>```math
+>X_1  \overset{k_1}{\underset{k_2}{\longleftrightarrow}} X_2 
+>```
+
+"
+
+# ╔═╡ fba4e0b3-52a5-4d1a-b7da-6740f2c2a836
+md" ## Solution Task 1
+
+Decomposing the reversible reaction into two irreversible reactions
+```math
+\begin{align*}
+X_1  \overset{k_1}{\underset{}{\longrightarrow}} X_2 \\
+X_2  \overset{k_2}{\underset{}{\longrightarrow}} X_1 
+\end{align*}
+```
+
+let's put the stoichiometric values
+
+```math
+\begin{align*}
+1 \cdot  X_1 + 0 \cdot X_2 \overset{k_1}{\underset{}{\longrightarrow}} 0 \cdot X_1+ 1 \cdot X_2 \\
+0 \cdot X_1+ 1 \cdot X_2 \overset{k_2}{\underset{}{\longrightarrow}} 1 \cdot  X_1 + 0 \cdot X_2
+\end{align*}
+```
+
+
+##
+the stoichiometric matrices are:
+
+"
+
+# ╔═╡ 0731c83b-3b56-4b80-9654-1760dcbfca9b
+AA=[1 0; 0 1];
+
+# ╔═╡ 51ac8bbb-314d-4e82-ab3c-4d65be6f5e74
+BB=[0 1; 1 0];
+
+# ╔═╡ 7155b893-ec48-4213-b763-fe4d604efdaa
+transpose(BB-AA)
+
+# ╔═╡ e6a154b3-1f4f-4759-b0ab-62429b0c5200
+function Calculate_Keq_stoichiometric_generic(A,B)
+
+ for i=1:size(A)[1]
+    	md"The order of the reaction $i is $(sum(A[i,:]))"
+    #println("The Units of k$i are s^-1 . k^$(1-(sum(A[i,:])))")
+ end
+    stoichiometric_matrix= transpose(B-A)
+
+	 md"The stoichiometric matrix is $stoichiometric_matrix" 	
+    
 end
 
-# ╔═╡ a9357ca7-54ea-4f67-a0a8-df01d1bc4246
-plot(time,logi, xlims=(0,10),ylims=(0.0,1.0),xlabel="Time",ylabel="Number of individuals in population",title=("Constrained growth, r=$rrrrr"),leg=false)
+# ╔═╡ 7206af1d-1d79-4c18-82c2-7979d3baa2d5
+Calculate_Keq_stoichiometric_generic(AA,BB)
 
-# ╔═╡ af01b6ef-bd47-4a15-8bd4-f90e214411f3
-md" ##
-As seen from the plot above, now we have three cases:
+# ╔═╡ b23e2b04-83a3-46f3-86e4-f49d8d42314d
+md"## 
+The $K$ matrix and the $X^A$ vector required for the equation for the general form of the Mass action are:
 
-- With r < 1.0, the system converges to 0:
+```math
+K=\begin{pmatrix}
+ k_1 & 0\\
+ 0 & k_2
+\end{pmatrix} \tag{26}
+```
 
-- With 1.0 < r < 3.0  the system converges to a fixed value above  0
 
-- With 3.0 < r < 3.6  something else happens, the system becomes periodic
+```math
+X^A=\begin{pmatrix}
+X_1^1\cdot X_2^0\\
+X_1^0\cdot X_2^1
+\end{pmatrix} = \begin{pmatrix}
+X_1\\
+ X_2
+\end{pmatrix}  \tag{27}
+```
+##
+so 
 
-- With r > 3.6 we get chaos
+```math
+\begin{align}
+ \begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \end{bmatrix}= \begin{bmatrix}
+-1 & 1\\
+ 1 & -1   \end{bmatrix} \begin{pmatrix}
+ k_1 & 0\\
+ 0 & k_2
+\end{pmatrix}\begin{pmatrix}
+X_1\\
+ X_2
+\end{pmatrix}  
+\end{align}
+```
+##
+```math
+\begin{align}
+\begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \end{bmatrix}=  \begin{bmatrix}
+-1 & 1\\
+ 1 & -1   \end{bmatrix}\begin{pmatrix}
+k_1 \cdot X_1\\
+  k_2 \cdot X_2
+\end{pmatrix} =   \begin{bmatrix}
+- k_1 \cdot X_1 +  k_2 \cdot X_2\\
+ k_1 \cdot X_1 -k_2 \cdot X_2   \end{bmatrix}
+\end{align} \tag{28}
+```
 
-Chaos is a property of a complex system whose behaviour is so unpredictable as to appear random, due to great sensitivity to small changes in conditions.
+##
 
-In the logistic map, if we adjust the growth rate parameter beyond 3.5, we see the onset of chaos. A chaotic system has a strange attractor, around which the system oscillates forever, never repeating itself or settling into a steady state of behavior. It never hits the same point twice and its structure has a fractal form, meaning the same patterns exist at every scale no matter how much you zoom into it.
+The differential equations of the system can be written using the differential form of Mass Action Law as: 
 
-To show this more clearly, let’s run the logistic model again, this time for 200 generations across 1,000 growth rates between 0.0 to 4.0. . This time we’ll have 1,000 so we’ll need to visualize it in a different way, using something called a bifurcation diagram:
+```math
+\begin{align}
+\frac{dX_1}{dt} = -k_1 \cdot X_1 +k_2 \cdot X_2 \tag{29}\\
+\frac{dX_2}{dt} = k_1 \cdot X_1 - k_2 \cdot X_2 \tag{30}\\
+\end{align}
+```
+
+	"
+
+# ╔═╡ 9eff9a4e-4fcb-41a2-9924-0bf56de12eb7
+md"
+##
+> __Task 2__: Find the order of the reactions, the units of the kinetic rate constants, and write the differential equations that govern the dynamics of the following system:
+>
+>```math 
+>X_1 + X_2 \overset{k_1}{\underset{k_2}{\longleftrightarrow}} 2 X_1 
+>```
+
+"
+
+# ╔═╡ 0ca58de1-28bd-4df1-88ca-efa8d17250f6
+md"
+##
+#### Solution Task 2
+
+Decomposing the reversible reaction into two irreversible reactions
+```math 
+\begin{align}
+X_1  + X_2 \overset{k_1}{\underset{}{\longrightarrow}} 2 X_1 \\
+ 2 X_1  \overset{k_2}{\underset{}{\longrightarrow}}  X_1  + X_2 
+\end{align}
+```
+
+##
+lest put the stoichiometric values
+
+```math 
+\begin{align}
+1 \cdot  X_1 + 1 \cdot X_2 \overset{k_1}{\underset{}{\longrightarrow}} 2 \cdot X_1+ 0 \cdot X_2 \\
+2 \cdot X_1+ 0 \cdot X_2 \overset{k_2}{\underset{}{\longrightarrow}} 1 \cdot  X_1 + 1 \cdot X_2 
+\end{align}
+```
+##
+the stoichiometric matrices are:"
+
+# ╔═╡ 52a42411-35b9-472a-bd7e-99e7e6395015
+AAA=[1 1; 2 0];
+
+# ╔═╡ 637ae77a-a61c-4742-b737-aa4985ce6a32
+BBB=[2 0; 1 1];
+
+# ╔═╡ 45f11cc5-59bd-44a6-977b-78e1bea3d9c5
+(BBB-AAA)'
+
+# ╔═╡ a21e1203-57a8-4677-968b-c0a90cec9403
+Calculate_Keq_stoichiometric_generic(AAA,BBB)
+
+# ╔═╡ a796442b-85fa-45af-8c90-9ce9a8d4fcd2
+md"##
+The $K$ matrix and the $X^A$ vector required for the equation for the general form of the Mass action are:
+
+```math
+K=\begin{pmatrix}
+ k_1 & 0\\
+ 0 & k_2
+\end{pmatrix} \tag{26}
+```
+
+##
+```math
+X^A=\begin{pmatrix}
+X_1^1\cdot X_2^1\\
+X_1^2\cdot X_2^0
+\end{pmatrix} = \begin{pmatrix}
+X_1 \cdot X_2\\
+ X_1^2
+\end{pmatrix}  \tag{27}
+```
+##
+so 
+
+```math
+\begin{align}
+ \begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \end{bmatrix}= \begin{bmatrix}
+1 & -1\\
+ -1 & 1   \end{bmatrix} \begin{pmatrix}
+ k_1 & 0\\
+ 0 & k_2
+\end{pmatrix}\begin{pmatrix}
+X_1 \cdot X_2\\
+ X_1^2
+\end{pmatrix}  
+\end{align}
+```
+
+```math
+\begin{align}
+\begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \end{bmatrix}=  \begin{bmatrix}
+1 & -1\\
+ -1 & 1   \end{bmatrix}\begin{pmatrix}
+k_1 \cdot X_1 \cdot X_2\\
+  k_2 \cdot X_1^2
+\end{pmatrix} =   \begin{bmatrix}
+ k_1 \cdot X_1 \cdot X_2 -  k_2 \cdot X_1^2\\
+- k_1 \cdot X_1 \cdot X_2 + k_2 \cdot X_1^2   \end{bmatrix}
+\end{align} \tag{28}
+```
+
+
+##
+The differential equations of the system can be written using the differential form of Mass Action Law as: 
+
+```math
+\begin{align}
+\frac{dX_1}{dt} =  k_1 \cdot X_1 \cdot X_2 -  k_2 \cdot X_1^2 \tag{29}\\
+\frac{dX_2}{dt} = - k_1 \cdot X_1 \cdot X_2 + k_2 \cdot X_1^2 \tag{30}\\
+\end{align}
+```
+"
+
+# ╔═╡ 49eca337-d523-49c7-bc16-973f3a6a5638
+md"
+##
+> __Task 3:__  Find the order of the reactions, the units of the kinetic rate constants, and write the differential equations that govern the dynamics of the following system:
+>
+>```math 
+>X_1\overset{k_1}{\longrightarrow}X_2\overset{k_2}{\longrightarrow}X_3
+>```
+"
+
+# ╔═╡ 3ac754bf-e6de-417f-9093-35a73f036a1e
+md"##
+#### Solution Task 3
+
+Decomposing the reversible reaction into two irreversible reactions
+```math
+\begin{align}
+X_1   \overset{k_1}{\underset{}{\longrightarrow}}  X_2 \\
+X_2  \overset{k_2}{\underset{}{\longrightarrow}}  X_3  
+\end{align}
+```
+
+lest put the stoichiometric values
+
+```math
+\begin{align}
+1 \cdot  X_1 + 0 \cdot X_2 + 0 \cdot X_3 \overset{k_1}{\underset{}{\longrightarrow}} 0 \cdot X_1+ 1 \cdot X_2 + 0 \cdot X_3\\
+ 0 \cdot X_1+ 1 \cdot X_2 + 0 \cdot X_3 \overset{k_2}{\underset{}{\longrightarrow}}  0 \cdot X_1+ 0 \cdot X_2 + 1 \cdot X_3 
+\end{align}
+```
 
 
 
 ##
-Let's now produce a useful visualizations that will allow us to characterize the behaviour of the logistic map. It is called a _bifurcation plot_, and it is generated ploting the steady state values of teh system for diferent parameter values. The following code generates the bifurcation plot for the logistic map with r∈[1,4].
 
+the stoichiometric matrices are:"
+
+# ╔═╡ 6c027717-d272-4a3d-824c-54ea64f4fd92
+AAAA=[1 0 0 ; 0 1 0];
+
+# ╔═╡ d3950d79-5918-4ed7-bdad-dd04f22d3a30
+BBBB=[0 1 0; 0 0 1];
+
+# ╔═╡ 3895430e-9726-4c54-b0d2-9d7901f66f01
+Calculate_Keq_stoichiometric_generic(AAAA,BBBB)
+
+# ╔═╡ 3b18856d-27b8-4e1b-bdef-927f3e487e49
+md"##
+The $K$ matrix and the $X^A$ vector required for the equation for the general form of the Mass action are:
+
+```math
+K=\begin{pmatrix}
+ k_1 & 0\\
+ 0 & k_2
+\end{pmatrix} \tag{26}
+```
+
+
+```math
+X^A=\begin{pmatrix}
+X_1^1\cdot X_2^0 \cdot X_3^0\\
+X_1^0\cdot X_2^1 \cdot X_3^0
+\end{pmatrix} = \begin{pmatrix}
+X_1 \\
+ X_2
+\end{pmatrix}  \tag{27}
+```
+##
+so 
+
+```math
+\begin{align}
+ \begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \\ \frac{\mathrm{d} X_3}{\mathrm{d} t} \end{bmatrix}= \begin{bmatrix}
+-1 & 0\\
+ 1 & -1  \\
+ 0 & 1 \end{bmatrix} \begin{pmatrix}
+ k_1 & 0\\
+ 0 & k_2
+\end{pmatrix}\begin{pmatrix}
+X_1 \\
+ X_2
+\end{pmatrix}  
+\end{align}
+```
+
+```math
+\begin{align}
+\begin{bmatrix}
+\frac{\mathrm{d} X_1}{\mathrm{d} t}\\ \frac{\mathrm{d} X_2}{\mathrm{d} t} \\ \frac{\mathrm{d} X_3}{\mathrm{d} t} \end{bmatrix}=  \begin{bmatrix}
+-1 & 0\\
+ 1 & -1  \\
+ 0 & 1 \end{bmatrix} \begin{pmatrix}
+k_1 X_1 \\
+ k_2 X_2
+\end{pmatrix}   =   \begin{bmatrix}
+ - k_1 \cdot X_1 \\
+ k_1 \cdot X_1 - k_2 \cdot X_2  \\
+ k_2 \cdot X_2 \end{bmatrix}
+\end{align} \tag{28}
+```
+
+
+
+## 
+The differential equations of the system can be written using the differential form of Mass Action Law as: 
+
+```math
+\begin{align}
+\frac{dX_1}{dt} =  -k_1 \cdot X_1 \\
+\frac{dX_2}{dt} =   k_1 \cdot X_1 \cdot X_2 - k_2 \cdot X_2 \tag{30}\\
+\frac{dX_3}{dt} =   k_2 \cdot X_2 
+\end{align}
+```
 "
-
-# ╔═╡ 26c5caa7-ab30-4dc2-9eea-2e6e8316b184
-begin
-	#  bifurcation plot with animation
-	p = plot([],zeros(0),leg=false)
-	xlims!((1.0,4.0))
-	ylims!((0.0,1.0))
-	anim = Animation()
-	T = 1000 # number of iterations
-	M = 300  # pick last M points
-	for γ in 1.0:0.01:4.0
-	    pts = []
-	    x = 0.1         # arbitrary initial value
-	    for t = 1:T     # mapping
-	        push!(pts, x)
-	        x = γ * x * (1.0 - x)
-	    end
-	    p=scatter!(p,γ*ones(M),pts[T-M:T],label=nothing,ms=0.5,c=:black)
-	    frame(anim)
-	end
-	gif(anim, "Logistic-bifur.gif", fps=25)
-end
-
-# ╔═╡ 4185a115-9871-4065-85e9-37df17d54891
-md"
-
-In these type of plots, we can see points where the steady state solution goes from one to two solutions. These points are called _bifurcations_, and in this particular case, _perid doubling bifurcations_, since the pediod of oscillation duplicates as we crossed one of thsi points. To understand better how this chaoting behavior emerges, we will now plot the first and second values predicted by the logistic equation "
-
-# ╔═╡ 93741ffc-2d2b-4b6a-bcb5-d0e899b0586b
-x_1=collect(0:0.05:1);
-
-# ╔═╡ 4d9dde04-0476-448e-ad6c-a8374b35568f
-begin
-	rrrrrr_slide = @bind rrrrrr html"<input type=range min=0.9 max=4.0 step=0.1>"
-	
-	md"""
-	##
-	**Set the growth rate?**
-	
-	value of r: $(rrrrrr_slide)
-	
-	"""
-end
-
-# ╔═╡ 7f608559-6b37-4246-afa6-60cfda53d321
-begin
-	p3_=plot(x_1, x_1,xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="initial")
-	plot!(x_1, rrrrrr .* x_1 .* (1 .− x_1),xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="first")
-	
-	plot!(x_1, rrrrrr .^2  .* (1 .− x_1) .* x_1 .* (1 .- (rrrrrr .* x_1) .+ (rrrrrr .* x_1 .^2) ),xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="second")
-end
-
-# ╔═╡ 80f0dfcf-b202-47e0-b7af-c0d8f3c7deb8
-md"now we will plot on top of this, the first time points of the simulation of the population growth. Thsi type of plot is called a _Verhulst diagram_."
-
-# ╔═╡ 7c850679-a706-4d27-b6a2-d5a078c38bb7
-begin
-	# Verhulst diagram 
-	#gr(size=(600, 500))
-	p3_
-	#p2 = plot([0, 1], [0, 1], label="", linecolor="black")
-	anim2 = Animation()
-	#γ = 3.9
-	x_initial = 0.1
-	for t = 1:10
-	    x_new = rrrrrr * x_initial * (1.0 - x_initial)
-	    push!(p3_, [x_initial, x_initial], [x_initial, x_new])   # vertical
-	    push!(p3_, [x_initial, x_new], [x_new, x_new])  # horizontal
-	    frame(anim2)
-	    x_initial = x_new
-	end
-	gif(anim2, "LogisticmapVerhulst.gif", fps=15)
-end
-
-# ╔═╡ 43b4f6a3-8cff-4198-a0dd-409643f2059f
-md" ## 3.4 Conclusions: 
-Chaos is not just a cool mathematical idea. It is everywhere in the nature. So, learning how to deal with chaotic data allows us to understand and interact with the physical world better.
-Apart from displaying interesting bifurcation patterns as shown above, another important characteristic of a chaotic system is it’s exponentially sentitive to small perturbations. A small drift in the initial state will cause increasing and significant divergence, a phenomenon termed “the butterfly effect”.
-
-Edward Lorenz, the father of chaos theory, described chaos as:
-
-_when the present determines the future, but the approximate present does not approximately determine the future_
-
-
-"
-
-# ╔═╡ 8b7117ed-e4e5-4111-bd04-078d7baf9320
-Resource("https://i.ibb.co/QnW9TjW/X-Next-5-1024x666.jpg",:width => 800)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
+ParameterizedFunctions = "65888b18-ceab-5e60-b2b9-181511a3b968"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 DifferentialEquations = "~7.7.0"
-Plots = "~1.38.5"
+ParameterizedFunctions = "~5.15.0"
+Plots = "~1.38.6"
 PlutoUI = "~0.7.50"
 """
 
@@ -640,7 +649,13 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "327dd4d7cc8897d09e64be7b62b44238f24b914d"
+project_hash = "42b8044ec1e8e581f06a777e9579d4de6070d012"
+
+[[deps.AbstractAlgebra]]
+deps = ["GroupsCore", "InteractiveUtils", "LinearAlgebra", "MacroTools", "Markdown", "Random", "RandomExtensions", "SparseArrays", "Test"]
+git-tree-sha1 = "29e65c331f97db9189ef00a4c7aed8127c2fd2d4"
+uuid = "c3fe647b-3220-5bb0-a1ea-a7954cac585d"
+version = "0.27.10"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -648,11 +663,16 @@ git-tree-sha1 = "8eaf9f1b4921132a4cff3f36a1d9ba923b14a481"
 uuid = "6e696c72-6542-2067-7265-42206c756150"
 version = "1.1.4"
 
+[[deps.AbstractTrees]]
+git-tree-sha1 = "faa260e4cb5aba097a73fab382dd4b5819d8ec8c"
+uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+version = "0.4.4"
+
 [[deps.Adapt]]
-deps = ["LinearAlgebra", "Requires"]
-git-tree-sha1 = "cc37d689f599e8df4f464b2fa3870ff7db7492ef"
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "0310e08cb19f5da31d08341c6120c047598f5b9c"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "3.6.1"
+version = "3.5.0"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -666,9 +686,9 @@ version = "0.2.0"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "ec9c36854b569323551a6faf2f31fda15e3459a7"
+git-tree-sha1 = "4d9946e51e24f5e509779e3e2c06281a733914c2"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.2.0"
+version = "7.1.0"
 
 [[deps.ArrayInterfaceCore]]
 deps = ["LinearAlgebra", "SnoopPrecompile", "SparseArrays", "SuiteSparse"]
@@ -693,6 +713,11 @@ version = "0.17.16"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.Bijections]]
+git-tree-sha1 = "fe4f8c5ee7f76f2198d5c2a06d3961c249cce7bd"
+uuid = "e2ed5e7c-b2de-5872-ae92-c73ca462fb04"
+version = "0.1.4"
 
 [[deps.BitFlags]]
 git-tree-sha1 = "43b1a4a8f797c1cddadf60499a8a077d4af2cd2d"
@@ -727,6 +752,12 @@ deps = ["CpuId", "IfElse", "Static"]
 git-tree-sha1 = "2c144ddb46b552f72d7eafe7cc2f50746e41ea21"
 uuid = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
 version = "0.2.2"
+
+[[deps.CSTParser]]
+deps = ["Tokenize"]
+git-tree-sha1 = "3ddd48d200eb8ddf9cb3e0189fc059fd49b97c1f"
+uuid = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
+version = "3.3.6"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -788,6 +819,17 @@ git-tree-sha1 = "fc08e5930ee9a4e03f84bfb5211cb54e7769758a"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.10"
 
+[[deps.Combinatorics]]
+git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.2"
+
+[[deps.CommonMark]]
+deps = ["Crayons", "JSON", "SnoopPrecompile", "URIs"]
+git-tree-sha1 = "e2f4627b0d3f2c1876360e0b242a7c23923b469d"
+uuid = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+version = "0.8.10"
+
 [[deps.CommonSolve]]
 git-tree-sha1 = "9441451ee712d1aec22edad62db1a9af3dc8d852"
 uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
@@ -810,6 +852,11 @@ deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "1.0.1+0"
 
+[[deps.CompositeTypes]]
+git-tree-sha1 = "02d2316b7ffceff992f3096ae48c7829a8aa0638"
+uuid = "b152e2b5-7a66-4b01-a709-34e65c35f657"
+version = "0.1.3"
+
 [[deps.ConstructionBase]]
 deps = ["LinearAlgebra"]
 git-tree-sha1 = "89a9db8d28102b094992472d333674bd1a83ce2a"
@@ -826,6 +873,11 @@ deps = ["Markdown"]
 git-tree-sha1 = "fcbb72b032692610bfbdb15018ac16a36cf2e406"
 uuid = "adafc99b-e345-5852-983c-f28acb93d879"
 version = "0.3.1"
+
+[[deps.Crayons]]
+git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
+uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
+version = "4.1.1"
 
 [[deps.DataAPI]]
 git-tree-sha1 = "e8119c1a33d267e16108be441a287a6981ba1630"
@@ -911,15 +963,21 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "fb372fc76a20edda014dfc2cdb33f23ef80feda6"
+git-tree-sha1 = "d71264a7b9a95dca3b8fff4477d94a837346c545"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.85"
+version = "0.25.84"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
 git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.9.3"
+
+[[deps.DomainSets]]
+deps = ["CompositeTypes", "IntervalSets", "LinearAlgebra", "Random", "StaticArrays", "Statistics"]
+git-tree-sha1 = "988e2db482abeb69efc76ae8b6eba2e93805ee70"
+uuid = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
+version = "0.5.15"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -931,6 +989,12 @@ deps = ["Calculus", "NaNMath", "SpecialFunctions"]
 git-tree-sha1 = "5837a837389fccf076445fce071c8ddaea35a566"
 uuid = "fa6b7ba4-c1ee-5f82-b5fc-ecf0adba8f74"
 version = "0.6.8"
+
+[[deps.DynamicPolynomials]]
+deps = ["DataStructures", "Future", "LinearAlgebra", "MultivariatePolynomials", "MutableArithmetics", "Pkg", "Reexport", "Test"]
+git-tree-sha1 = "8b84876e31fa39479050e2d3395c4b3b210db8b0"
+uuid = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
+version = "0.4.6"
 
 [[deps.EnumX]]
 git-tree-sha1 = "bdb1942cd4c45e3c678fd11569d5cccd80976237"
@@ -1091,6 +1155,11 @@ git-tree-sha1 = "d3b3624125c1474292d0d8ed0f65554ac37ddb23"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
 version = "2.74.0+2"
 
+[[deps.Glob]]
+git-tree-sha1 = "4df9f7e06108728ebf00a0a11edee4b29a482bb2"
+uuid = "c27321d9-0574-5035-807b-f59d2c89b15c"
+version = "1.3.0"
+
 [[deps.Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "344bf40dcab1073aca04aa0df4fb092f920e4011"
@@ -1107,6 +1176,18 @@ version = "1.8.0"
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
 uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
+
+[[deps.Groebner]]
+deps = ["AbstractAlgebra", "Combinatorics", "Logging", "MultivariatePolynomials", "Primes", "Random"]
+git-tree-sha1 = "47f0f03eddecd7ad59c42b1dd46d5f42916aff63"
+uuid = "0b43b601-686d-58a3-8a1c-6623616c7cd4"
+version = "0.2.11"
+
+[[deps.GroupsCore]]
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "9e1a5e9f3b81ad6a5c613d181664a0efc6fe6dd7"
+uuid = "d5909c97-4eac-4ecc-a3dc-fdd0858a4120"
+version = "0.4.0"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "Dates", "IniFile", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
@@ -1165,9 +1246,20 @@ git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
 uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"
 version = "0.5.1"
 
+[[deps.IntegerMathUtils]]
+git-tree-sha1 = "f366daebdfb079fd1fe4e3d560f99a0c892e15bc"
+uuid = "18e54dd8-cb9d-406c-a71d-865a43cbb235"
+version = "0.1.0"
+
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[deps.IntervalSets]]
+deps = ["Dates", "Random", "Statistics"]
+git-tree-sha1 = "3f91cd3f56ea48d4d2a75c2a65455c5fc74fa347"
+uuid = "8197267c-284f-5f27-9208-e0e47529a953"
+version = "0.7.3"
 
 [[deps.InverseFunctions]]
 deps = ["Test"]
@@ -1176,9 +1268,9 @@ uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.8"
 
 [[deps.IrrationalConstants]]
-git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
+git-tree-sha1 = "3868cac300a188a7c3a74f9abd930e52ce1a7a51"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
-version = "0.2.2"
+version = "0.2.1"
 
 [[deps.IterativeSolvers]]
 deps = ["LinearAlgebra", "Printf", "Random", "RecipesBase", "SparseArrays"]
@@ -1214,6 +1306,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "6f2675ef130a300a112286de91973805fcc5ffbc"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "2.1.91+0"
+
+[[deps.JuliaFormatter]]
+deps = ["CSTParser", "CommonMark", "DataStructures", "Glob", "Pkg", "SnoopPrecompile", "Tokenize"]
+git-tree-sha1 = "04c4f16ef537e7b5fe0998e507cfeedc5b95b01d"
+uuid = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
+version = "1.0.24"
 
 [[deps.JumpProcesses]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "FunctionWrappers", "Graphs", "LinearAlgebra", "Markdown", "PoissonRandom", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SciMLBase", "StaticArrays", "TreeViews", "UnPack"]
@@ -1261,6 +1359,17 @@ version = "2.10.1+0"
 git-tree-sha1 = "f2355693d6778a178ade15952b7ac47a4ff97996"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
 version = "1.3.0"
+
+[[deps.LabelledArrays]]
+deps = ["ArrayInterface", "ChainRulesCore", "ForwardDiff", "LinearAlgebra", "MacroTools", "PreallocationTools", "RecursiveArrayTools", "StaticArrays"]
+git-tree-sha1 = "cd04158424635efd05ff38d5f55843397b7416a9"
+uuid = "2ee39098-c373-598a-b85f-a56591580800"
+version = "1.14.0"
+
+[[deps.LambertW]]
+git-tree-sha1 = "c5ffc834de5d61d00d2b0e18c96267cffc21f648"
+uuid = "984bce1d-4616-540c-a9ee-88d1112d94c9"
+version = "0.4.6"
 
 [[deps.Latexify]]
 deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Printf", "Requires"]
@@ -1438,6 +1547,12 @@ version = "1.1.0"
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
+[[deps.ModelingToolkit]]
+deps = ["AbstractTrees", "ArrayInterface", "Combinatorics", "Compat", "ConstructionBase", "DataStructures", "DiffEqBase", "DiffEqCallbacks", "DiffRules", "Distributed", "Distributions", "DocStringExtensions", "DomainSets", "ForwardDiff", "FunctionWrappersWrappers", "Graphs", "IfElse", "InteractiveUtils", "JuliaFormatter", "JumpProcesses", "LabelledArrays", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "NaNMath", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLBase", "Serialization", "Setfield", "SimpleNonlinearSolve", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicIndexingInterface", "SymbolicUtils", "Symbolics", "UnPack", "Unitful"]
+git-tree-sha1 = "8ed67a1c75893cf35f4e74b27cf4485f60cc3c41"
+uuid = "961ee093-0014-501f-94e3-6117800e7a78"
+version = "8.48.0"
+
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
 version = "2022.2.1"
@@ -1446,6 +1561,18 @@ version = "2022.2.1"
 git-tree-sha1 = "cac9cc5499c25554cba55cd3c30543cff5ca4fab"
 uuid = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
 version = "0.2.4"
+
+[[deps.MultivariatePolynomials]]
+deps = ["ChainRulesCore", "DataStructures", "LinearAlgebra", "MutableArithmetics"]
+git-tree-sha1 = "eaa98afe2033ffc0629f9d0d83961d66a021dfcc"
+uuid = "102ac46a-7ee4-5c85-9060-abc95bfdeaa3"
+version = "0.4.7"
+
+[[deps.MutableArithmetics]]
+deps = ["LinearAlgebra", "SparseArrays", "Test"]
+git-tree-sha1 = "3295d296288ab1a0a2528feb424b854418acff57"
+uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
+version = "1.2.3"
 
 [[deps.NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
@@ -1545,9 +1672,15 @@ version = "10.40.0+0"
 
 [[deps.PDMats]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "67eae2738d63117a196f497d7db789821bce61d1"
+git-tree-sha1 = "cf494dca75a69712a72b80bc48f59dcf3dea63ec"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.11.17"
+version = "0.11.16"
+
+[[deps.ParameterizedFunctions]]
+deps = ["DataStructures", "DiffEqBase", "DocStringExtensions", "Latexify", "LinearAlgebra", "ModelingToolkit", "Reexport", "SciMLBase"]
+git-tree-sha1 = "78ab7ecc18b307e00abba28bb29d7ed6bf11b9f7"
+uuid = "65888b18-ceab-5e60-b2b9-181511a3b968"
+version = "5.15.0"
 
 [[deps.Parameters]]
 deps = ["OrderedCollections", "UnPack"]
@@ -1637,6 +1770,12 @@ git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
 
+[[deps.Primes]]
+deps = ["IntegerMathUtils"]
+git-tree-sha1 = "311a2aa90a64076ea0fac2ad7492e914e6feeb81"
+uuid = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
+version = "0.5.3"
+
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
@@ -1666,6 +1805,12 @@ deps = ["Random", "RandomNumbers"]
 git-tree-sha1 = "7a1a306b72cfa60634f03a911405f4e64d1b718b"
 uuid = "74087812-796a-5b5d-8853-05524746bad3"
 version = "1.6.0"
+
+[[deps.RandomExtensions]]
+deps = ["Random", "SparseArrays"]
+git-tree-sha1 = "062986376ce6d394b23d5d90f01d81426113a3c9"
+uuid = "fb686558-2515-59ef-acaa-46db3789a887"
+version = "0.4.3"
 
 [[deps.RandomNumbers]]
 deps = ["Random", "Requires"]
@@ -1891,9 +2036,9 @@ version = "0.33.21"
 
 [[deps.StatsFuns]]
 deps = ["ChainRulesCore", "HypergeometricFunctions", "InverseFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
-git-tree-sha1 = "f625d686d5a88bcd2b15cd81f18f98186fdc0c9a"
+git-tree-sha1 = "5aa6250a781e567388f3285fb4b0f214a501b4d5"
 uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
-version = "1.3.0"
+version = "1.2.1"
 
 [[deps.SteadyStateDiffEq]]
 deps = ["DiffEqBase", "DiffEqCallbacks", "LinearAlgebra", "NLsolve", "Reexport", "SciMLBase"]
@@ -1936,9 +2081,21 @@ version = "5.2.1+0"
 
 [[deps.SymbolicIndexingInterface]]
 deps = ["DocStringExtensions"]
-git-tree-sha1 = "f8ab052bfcbdb9b48fad2c80c873aa0d0344dfe5"
+git-tree-sha1 = "6b764c160547240d868be4e961a5037f47ad7379"
 uuid = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
-version = "0.2.2"
+version = "0.2.1"
+
+[[deps.SymbolicUtils]]
+deps = ["AbstractTrees", "Bijections", "ChainRulesCore", "Combinatorics", "ConstructionBase", "DataStructures", "DocStringExtensions", "DynamicPolynomials", "IfElse", "LabelledArrays", "LinearAlgebra", "MultivariatePolynomials", "NaNMath", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "TimerOutputs", "Unityper"]
+git-tree-sha1 = "ca0dbe8434ace322cea02fc8cce0dea8d5308e87"
+uuid = "d1185830-fcd6-423d-90d6-eec64667417b"
+version = "1.0.3"
+
+[[deps.Symbolics]]
+deps = ["ArrayInterface", "ConstructionBase", "DataStructures", "DiffRules", "Distributions", "DocStringExtensions", "DomainSets", "Groebner", "IfElse", "LaTeXStrings", "LambertW", "Latexify", "Libdl", "LinearAlgebra", "MacroTools", "Markdown", "NaNMath", "RecipesBase", "Reexport", "Requires", "RuntimeGeneratedFunctions", "SciMLBase", "Setfield", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "TreeViews"]
+git-tree-sha1 = "fce1fd0b13f860128c8b8aab0bab475eeeeb7994"
+uuid = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+version = "5.1.0"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1977,6 +2134,17 @@ deps = ["ManualMemory"]
 git-tree-sha1 = "c97f60dd4f2331e1a495527f80d242501d2f9865"
 uuid = "8290d209-cae3-49c0-8002-c8c24d57dab5"
 version = "0.5.1"
+
+[[deps.TimerOutputs]]
+deps = ["ExprTools", "Printf"]
+git-tree-sha1 = "f2fd3f288dfc6f507b0c3a2eb3bac009251e548b"
+uuid = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
+version = "0.5.22"
+
+[[deps.Tokenize]]
+git-tree-sha1 = "90538bf898832b6ebd900fa40f223e695970e3a5"
+uuid = "0796e94c-ce3b-5d07-9a54-7f471281c624"
+version = "0.5.25"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
@@ -2029,6 +2197,18 @@ deps = ["REPL"]
 git-tree-sha1 = "53915e50200959667e78a92a418594b428dffddf"
 uuid = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 version = "0.4.1"
+
+[[deps.Unitful]]
+deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
+git-tree-sha1 = "bb37ed24f338bc59b83e3fc9f32dd388e5396c53"
+uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
+version = "1.12.4"
+
+[[deps.Unityper]]
+deps = ["ConstructionBase"]
+git-tree-sha1 = "d5f4ec8c22db63bd3ccb239f640e895cfde145aa"
+uuid = "a7c27f48-0311-42f6-a7f8-2c11e75eb415"
+version = "0.1.2"
 
 [[deps.Unzip]]
 git-tree-sha1 = "ca0969166a028236229f63514992fc073799bb78"
@@ -2285,60 +2465,43 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─d096a6be-65a1-428d-9bfb-da7fe89f4c19
-# ╟─0ca85fbd-7b68-45e6-8433-118492920050
-# ╟─51ea04ff-c66b-46d1-9e62-b1ec3554ee8a
-# ╟─ff1f143a-77d0-43e9-8975-b7b28c6f9ae4
-# ╟─2b43b0c5-fe0b-419a-b2d9-ec349625d6df
-# ╟─617ce27f-57e2-4e8c-8fda-4029fc6a01e3
-# ╟─081daad5-b960-4c64-bdec-c0ecb0d6896b
-# ╟─4e2cead3-1c4f-48b4-8f5a-f78c4efaee2c
-# ╠═16c39710-8f90-45c8-983a-25438019d90c
-# ╠═bd8ee393-6193-4662-b199-edbe339ffc31
-# ╟─7b74322b-8481-4311-a77c-1a62cfb5b15c
-# ╠═a1ce2262-da8e-496a-81d8-10ff5246c17f
-# ╟─85defe33-1c87-4e81-a7d2-a363bee3e699
-# ╠═b043d65b-a214-482a-96cb-e8c075814490
-# ╟─842e2c41-72a3-443c-82db-ab1ff3612a12
-# ╟─86804a6f-9178-40f3-ae82-cc6723412ae8
-# ╟─7d7ff37f-c221-4067-a74c-d50603448906
-# ╠═8510e3df-ea93-4c25-ac3d-1069b067a62d
-# ╟─53d4538b-bcfb-46ec-ab6c-a57d97747e6b
-# ╠═d048e8f1-5de8-4d4f-a984-9e25d571e209
-# ╟─469df604-25da-4579-9f47-5c48e91a6288
-# ╠═31b7cdd1-c2a7-49bc-a08d-9675090030b6
-# ╠═e02d057b-32d6-457b-b00e-f9dde43bf198
-# ╠═9a56b78a-eec0-4f0f-b30d-6f4fa777e59a
-# ╟─085747be-ed2c-435e-acbb-6bec8ea005f7
-# ╠═e88fb46c-3a9f-4be3-9318-3efe50e66938
-# ╟─68f8b497-3dcd-4a4b-a4fa-8f72c85706e3
-# ╟─2a518074-ea51-457a-b309-2d7650cd3463
-# ╟─c5a658da-7953-4131-ad6f-d2ce50294982
-# ╟─f972b4da-236d-4a7c-b2d6-ba1b4dc5a7d9
-# ╟─7915360f-4bd5-40d6-9cb8-0b278c3944d6
-# ╟─d55d1137-e6f9-45ba-a68b-377d388feac9
-# ╠═b7cebd3a-c4a1-48ae-99e0-5431e2b261a2
-# ╟─d43ffd8f-1bfd-437b-81e3-0dabc6a3d081
-# ╠═db1e527b-7fdc-45cc-8c20-d106dd347103
-# ╟─bc878bca-ad29-43ca-b76c-cc710bb2aa33
-# ╠═46d6d1ea-7b07-4e65-b965-b65c8655503d
-# ╟─2d392e4f-8944-438a-a5c5-977ed95e258b
-# ╟─4a924aa1-e7f4-4664-b9e3-498d24dcffeb
-# ╟─1ede2ba1-18d6-4385-9df1-458b572e5121
-# ╟─b3171639-fd44-4aa5-8c89-7ff91ce9fc61
-# ╟─6ea8e4b3-1393-4675-86df-b32bd70bf587
-# ╟─bbe71b50-2387-4a22-898a-8140c55121e4
-# ╟─988ee18e-1dc3-4061-9cbe-96424961fbb7
-# ╠═a9357ca7-54ea-4f67-a0a8-df01d1bc4246
-# ╟─af01b6ef-bd47-4a15-8bd4-f90e214411f3
-# ╟─26c5caa7-ab30-4dc2-9eea-2e6e8316b184
-# ╟─4185a115-9871-4065-85e9-37df17d54891
-# ╟─93741ffc-2d2b-4b6a-bcb5-d0e899b0586b
-# ╟─4d9dde04-0476-448e-ad6c-a8374b35568f
-# ╟─7f608559-6b37-4246-afa6-60cfda53d321
-# ╟─80f0dfcf-b202-47e0-b7af-c0d8f3c7deb8
-# ╟─7c850679-a706-4d27-b6a2-d5a078c38bb7
-# ╟─43b4f6a3-8cff-4198-a0dd-409643f2059f
-# ╟─8b7117ed-e4e5-4111-bd04-078d7baf9320
+# ╟─fffc6cac-c044-4cd9-a3b7-084341878faf
+# ╟─b57ade87-40af-4f58-b56d-7f883d5b2367
+# ╟─336cae68-a9fd-45a0-8ba8-0fd6fab4a287
+# ╟─dd3e39ac-8b2c-11ec-1774-7543d2573dc0
+# ╟─7d856c88-f52b-497d-b64c-281da39eff6f
+# ╟─30a79e11-2165-4908-94a3-d020cc6d2e16
+# ╟─e11754b1-6993-403b-a0ec-e0aaf86a5dd3
+# ╟─ab0aa754-78e2-47b5-a398-a7e1ab8d6c58
+# ╟─4f218166-40d1-4ab0-adf4-e938061bf78d
+# ╟─0e326b5a-c8df-4c28-9ffb-4581d6dac0cb
+# ╟─fee636f1-4944-46a4-bcbe-32b7273268c7
+# ╟─56a68cf6-6e64-4875-b614-18987857bc06
+# ╟─0d524884-afbf-4594-80ee-9fdfcdabbea0
+# ╟─61a1a25f-21b1-40a6-aafa-17fddf4a848c
+# ╟─2b58c174-c501-47ed-ade6-0ee9b88b76eb
+# ╟─6c491ea3-10b9-46b3-a3ff-2c27d029efe0
+# ╟─eb79f46c-5b6d-4b36-a6e0-f92fe6938b46
+# ╟─2c093ace-a53b-4fd8-91f9-3816e4ccdf62
+# ╟─fba4e0b3-52a5-4d1a-b7da-6740f2c2a836
+# ╠═0731c83b-3b56-4b80-9654-1760dcbfca9b
+# ╠═51ac8bbb-314d-4e82-ab3c-4d65be6f5e74
+# ╠═7155b893-ec48-4213-b763-fe4d604efdaa
+# ╟─e6a154b3-1f4f-4759-b0ab-62429b0c5200
+# ╠═7206af1d-1d79-4c18-82c2-7979d3baa2d5
+# ╟─b23e2b04-83a3-46f3-86e4-f49d8d42314d
+# ╟─9eff9a4e-4fcb-41a2-9924-0bf56de12eb7
+# ╟─0ca58de1-28bd-4df1-88ca-efa8d17250f6
+# ╠═52a42411-35b9-472a-bd7e-99e7e6395015
+# ╠═637ae77a-a61c-4742-b737-aa4985ce6a32
+# ╠═45f11cc5-59bd-44a6-977b-78e1bea3d9c5
+# ╠═a21e1203-57a8-4677-968b-c0a90cec9403
+# ╟─a796442b-85fa-45af-8c90-9ce9a8d4fcd2
+# ╟─49eca337-d523-49c7-bc16-973f3a6a5638
+# ╟─3ac754bf-e6de-417f-9093-35a73f036a1e
+# ╠═6c027717-d272-4a3d-824c-54ea64f4fd92
+# ╠═d3950d79-5918-4ed7-bdad-dd04f22d3a30
+# ╠═3895430e-9726-4c54-b0d2-9d7901f66f01
+# ╟─3b18856d-27b8-4e1b-bdef-927f3e487e49
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

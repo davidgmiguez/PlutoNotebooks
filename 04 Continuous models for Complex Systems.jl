@@ -14,11 +14,10 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ d096a6be-65a1-428d-9bfb-da7fe89f4c19
+# ╔═╡ 62c492eb-eedb-4452-a0f1-7bf5e93a8e69
+using DifferentialEquations, PlutoUI, Plots
 
-	using  PlutoUI,Plots, DifferentialEquations
-
-# ╔═╡ 0ca85fbd-7b68-45e6-8433-118492920050
+# ╔═╡ 73941e4a-7d10-4728-8ec2-9d9e2ddc552e
 begin
 	struct Foldable{C}
 	    title::String
@@ -32,594 +31,789 @@ begin
 	end
 end
 
-# ╔═╡ 51ea04ff-c66b-46d1-9e62-b1ec3554ee8a
+# ╔═╡ 313ee9bf-1a07-4445-958e-d1dad4847476
 html"<button onclick='present()'>present</button>"
 
-# ╔═╡ ff1f143a-77d0-43e9-8975-b7b28c6f9ae4
-md" # 3. Population dynamics in complex systems
+# ╔═╡ 7ba042d6-107d-4188-a877-c7f7d7b35c46
+md" #  
 
-A key aspect of complex systems is their dynamics, how they change in time. The core idea is to try to define a set of equations that capture their evolution in time. These mathematical models are abstract description of a concrete system using mathematical concepts and language. 
+## 4.1 Continuous Models for Unconstrained population growth
 
-What type of models do we want? Very realistic models with many interactions or simpified models?
+Discrete models have their advantages, but they can be unrealistic (chaos...): also they assume that all events (division, death ocurr in discrete time points), which it is far from what really happens in biological systems, wher events occur more like a contunuum in time.
 
-Simple models can be much easily analyzed and understood mathematically. Models with many variables become obscure and do not provide much information of the experiment. Our idea is to generate models that can reproduce the core properties and features of a given experiment. Simple models with few equations are therefore, much more difficult to generate than models with many interactions. 
-##
-So, when we try to capture the change in the state of a given system overtime, we have to include the temporal variable. This is why, our basic tool from now own will be some sort of differential equation, that camputes how the system changes between two different time points.  
-##
-*Models are useful when they are wrong*
+Let's now generize the discrete model of previous chapter towards a contiunumm time.  To do that, let's assume we have an initial number of cells `N` in a population 
 
-"
-
-# ╔═╡ 2b43b0c5-fe0b-419a-b2d9-ec349625d6df
-md"
-##
-
-We will start with a very simple system of just one species that is proliferating and/or dying. In these type of models, the number of individuals in the population at a given time in the future will depend on the number of individuals in the past. This is the tipical situation of bacterias proliferating. 
-"
-
-# ╔═╡ 617ce27f-57e2-4e8c-8fda-4029fc6a01e3
-Resource("https://i.ibb.co/hLbYxCg/bacteria-in-a-petri-dish-compressed.jpg")
-
-# ╔═╡ 081daad5-b960-4c64-bdec-c0ecb0d6896b
-md"
-
-
-## 3.1 Unconstrained growth 
-
-The most basic approach to population growth is to begin with the assumption that every individual produces two offspring in its lifetime, then dies, which would double the population size each generation. The same approach is for cells that divide and produce two identical cells, such as bacteria.
-
-Stem cells also undergo a similar type of scheme: during the early stages of development, they undergo a phase of proliferation that expands the population, in a process that called proliferative divisions. Later on, they start to differentiate to produce the different types of progeny. A very important question in develpmental biology is to understand how these populations grow in time and how this growth may be affected by external stimuly. 
-
-##
-A first simplified population approach is to assume a constant relative growth rate. In a discrete model, this rate would represent growth over time intervals of some fixed length. We can do that easily in the context of discrete __Difference Equations__ , which are simply recursive relations that describe the evolution of a quantity or a population whose changes are measured over discrete time intervals (days, for instance). This difference equations allow us to calculate the next value of a quantity based on the previous value
+After a given time, we have a number of new stem cells `∆N` (number of newly produced cells) during a given time interval, `∆t`. Thsi increment `∆N` is proportional to the initial number of cells `N`, as expected (if a population of 20,000 cells produces 1200 new cells in 1 h, a 4-fold bigger population of 80,000 cells of the same type of microorganism will produce 4 times as many, viz. 4800, new cells in 1 h): 
 
 ```math
-p_{t+1} = f(p_t)
-```
-
-In other words, the output that we obtain from a difference equation will become our input when we calculate the next term of the recursion. Consider as an example the growth of a population of cells with an initial number of $p(t=0)=p_0$. 
-##
-
-After a given time interval '∆t', a percentage of the population will reproduce, resulting in a number of new cells '∆p'. This number of newly produced cells has to be  proportional to the initial number of cells 'p(0)' (if a population of 20,000 cells produces 1200 new cells in 1 h, then a 4-fold bigger population of 80,000  will produce 4 times as many, i.e., 4800, new cells in 1 h). We can write this proportionality as a discrete system in the following way
-
-```math
-p_{t+1} = r \cdot p_t
-```
-
-where $p_t$ is the population at the start of hour $n$, $p_{t+1}$ is the number of cells at the end of the time interval, and $r$ is a fixed growth factor. Here, each term $p_t$ is simply multiplied by $r$ to produce the next term. Because the newly produced cells always add to the population, i.e. the number of cells in the system increases, it is straightforward to see that the number of cells in the system at succesive time intervals will be
-
-```math
-\begin{align} 
-p_0\\
-p_1 &=r \cdot p_0 \\
-p_2 &=r \cdot p_1 = r^2 \cdot p_0 \\
-p_3 &=r \cdot p_2 = r^3 \cdot p_0 \\
-···\\
-\end{align}
+\frac{\Delta N}{\Delta t} \sim N\tag{1}
 ```
 ##
-So, in general 
+Because the newly produced cells always add to the population, i.e. N increases steadily, we have to establish time intervals (and accordingly numbers of newly formed cells) that are as small as possible. Mathematically we  have to deal with infinitesimal increases or differentials: 
 
 ```math
-p_{t}=r^t \cdot p_0
+\frac{\mathrm{d} N}{\mathrm{d} t} \sim N\tag{2}
 ```
 
-The factor $r$ exceeds unity by the relative growth rate. For example, if the population increases by $6\%$ each hour then $r = 1.06$. In general, with a positive relative growth rate, the solution to is an exponential function with base $r > 1$
-
-"
-
-# ╔═╡ 4e2cead3-1c4f-48b4-8f5a-f78c4efaee2c
-begin
-	r_slide = @bind r html"<input type=range min=0.1 max=2 step=0.1>"
-	
-	md"""
-	##
-	**Move the slider to set the growth rate in the population**
-	
-	value of r: $(r_slide)
-	
-	"""
-end
-
-# ╔═╡ 16c39710-8f90-45c8-983a-25438019d90c
-time=collect(1:0.1:10);
-
-# ╔═╡ bd8ee393-6193-4662-b199-edbe339ffc31
-plot(time,r .^(time),ylims = (0,10),title=("Unconstrained growth, r=$r"))
-
-# ╔═╡ 7b74322b-8481-4311-a77c-1a62cfb5b15c
-md"
-
-## 3.2 Constrained growth 
-
-Although the unconstrained model might be fairly accurate in the short term, this type of exponential growth is not realistic in the long term. For instance, there will be potentially a limitation in environmental factors (size, nutrients...). A simple approximation but much more realistic, it is to assume that $r$ changes with the population size. 
+To get from proportionality to an equation, a proportionality factor, μ, is introduced. This is the specific growth rate or often termed simply growth rate (similar to _r_ in previous chapter). Sorting of variables yields: 
 
 ```math
-p_{t+1} = r(p_t) \cdot p_t
-```
-
-where the function $r(p)$ is set to decrease as the population p increases. From a mathematical standpoint, it is natural to begin an investigation of such models by considering the case of a linear function r(p).
-
-##
-
-Lets think of a population that initially grows with very little environmental constraint ($r>1$), a situation that might arise when a few members of a new species are introduced into an environment rich in nutrients and habitable area. Over time the population will increase until it approaches some maximum sustainable size, eventually reaching an equilibrium ($r=1$).
-
-As a starting point, we need to introduce the growth factor in consitions of no restrictions (the rate of generation of new individuals per unit of time with no restrictions) r(0).
-
-Next, we introduce the concept of carrying capacity _K_, which represents the maximum population size that a particular environment can support. This means that when the system reaches its carrying capacity, it stops growing, and reaches an equilibrium. In othger words, r(K) = 1
-##
-As an example, lets plot the linear dependence $r(p_t)$ for values of $r(0) = 1.1$ and $K=50$.
-"
-
-# ╔═╡ a1ce2262-da8e-496a-81d8-10ff5246c17f
-begin
-	plot([0,50],[1.1,1],line = (:line, 4))
-	title!("r for constrained growth")
-	xlabel!("Number of cells")
-	ylabel!("r")
-end
-
-# ╔═╡ 85defe33-1c87-4e81-a7d2-a363bee3e699
-md"
-##
-The slope of the previous line is:
-
-```math
-Slope=\frac{1-1.1}{50-0}=\frac{- 0.1}{50}=- 2 \cdot 10^{-3}\\
-
-```
-Therefore, the function takes $r(p)$the form
-
-```math
-r(p) = r(0) + slope \cdot p = 1.1 - 2 \cdot 10^{-3} p
-```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t} (1.1 -2 \cdot 10^{-3} p_{t})  = 
+\frac{\mathrm{d} N}{N}  = \mu \mathrm{d} t\tag{3}
 ```
 ##
-"
-
-# ╔═╡ b043d65b-a214-482a-96cb-e8c075814490
-growth_factor(p) = 1.10 - 0.002 * p
-
-# ╔═╡ 842e2c41-72a3-443c-82db-ab1ff3612a12
-begin
-	plot([0,50],[growth_factor(0),growth_factor(50)],line = (:line, 4))
-	title!("r for constrained growth")
-	xlabel!("Number of cells")
-	ylabel!("r")
-end
-
-# ╔═╡ 86804a6f-9178-40f3-ae82-cc6723412ae8
-function constrained_growth_generic(p, r, K; dt=0.01)
-traj = []
-	slope= (1-r)/K
-for t in 1:100 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-#	p = p * (r + slope * p)
-p = p * r * (1 - p/K + p/(r*K)) 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 7d7ff37f-c221-4067-a74c-d50603448906
-begin
-	rrrr_slide = @bind rrrr html"<input type=range min=0.1 max=1.7 step=0.1>"
-	
-	md"""
-	##
-	**Move the slider to set the growth rate in the population**
-	
-	value of r: $(rrrr_slide)
-	
-	"""
-end
-
-# ╔═╡ 8510e3df-ea93-4c25-ac3d-1069b067a62d
-plot([1:100],constrained_growth_generic(5, rrrr,50; dt=0.01),ylims = (0,55),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 53d4538b-bcfb-46ec-ab6c-a57d97747e6b
-md"
-## 
->
-> __Task 1__: Suppose the population of cells in a tumor grows according to the logistic differential, where time interval is one week:
->
->```math
->P_{t+1}= 2 P_t - (0.002  P_{t}^{2})
->```
->
->(a) If $P_0$=100, Calculate the population after 3 weeks. find $\lim_{t \to  \infty}  P_t$. Is the solution curve increasing or decreasing? Justify your answer. Sketch the graph of $P_t$.
->
->(b) If $P_0$=300, Calculate the population after 3 weeks. find $\lim_{t \to \infty}  P_t$. Is the solution curve increasing or decreasing? Justify your answer. Sketch the graph of $P_t$.
->
->
->(c) How many cells are in the tumour when the population is growing the fastest? Justify your answer. 
-
-
-"
-
-# ╔═╡ d048e8f1-5de8-4d4f-a984-9e25d571e209
-p0=Int(100);p1 = p0 * (2 - 0.002 * p0);p2 = p1 * (2 - 0.002 * p1);p3 = p2 * (2 - 0.002 * p2);
-
-# ╔═╡ 469df604-25da-4579-9f47-5c48e91a6288
-Foldable("Solution 1a:", md"The number of cells after n=3 is $p3. The limit is the carrying capacity.
-
-So, rewriting the equation:
+If we integrate this differential equation:
 
 ```math
-P_{t+1}= 2 P_t - (0.002  P_{t}^{2})= P_t (2 - 0.002  P_{t}) = P_t (r(0) + \frac{1-r(0)}{K} P_t )
+\int \frac{\mathrm{d} N}{N}  = \int \mu \mathrm{d} t \tag{4}
 ```
 
-so $r(0)=2$ and 
-```math
-\frac{1-r(0)}{K}= - 0.002 \\
-```
-```math
-\frac{r(0)-1}{0.002}= K
-```
-so K = 500. The system is increasing because the number of cells after n=3 is below the carrying capacity.
-")
-
-# ╔═╡ 31b7cdd1-c2a7-49bc-a08d-9675090030b6
-function constrained_growth_1a(p, r, slope,time)
-traj = []
-for t in 1:time  
-p = p * (r + slope * p)
-push!(traj,p)
-end
-return traj
-end
-
-# ╔═╡ e02d057b-32d6-457b-b00e-f9dde43bf198
-plot([1:10],constrained_growth_1a(100, 2 ,-0.002,10),ylims = (0,500),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 9a56b78a-eec0-4f0f-b30d-6f4fa777e59a
-p00=Int(300);p11 = p00 * (2 - 0.002 * p00);p22 = p11 * (2 - 0.002 * p11);p33 = p22 * (2 - 0.002 * p22);
-
-# ╔═╡ 085747be-ed2c-435e-acbb-6bec8ea005f7
-Foldable("Solution 1b:", md"The number of cells after n=3 is $p33. Again, the system is increasing because the number of cells after n=3 is below the carrying capacity.
-")
-
-# ╔═╡ e88fb46c-3a9f-4be3-9318-3efe50e66938
-plot([1:10],constrained_growth_1a(300, 2 ,-0.002,10),ylims = (0,500),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 68f8b497-3dcd-4a4b-a4fa-8f72c85706e3
-Foldable("Solution 1c:", md"The maximum growth occurs at:
-
-```math
-P_{t+1} - P_{t}= max = P_{t} * (2 - 0.002  * P_{t}) - P_{t}
-```
-```math
-P_{t+1} - P_{t}= max =  2 P_{t} - 0.002  * P_{t}^2 - P_{t} = P_{t} - 0.002  * P_{t}^2
-```
-so, taking the derivative of this function
-
-```math
-1 - 0.004  * P_{t} = 0 => P_{t} =\frac{1}{0.004}= 250
-```
-
-which corresponds to half of the carrying capacity.
-
-")
-
-# ╔═╡ 2a518074-ea51-457a-b309-2d7650cd3463
-
-	plot([1:10],constrained_growth_1a(10, 2 ,-0.002,10),ylims = (0,600),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-
-
-# ╔═╡ c5a658da-7953-4131-ad6f-d2ce50294982
-md" 
-## 
-
-> __Task 2:__(a) Write the logistic discrete equation for an initial population of bacteria of 1e2 cells that is dividing every hour in a flask with limited to 1e6 cells. 
->
->(b) Update the previous equation to include the fact that in average, only 50% of the cells are cycling. 
->
->(c) Update the equation in (b) to include the fact that in average, cells have a probability of dying of 10%
->
->(d) Update the equation in (b) to include the fact that in average, the newborn cells have a probability of dying of 10%, and the noncycling cells have a probability of dying of 20%. 
-
-
-"
-
-# ╔═╡ f972b4da-236d-4a7c-b2d6-ba1b4dc5a7d9
-md" 
- (a) Solution: the intial r=2, and it goes to 1 when p=10^6
-
-The linear function r is thus determined to be
-
-```math
-Slope=\frac{1 - 2}{10^6-0}=\frac{- 1}{10^6}\\
-```
-Therefore, the function takes the form
-
-```math
-r(p) = 2 - \frac{p}{10^6}
-```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t}(2 - \frac{p_{t}}{10^6} )  = 
-```
-
-
-"
-
-# ╔═╡ 7915360f-4bd5-40d6-9cb8-0b278c3944d6
-begin
-	growth_factor2(p) = 2 -  p / 1E6
-	plot([0,1E6],[growth_factor2(0),growth_factor2(1E6)],line = (:line, 4))
-	title!("r for Exercise 2a")
-	xlabel!("Number of cells")
-	ylabel!("r")
-	
-end
-
-# ╔═╡ d55d1137-e6f9-45ba-a68b-377d388feac9
-function constrained_growth_4(p, r; dt=0.01)
-traj = []
-for t in 1:50 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = p * (2 - p/ 1E6)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ b7cebd3a-c4a1-48ae-99e0-5431e2b261a2
-pp1=plot([1:50],constrained_growth_4(1, r; dt=0.01),ylims = (0,50000+1E6),xlabel=("Time"),ylabel=("Number of cells"),label=("100% proliferating"),title=("Constrained growth, r=2"))
-
-# ╔═╡ d43ffd8f-1bfd-437b-81e3-0dabc6a3d081
- md"
- ## 
-(b) Solution: so, now on average, from 100 cells, only 50 cells proliferate. This is a common biological phenomena called _quiescence_, by which some cells in a population decide not to cycle and rest. Sometimes thsi rest can last years (adult stem cells). 
+ we obtain:
  
-In our system, now after one hour, you have 50 new cells + the previous 100 cells. This means that, in unrestricted conditions $r_0$=1.5
-
-
-
- The linear function r is thus determined to be
-
-```math
-Slope=\frac{1 - 1.5}{10^6-0}=\frac{- 0.5}{10^6}=- 0.5 \cdot 10^{-6}\\
+ ```math
+\ln N = \mu t + C \tag{5}
 ```
-Therefore, the function takes the form
+## 
+ The undefined integration constant `C` can be fixed if we define the initial conditions: $N(t = 0) = N_0$
 
-```math
-r(p) = 1.5 - 0.5 \cdot 10^{-6} p
+ ```math
+\ln N_0 = \mu 0 + C =C \tag{6}
 ```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t} (1.5 - 0.5 \cdot 10^{-6} p_{t})  = 
+ 
+ so the equation becomes:
+ 
+  ```math
+\ln N = \mu t + \ln N_0 \tag{7}
 ```
-
-
+##  
+  and after applying the properties of logatithms:
+  
 ```math
-p_{t+1}= p_{t} (1.5- \frac{p_{t}}{2\cdot10^6})
+\begin{align*}
+\ln N - \ln N_0 &= \mu t  \tag{8}\\
+\ln \frac{N}{N_0}&= \mu t  \tag{9}\\
+\frac{N}{N_0} &= e^{\mu t}  \tag{10}\\
+N &= N_0 e^{\mu t}  \tag{11}\\
+\end{align*}
 ```
-"
+##  
+   If the time that has passed is exactly the average length of the cell cycle of the stem cell population, we can write that in $t = T$ the population has doubled, so $N_0$ has increased to $2 N_0$, as expected:
 
-# ╔═╡ db1e527b-7fdc-45cc-8c20-d106dd347103
-begin
-	growth_factor3(p) = 1.5 -  0.5 * p / 1E6
-	plot([0,1E6],[growth_factor3(0),growth_factor3(1E6)],line = (:line, 4))
-	title!("r for Exercise 2b")
-	xlabel!("Number of cells")
-	ylabel!("r")
-	
-end
-
-# ╔═╡ bc878bca-ad29-43ca-b76c-cc710bb2aa33
-function constrained_growth_5(p, r; dt=0.01)
-traj = []
-for t in 1:50 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = p * (1.5 - p/ 2E6)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 46d6d1ea-7b07-4e65-b965-b65c8655503d
-begin
-show(pp1);
-plot!([1:50],constrained_growth_5(1, r; dt=0.01),ylims = (0,50000+1E6),xlabel=("Time"),ylabel=("Number of cells"),label=("50% proliferating"),title=("Constrained growth"));
-end
-
-# ╔═╡ 2d392e4f-8944-438a-a5c5-977ed95e258b
-md"so, you can see that you reach the same final point, but later in time, "
-
-# ╔═╡ 4a924aa1-e7f4-4664-b9e3-498d24dcffeb
-md" d)  If counting all cells, 10% died, it means that, if we start with 100, we generate 150. Then 10% of the cells die, so in the first iteration with no restrictions you produce 135, this means an r=1.35."
-
-# ╔═╡ 1ede2ba1-18d6-4385-9df1-458b572e5121
-md" d)  if from the newborn cells, only 90% survive, this means that if we start with 100 cells, and 50% proliferate, we obtain 50 new cells. Now, from these new 50 cells, only 45 cell survive. from 50 cells that are non cycling, we have to remove the 20%, so we have 40 cells. In total, from 100 cells, you have 50 mothers, 45 daugthers, and 40 noncycling, so 135 in total. this gives an r=1.35"
-
-# ╔═╡ b3171639-fd44-4aa5-8c89-7ff91ce9fc61
-md" ## 3.3 Equilibrium in the logistic map
-
-A more common way of finding the equation for the logistic growth model is its dimensionless form. 
-
+  
 ```math
-x_{t+1} =   x_{t} \cdot r (1 - x_{t}) 
+\begin{align*}
+2 N &= N_0 e^{\mu T}  \\
+\frac{2 N_0}{N_0 }& =2= e^{\mu T}  \tag{13}\\
+ \ln 2&= \mu T  \tag{14}\\
+\end{align*}
 ```
-
-When we find the equilibrium points of our difference equation, we can move into the study of stability analysis, which explores the behavior of solutions when the initial condition is close to the difference equation’s equilibrium point(s). If the initial term is close to an equilibrium point and the solution converges towards the equilibrium point, then the equilibrium point is considered a sink,
-
-condition for equilibrium is that the next point is equial to the previous time point
-
+##   
+   So, the proportionality constant is related to the cell cycle length as:
 ```math
-x = r \cdot x (1 − x)
+\begin{align*}
+ \mu = \frac{\ln 2}{T}  \tag{15}
+\end{align*}
 ```
-##
-
-Solving for $x$, we find that the
-equilibrium points are $x=0$ and 
-
-```math
-\begin{align}
-1 &= r (1 − x) \\
-1 &= r − r x\\
-r x  &= r - 1\\
-x  &= \frac{r - 1}{r}\\
-\end{align}
-```
-
-where r>1.We will refer to $x = 0$ as the zero equilibrium, and $x  = \frac{r - 1}{r}$ as the positive equilibrium. Now that we established where the equilibrium points are located, we can examine what happens when we modify the constant r, and the initial value of the sequence. When 0 < r ≤ 1, we will only have one equilibrium point, x = 0. Moreover, the recursive sequence will converge to x = 0. 
-
-Now move the slider in the
- next plot to see what happens for higher values of r:
 
 
 "
 
-# ╔═╡ 6ea8e4b3-1393-4675-86df-b32bd70bf587
-logimap(x, r) = r*x*(1-x)
+# ╔═╡ 4b516468-55ff-492b-a026-61154c8062a0
+function unconstrained_growth_continuous(N₀,t,T)
+	μ=log(2)/T
+    N₀ .* exp.(μ .* t)
+end
 
-# ╔═╡ 988ee18e-1dc3-4061-9cbe-96424961fbb7
+# ╔═╡ 51945b7a-f1ac-423b-affd-f1676987de7b
 begin
-	rrrrr_slide = @bind rrrrr html"<input type=range min=0.9 max=4.0 step=0.1>"
+	T_slide = @bind TT html"<input type=range min=5 max=15 step=1>"
 	
 	md"""
-	##
-	**Move the slider to set the growth rate of the population**
+	**Set the Cell cycle length**
 	
-	value of r: $(rrrrr_slide)
+	value of T: $(T_slide)
 	
 	"""
 end
 
-# ╔═╡ bbe71b50-2387-4a22-898a-8140c55121e4
-begin
-	x = 0.001;	 logi = Float64[]
-	for t in time
-		    x = logimap(x, rrrrr)
-		    push!(logi, x)
-		end
-end
+# ╔═╡ 1c24a2f1-2b15-48e6-b0d8-c3278103036d
 
-# ╔═╡ a9357ca7-54ea-4f67-a0a8-df01d1bc4246
-plot(time,logi, xlims=(0,10),ylims=(0.0,1.0),xlabel="Time",ylabel="Number of individuals in population",title=("Constrained growth, r=$rrrrr"),leg=false)
-
-# ╔═╡ af01b6ef-bd47-4a15-8bd4-f90e214411f3
-md" ##
-As seen from the plot above, now we have three cases:
-
-- With r < 1.0, the system converges to 0:
-
-- With 1.0 < r < 3.0  the system converges to a fixed value above  0
-
-- With 3.0 < r < 3.6  something else happens, the system becomes periodic
-
-- With r > 3.6 we get chaos
-
-Chaos is a property of a complex system whose behaviour is so unpredictable as to appear random, due to great sensitivity to small changes in conditions.
-
-In the logistic map, if we adjust the growth rate parameter beyond 3.5, we see the onset of chaos. A chaotic system has a strange attractor, around which the system oscillates forever, never repeating itself or settling into a steady state of behavior. It never hits the same point twice and its structure has a fractal form, meaning the same patterns exist at every scale no matter how much you zoom into it.
-
-To show this more clearly, let’s run the logistic model again, this time for 200 generations across 1,000 growth rates between 0.0 to 4.0. . This time we’ll have 1,000 so we’ll need to visualize it in a different way, using something called a bifurcation diagram:
+	plot(collect(0:1:100),unconstrained_growth_continuous(20,collect(0:1:100),TT),label="T= $TT",seriestype=:line,xlabel=("Time"),ylabel=("Number of cells"),ylims = (0,400))
 
 
-
-##
-Let's now produce a useful visualizations that will allow us to characterize the behaviour of the logistic map. It is called a _bifurcation plot_, and it is generated ploting the steady state values of teh system for diferent parameter values. The following code generates the bifurcation plot for the logistic map with r∈[1,4].
-
-"
-
-# ╔═╡ 26c5caa7-ab30-4dc2-9eea-2e6e8316b184
-begin
-	#  bifurcation plot with animation
-	p = plot([],zeros(0),leg=false)
-	xlims!((1.0,4.0))
-	ylims!((0.0,1.0))
-	anim = Animation()
-	T = 1000 # number of iterations
-	M = 300  # pick last M points
-	for γ in 1.0:0.01:4.0
-	    pts = []
-	    x = 0.1         # arbitrary initial value
-	    for t = 1:T     # mapping
-	        push!(pts, x)
-	        x = γ * x * (1.0 - x)
-	    end
-	    p=scatter!(p,γ*ones(M),pts[T-M:T],label=nothing,ms=0.5,c=:black)
-	    frame(anim)
-	end
-	gif(anim, "Logistic-bifur.gif", fps=25)
-end
-
-# ╔═╡ 4185a115-9871-4065-85e9-37df17d54891
+# ╔═╡ 85bc871e-6067-4a1d-bbb9-e3a9b0dfbd85
 md"
+## 4.2 Continuous Models for Constrained population growth: The Logistic model 
 
-In these type of plots, we can see points where the steady state solution goes from one to two solutions. These points are called _bifurcations_, and in this particular case, _perid doubling bifurcations_, since the pediod of oscillation duplicates as we crossed one of thsi points. To understand better how this chaoting behavior emerges, we will now plot the first and second values predicted by the logistic equation "
+Similarly to the previous chapter, we can introduce in the original equation a term that modulates growth depending on the limitation of resources. A possibility is this simple modulation 
 
-# ╔═╡ 93741ffc-2d2b-4b6a-bcb5-d0e899b0586b
-x_1=collect(0:0.05:1);
+```math
+\begin{align*}
+1 -\frac{N}{K} \tag{16}
+\end{align*}
+```
+##
 
-# ╔═╡ 4d9dde04-0476-448e-ad6c-a8374b35568f
-begin
-	rrrrrr_slide = @bind rrrrrr html"<input type=range min=0.9 max=4.0 step=0.1>"
-	
-	md"""
-	##
-	**Set the growth rate?**
-	
-	value of r: $(rrrrrr_slide)
-	
-	"""
-end
+This factor is close to 1 (i.e., has no effect) when $N$ is much smaller than $K$, and which is close to $0$ when $N$ is close to $K$. The resulting differential equation is called is the __logistic growth model__.
 
-# ╔═╡ 7f608559-6b37-4246-afa6-60cfda53d321
-begin
-	p3_=plot(x_1, x_1,xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="initial")
-	plot!(x_1, rrrrrr .* x_1 .* (1 .− x_1),xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="first")
-	
-	plot!(x_1, rrrrrr .^2  .* (1 .− x_1) .* x_1 .* (1 .- (rrrrrr .* x_1) .+ (rrrrrr .* x_1 .^2) ),xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="second")
-end
 
-# ╔═╡ 80f0dfcf-b202-47e0-b7af-c0d8f3c7deb8
-md"now we will plot on top of this, the first time points of the simulation of the population growth. Thsi type of plot is called a _Verhulst diagram_."
+```math
+\begin{align*}
+\frac{\mathrm{d} N}{\mathrm{d} t}=\mu N(1 -\frac{N}{K}) \tag{17}
+\end{align*}
+```
+##
 
-# ╔═╡ 7c850679-a706-4d27-b6a2-d5a078c38bb7
-begin
-	# Verhulst diagram 
-	#gr(size=(600, 500))
-	p3_
-	#p2 = plot([0, 1], [0, 1], label="", linecolor="black")
-	anim2 = Animation()
-	#γ = 3.9
-	x_initial = 0.1
-	for t = 1:10
-	    x_new = rrrrrr * x_initial * (1.0 - x_initial)
-	    push!(p3_, [x_initial, x_initial], [x_initial, x_new])   # vertical
-	    push!(p3_, [x_initial, x_new], [x_new, x_new])  # horizontal
-	    frame(anim2)
-	    x_initial = x_new
-	end
-	gif(anim2, "LogisticmapVerhulst.gif", fps=15)
-end
+if we separate variables
 
-# ╔═╡ 43b4f6a3-8cff-4198-a0dd-409643f2059f
-md" ## 3.4 Conclusions: 
-Chaos is not just a cool mathematical idea. It is everywhere in the nature. So, learning how to deal with chaotic data allows us to understand and interact with the physical world better.
-Apart from displaying interesting bifurcation patterns as shown above, another important characteristic of a chaotic system is it’s exponentially sentitive to small perturbations. A small drift in the initial state will cause increasing and significant divergence, a phenomenon termed “the butterfly effect”.
+```math
+\begin{align*}
+\frac{\mathrm{d} N}{N(1 -\frac{N}{K})}=\mu \mathrm{d} t   \tag{18}
+\end{align*}
+```
+##
+Our next goal would be to integrate both sides of this equation, but the form of the right hand side doesn't look elementary and will require a partial fractions expansion. That is, we wish to write 
 
-Edward Lorenz, the father of chaos theory, described chaos as:
 
-_when the present determines the future, but the approximate present does not approximately determine the future_
+```math
+\begin{align*}
+\frac{1}{N(1 -\frac{N}{K})} = \frac{A}{N}+\frac{B}{1 -\frac{N}{K}} \tag{19}
+\end{align*}
+```
+
+##
+where $A$ and $B$ are unknown constants. If we multiply  left and right hand sides by  $N \left( 1- \frac{N}{K} \right)$ (which is equivalent to putting the right hand side over a common denominator) we arrive at the equation 
+
+```math
+\begin{align*}
+1 = A \ \left( 1 -\frac{N}{K}\right) + B \cdot N  = A + N (B - \frac{A}{K}) \tag{20}
+\end{align*}
+```
+##
+Since there is no term with $N$ on the left hand side, we see that 
+
+```math
+\begin{align*}
+B - \frac{A}{K} = 0 \quad \mbox{ or } \quad B = \frac{A}{K} \tag{21}
+\end{align*}
+```
+##
+If we set $B = \frac{A}{K}$ then we are left with $A=1$, and thus the partial fraction decomposition is 
+
+```math
+\begin{align*}
+\frac{1}{N(1 -\frac{N}{K})} = \frac{1}{N}+\frac{\frac{1}{K}}{1 -\frac{N}{K}} \tag{22}
+\end{align*}
+```
+##
+so the integral becomes
+
+```math
+\begin{align*}
+\frac{\mathrm{d} N}{N}+\frac{\frac{\mathrm{d} N}{K}}{1 -\frac{N}{K}}=\mu \mathrm{d} t   \tag{23}
+\end{align*}
+```
+##
+the first part is simply:
+
+```math
+\begin{align*}
+\int\frac{dN}{N} = \ln (N) \tag{24},
+\end{align*}
+```
+##
+For the second term, we must use a substitution $u=1-\frac{N}{K}$, which gives a differential  $du = \frac{-1}{K} \ dN$. Thus we may write the second term on the right hand side as:
+
+```math
+\begin{align*}
+\int \frac{dN/K}{\left( 1-\frac{N}{K} \right)} = \int \frac{-du}{u} = -\ln (u) = -\ln (1-N/K) \tag{25}
+\end{align*}
+```
+
+##
+Putting all these terms together gives us:
+
+```math
+\begin{align*}
+\mu t + c = \ln (N)-\ln (1-\frac{N}{K}) = \ln \left[\frac{N}{1-N/K} \right] \tag{26}
+\end{align*}
+```
+
+##
+Here we have used the property of logarithms to equate the difference of the logs with the log of the quotient. The additional term, $c$, on the left hand side is the free constant of integration, which will be determined by considering initial conditions to the differential equation. Exponentiating both sides of the equation gives 
+
+```math
+\begin{align*}
+e^{\mu t + c} = \frac{N}{1-\frac{N}{K}} \tag{27},
+\end{align*}
+```
+##
+so
+
+```math
+\begin{align*}
+ e^{\mu t} e^c = \frac{N}{1-\frac{N}{K}} \tag{28}
+\end{align*}
+```
+
+```math
+\begin{align*}
+e^{\mu t} C = \frac{N}{1-\frac{N}{K}} \tag{29}
+\end{align*}
+```
+##
+to find $C$ we use the inital condition that $N(t=0)=N_0$, and substituting gives 
+
+```math
+\begin{align*}
+C = C e^0 = \frac{N_0}{1-\frac{N_0}{K}} = \frac{N_0}{1-\frac{N_0}{K}} \frac{K}{K} =\frac{K N_0}{K-N_0} \tag{30}
+\end{align*}
+```
+##
+Solving now for $P$, we first cross-multiply to arrive at 
+
+```math
+\begin{align*}
+\left(1-\frac{N}{K} \right) C e^{\mu t} = N \tag{31}
+\end{align*}
+```
+##
+and putting all terms including $N$ on one side of the equation, 
+
+```math
+\begin{align*}
+C e^{ \mu t} = N \left[1 + \frac{C e^{ \mu t}}{K} \right]  \tag{32}
+\end{align*}
+```
+##
+Solving now for $N$, 
+
+```math
+\begin{align*}
+N = \frac{C e^{\mu t}}{1 + \frac{C e^{\mu t}}{K} } =
+\frac{\frac{K \cdot N_0}{K-N_0} e^{\mu t}}{1 + \frac{\frac{K\cdot N_0}{K-N_0} e^{\mu t}}{K} }\tag{33}
+\end{align*}
+```
+##
+Simplifying this expression by multiplying numerator and denominator by  $(K-N_0) e^{-\mu t}$ gives 
+
+```math
+\begin{align*}
+N = \frac{K N_0}{N_0 +(K-N_0) e^{- \mu t}} \tag{34}
+\end{align*}
+```
+##
 
 
 "
 
-# ╔═╡ 8b7117ed-e4e5-4111-bd04-078d7baf9320
-Resource("https://i.ibb.co/QnW9TjW/X-Next-5-1024x666.jpg",:width => 800)
+# ╔═╡ a0c679f9-d9f9-4d63-b506-ca6f7ee533c4
+begin
+	N₀_slide = @bind N₀ html"<input type=range min=1 max=200 step=10>"
+	
+	md"""
+	**Set the initial number of cells**
+	
+	value of N₀: $(N₀_slide)
+	
+	"""
+end
+
+# ╔═╡ e1601070-d88e-4515-8ad7-af810d98e46d
+function logistic_growth_continuous(N₀,K,t,T)
+	μ=log(2)/T
+    #N₀ .* exp.(μ .* t)
+	N₀.* K  ./ (N₀ .+(K .- N₀) .* exp.(-μ .* t))
+end
+
+# ╔═╡ 8c2e51c1-e0b2-4f79-9a49-8690e6bcc98b
+md"
+ In unconstrained growth there was a clear relationship between $\mu$ and the cell cycle of the population.
+We can calculate the relationship between $\mu$ and the average cell cycle length for unconstrained growth as:
+"
+
+
+
+# ╔═╡ f48bcf9b-2881-4bf2-b07f-d0015b210bda
+md"if we monitor how the value of $\mu$ changes 
+
+```math
+\begin{align*}
+(K-N_0) e^{- \mu t} &=\frac{K N_0}{N} - N_0\\
+(K-N_0) e^{- \mu t} &=\frac{N_0 (K - N)}{N}\\
+ e^{- \mu t} &=\frac{N_0 (K - N)}{N (K-N_0)}\\
+ - \mu t &= Log(\frac{N_0 (K - N)}{N (K-N_0)})\\
+  \mu  &= \frac{1}{t}Log(\frac{N (K-N_0)}{N_0 (K - N)})\\
+    \frac{Log 2}{T}  &= \frac{1}{t}Log(\frac{N (K-N_0)}{N_0 (K - N)})\\
+    T  &=  \frac{t \cdot Log 2}{Log\frac{N (K-N_0)}{N_0 (K - N)}} \\
+\end{align*}
+```
+"
+
+# ╔═╡ 5b2cc001-ba95-4691-aba9-049b12e9ab65
+md"
+##
+> __Task 2__ : Calculate how long until a population reaches half its carrying capacity (N=K/2) :"
+
+# ╔═╡ 5a387568-2284-4d4e-85fc-f106db7377c9
+
+md"
+##
+We have to rewrite the equation:
+
+```math
+\begin{align*}
+N = \frac{K N_0}{N_0 +(K-N_0) e^{- \mu t}} \tag{34}
+\end{align*}
+```
+
+```math
+\begin{align*}
+N = \frac{K }{1 +(\frac{K}{N_0}-1) e^{- \mu t}} \tag{34}
+\end{align*}
+```
+##
+```math
+\begin{align*}
+\frac{K}{N}= 1 +(\frac{K}{N_0}-1) e^{- \mu t} \tag{34}
+\end{align*}
+```
+
+
+```math
+\begin{align*}
+\frac{K}{N} -1 = \frac{K}{N_0}-1 e^{- \mu t} \tag{34}
+\end{align*}
+```
+##
+```math
+\begin{align*}
+\frac{K-N}{N} = \frac{K-N_0}{N_0} e^{- \mu t} \tag{34}
+\end{align*}
+```
+
+
+```math
+\begin{align*}
+e^{- \mu t} = \frac{\frac{K-N}{N}}{\frac{K-N_0}{N_0}}
+\end{align*}
+```
+
+##
+```math
+\begin{align*}
+e^{- \mu t} = \frac{(K-N)N_0}{(K-N_0)N}
+\end{align*}
+```
+
+```math
+\begin{align*}
+- \mu t = log\frac{(K-N)N_0}{(K-N_0)N}
+\end{align*}
+```
+
+##
+```math
+\begin{align*}
+\mu t = log\frac{(K-N_0)N}{(K-N)N_0}
+\end{align*}
+```
+
+```math
+\begin{align*}
+t = \frac{1}{\mu}log\frac{(K-N_0)N}{(K-N)N_0}
+\end{align*}
+```
+##
+for t for N=K/2
+
+```math
+\begin{align*}
+t_{1/2} = \frac{1}{\mu}log\frac{(K-N_0)\frac{K}{2}}{(K-\frac{K}{2})N_0}
+\end{align*}
+```
+
+```math
+\begin{align*}
+t_{1/2} = \frac{1}{\mu}log\frac{(K-N_0)\frac{K}{2}}{\frac{K}{2}N_0}
+\end{align*}
+```
+##
+```math
+\begin{align*}
+t_{1/2} = \frac{1}{\mu}log\frac{(K-N_0)}{N_0}
+\end{align*}
+```
+
+```math
+\begin{align*}
+t_{1/2} = \frac{1}{\mu}log(\frac{K}{N_0}-1)
+\end{align*}
+```
+##
+and since
+
+```math
+\begin{align*}
+ \mu = \frac{\ln 2}{T}  \tag{15}
+\end{align*}
+```
+
+we obtain
+
+```math
+\begin{align*}
+t_{1/2} = \frac{T}{log(2)}log(\frac{K}{N_0}-1)
+\end{align*}
+```
+##
+and using the properties of logs
+
+```math
+\begin{align*}
+t_{1/2} = T \cdot log_{2}(\frac{K}{N_0}-1)
+\end{align*}
+```
+
+"
+
+# ╔═╡ ded83bd0-647a-4e98-b177-59cd78fc27de
+md"Let's study how this time changes with the carrying capacity"
+
+# ╔═╡ b8ed2a50-9e98-4359-8f9e-f6198e436de2
+md"
+##
+>__Task 3:__ Calculate how long until a population doubles in size (N=2 N0):"
+
+# ╔═╡ 0c3783c3-1fe1-40bd-be8a-13a82e646ef7
+md"
+##
+We start from the previous equation:
+
+```math
+\begin{align*}
+t = \frac{1}{\mu}log\frac{(K-N_0)N}{(K-N)N_0}
+\end{align*}
+```
+and set the condition
+
+$N=2 \cdot N_0$
+
+```math
+\begin{align*}
+t = \frac{1}{\mu}log\frac{(K-N_0) 2 \cancel{N_0}}{(K- 2 N_0) \cancel{N_0}}
+\end{align*}
+```
+
+```math
+\begin{align*}
+t = \frac{1}{\mu}log\frac{K-N_0}{\frac{K}{2}-  N_0 }
+\end{align*}
+```
+using the definition for $T$, and also the properties of logs, we arrive at 
+
+```math
+\begin{align*}
+t = T \cdot log_{2}\frac{K-N_0}{\frac{K}{2}- N_0 }
+\end{align*}
+```
+
+"
+
+# ╔═╡ c871a80d-113c-47ee-8292-3a857752b094
+begin
+	TTT_slide = @bind TTT html"<input type=range min=5 max=15 step=1>"
+	K_slide = @bind K html"<input type=range min=100 max=400 step=1>"
+	
+	md"""
+	**Set the Cell cycle length and the Carrying Capacity**
+	
+	value of T: $(TTT_slide) 
+	
+	value of K: $(K_slide)
+	
+	"""
+end
+
+# ╔═╡ 25caf1e9-788d-41a2-add3-f0cb451420aa
+	plot(collect(0:1:100),logistic_growth_continuous(N₀,K,collect(0:1:100),TTT),label="T= $TTT",seriestype=:line,xlabel=("Time"),ylabel=("Number of cells"),ylims = (0,400))
+
+# ╔═╡ d22b66c2-c7f4-4cf6-90eb-fb6e186128ff
+begin
+	plot(collect(0:1:150),logistic_growth_continuous(N₀,K,collect(0:1:150),TTT),label="T= $TTT",seriestype=:line,xlabel=("Time"),ylabel=("Number of cells"),ylims = (0,400))
+	hline!([K/2], label=" half carrying capacity")
+	#vline!([TTT/log(2) * log((K/20)-1)], label=" time until half carrying capacity")
+	vline!([TTT * log2((K/N₀)-1)], label=" time until half carrying capacity")
+end
+
+# ╔═╡ 27dc30f0-b6a7-44be-b9dd-e02348aec72b
+begin
+	plot(x -> TTT * log2((x/20)-1),collect(40:1:100),label="T= $TTT",seriestype=:line,xlabel=("K"),ylabel=("t until K/2"),ylims = (0,20))
+	hline!([TTT], label=" cell cycle")
+end
+
+# ╔═╡ 4cf4d8e3-0dec-4e7e-a7f6-f2221796127a
+begin
+	plot(collect(0:1:100),logistic_growth_continuous(20,K,collect(0:1:100),TTT),label="T= $TTT",seriestype=:line,xlabel=("Time"),ylabel=("Number of cells"),ylims = (0,400))
+	hline!([40], label=" 2 N0")
+	vline!([TTT], label=" cell cycle length")
+	#vline!([TTT/log(2) * log((K/20)-1)], label=" time until half carrying capacity")
+	vline!([TTT * log2((K-20)/(K/2-20))], label=" time until population doubles")
+end
+
+# ╔═╡ aff292c9-1ccb-4f8a-81b7-08240a035486
+md" A smaller carrying capacity increases the diference between the real cell cycle and the effective cell cycle (time for doubling the population). "
+
+# ╔═╡ c8e7329b-7389-454d-bd88-1da6ebab0477
+md"Let's study again how this doubling time in the population changes with the carrying capacity"
+
+# ╔═╡ a7a0e5f7-a0dc-41d7-a532-0a75799351b4
+begin
+	plot(K -> TTT * log2((K-20)/(K/2-20)),collect(40:1:500),label="T= $TTT",seriestype=:line,xlabel=("K"),ylabel=("time until P=K/2"),ylims = (0,60))
+	hline!([TTT], label=" cell cycle")
+end
+
+# ╔═╡ 81d67196-5ceb-49c7-9104-1d2b8b40bf4c
+md"The real doubling time increases as we approach towards the carrying capacity"
+
+# ╔═╡ 7defd5c3-ae8e-4b54-b732-f9d5e99690f3
+md"### Robustness and the logistic growth
+
+
+Systems in biology need to be robust. As an embryo develops, the correct number of cells is key to ensure a proper form, shape and function of an organ. Nature has implemented several ways to enhance robustness against perturbations. 
+
+Here we will like to study if growing with limited resources increases or reduces teh robustness. From the unconstrained growth:
+
+```math
+\begin{align*}
+t &= T \cdot log_2 (\frac{N}{N_0}) \\
+\end{align*}
+```
+
+now we assuem a small change in the initial conditions:
+
+
+```math
+\begin{align*}
+t' &= T \cdot log_2 (\frac{N}{N_0 \pm \delta N})  
+\end{align*}
+```
+
+we compute the change in time 
+
+```math
+\begin{align*}
+t' - t &= T \cdot ((log_2 (\frac{N}{N_0 \pm \delta N})  - log_2 (\frac{N}{N_0}))\\
+t' - t &= T \cdot log_2 \frac{\frac{\cancel{N}}{N_0 \pm \delta N}}{\frac{\cancel{N}}{N_0}}\\
+t' - t &= T \cdot log_2 \frac{N_0}{N_0 \pm \delta N}\\
+t' - t &= T \cdot log_2 \frac{1}{1 \pm \frac{\delta N}{N_0}}\\
+\end{align*}
+```
+using the properties of logs
+```math
+\begin{align*}
+t - t' &= T \cdot log_2 (1 \pm \frac{\delta N}{N_0})\\
+\end{align*}
+```
+so the difference in time depends on the log of the change.
+
+
+so for a change in 10% in the population, we have a change in the time to rech a certain size of
+
+
+
+"
+
+
+
+# ╔═╡ b3165ad4-1f3b-408c-aa13-5bac4ee9af9a
+
+ log2(1+ (20/20))
+
+# ╔═╡ 6563e669-e9f1-467a-bebe-a73ff5868f5f
+md" in terms of cell cycle units
+
+```math
+\begin{align*}
+\frac{\delta t}{T}  &=  log_2 (1 \pm \frac{\delta N}{N_0})\\
+\end{align*}
+```
+
+
+"
+
+# ╔═╡ f92ddb90-623c-461f-864e-14848af39278
+plot(x -> log2(1+x), collect(-1:0.1:1),seriestype=:line,xlabel=("amount of perturbation"),ylabel=("change in terms of cell cycle units"))
+
+
+# ╔═╡ 42765413-115e-4655-841a-38b8b1959af4
+md"now for the logistic growth
+
+```math
+\begin{align*}
+t = T \cdot log_2\frac{(K-N_0)N}{(K-N)N_0}
+\end{align*}
+```
+
+assume a perturbation 
+
+```math
+\begin{align*}
+t' = T \cdot log_2\frac{(K-N_0 \pm \delta N )N}{(K-N) (N_0 \pm \delta N)}
+\end{align*}
+```
+the difference:
+
+```math
+\begin{align*}
+t' - t = T (log_2\frac{(K-N_0 \pm \delta N) N}{(K-N) (N_0 \pm \delta N)} -log_2\frac{(K-N_0)N}{(K-N)N_0})\\
+t' - t = T \cdot log_2(\frac{\frac{(K-N_0 \pm \delta N )\cancel{N}}{\cancel{(K-N)} (N_0 \pm \delta N)}}{\frac{(K-N_0)\cancel{N}}{\cancel{(K-N)}N_0}})\\
+t' - t = T \cdot log_2\frac{N_0(K-N_0 \pm \delta N )}{(K-N_0)(N_0 \pm \delta N)}\\
+\end{align*}
+```
+
+Again, it does not depend on the final number of cells. We will give it a form similar to the exponential growth:
+
+```math
+\begin{align*}
+t' - t = T \cdot log_2\frac{(K-N_0 \pm \delta N )}{(K-N_0)\frac{N_0 \pm \delta N}{N_0}}\\
+t' - t = T \cdot log_2\frac{(K-N_0 \pm \delta N )}{(K-N_0) (1\pm \frac{\delta N}{N_0})}\\
+\end{align*}
+```
+changing signs
+
+```math
+\begin{align*}
+t' - t = T \cdot log_2\frac{(K-N_0) (1\pm \frac{\delta N}{N_0})}{(K-N_0 \pm \delta N )}\\
+t' - t = T \cdot log_2 (1\pm \frac{\delta N}{N_0}) \frac{(K-N_0) }{(K-N_0 \pm \delta N )}\\
+\end{align*}
+```
+
+
+So it is similar than before but modulated by teh distance between $N_0$ and $K$
+
+```math
+\begin{align*}
+t' - t = T \cdot log_2 (1\pm \frac{\delta N}{N_0}) \frac{1 }{(1 \pm \frac{\delta N}{(K-N_0)} )}\\
+\end{align*}
+```
+So, as a final form:
+
+```math
+\begin{align*}
+\frac{t' - t}{T} = log_2  \frac{(1\pm \frac{\delta N}{N_0}) }{(1 \pm \frac{\delta N}{(K-N_0)} )}\\
+\end{align*}
+```
+
+
+"
+
+# ╔═╡ f1e307d4-b410-43b6-99d1-3fa52a4573ba
+begin
+	x_relative_slide = @bind x_relative html"<input type=range min=0 max=1 step=0.1>"
+	
+	md"""
+	**value of perturbation respect to distance to carrying capacity**
+	
+	x relative: $(x_relative_slide)
+	
+	"""
+end
+
+# ╔═╡ cfa43b87-e62d-426f-a014-ff65f3ff6e9e
+begin
+	plot(x -> log2(1+x), collect(-1:0.1:1),seriestype=:line,xlabel=("amount of perturbation"),ylabel=("change in terms of cell cycle units"))
+	
+	plot!(x -> log2((1+x)/(1+x_relative)), collect(-1:0.1:1),seriestype=:line,xlabel=("amount of perturbation"),ylabel=("change in terms of cell cycle units"))
+end
+
+# ╔═╡ 1c9a5031-5e1a-4866-9971-0096d5bc5cc5
+CORRECT, because it should remain in zero,zero allways 
+also, test with noise, because negative perturbatiosn are amplifieed over positive perturbations
+
+# ╔═╡ a5cd8ccb-790a-48ba-8ec0-65274cc67e54
+md" ## Allee effect 
+
+Allee effects have been documented for a wide variety of taxa and have influenced many aspects of basic and applied ecology during the past decades (Courchamp, Berec, & Gascoigne, 2008; Kramer, Dennis, Liebhol, & Drake, 2009). In general, an Allee effect can be defined as a positive relationship between mean individual fitness and population size or density (hereafter population size), generally occurring in small populations (Stephens, Sutherland, & Freckleton, 1999). More specifically, Allee effects occur when there are beneficial interactions among individuals that cause the per capita population growth rate to increase with the number of individuals. Conversely, if the number of individuals decreases, they suffer from fewer or less efficient interactions and the per capita population growth rate decreases. The critical population size below which the per capita population growth rate becomes negative is called the Allee thresh- old. A major consequence of the Allee effect is that populations fall- ing below the Allee threshold become even smaller, thereby entering into a positive feedback loop that can ultimately lead to their extinction.
+
+A simple mathematical model of an Allee effect is one where initial densities below the threshold lead to extinction, whereas initial densities above the threshold lead to survival.
+
+The strong Allee model, is analogous to the logistic growth model, except that the dependency on N in this model occurs in the opposite regime—introducing an Allee effect term of 1  NA that lowers the observed growth rate at small N near the Allee threshold A
+```math
+\begin{align*}
+\frac{\partial N(t)}{\partial t}= \mu N(t) \left(1-\frac{A}{N(t)}\right) 
+\end{align*}
+```
+
+This model describes N cells whose net growth rate exists in 2 distinct regimes: when N is less than the Allee threshold (A), the Allee effect term results in reduction in the population, while for population levels above the Allee threshold, the system is exponential 
+
+"
+
+# ╔═╡ 888555ab-1561-47a1-8374-19762761d6c1
+md"If we separate variables and integrate, we obtain the following solution:
+
+```math
+\begin{align*}
+\frac{\partial N}{N \left(1-\frac{A}{N}\right)}= \mu \partial t  
+\end{align*}
+```
+solving
+
+```math
+\begin{align*}
+A \cdot log(N-A) + N = \mu t + cte \\ 
+\end{align*}
+```
+
+the constant will be 
+
+
+```math
+\begin{align*}
+cte = A \cdot log(N_0-A) + N_0  \\ 
+\end{align*}
+```
+
+so we obtain
+
+```math
+\begin{align*}
+A \cdot log(N-A) + N = \mu t + A \cdot log(N_0-A) + N_0 \\ 
+\end{align*}
+```
+
+"
+
+# ╔═╡ 62ba4586-6eea-4b6a-b350-3997179c95d7
+
+
+# ╔═╡ 96b05778-c4bf-47cf-9c62-514c7440ee42
+plot(N -> N + log(N-1), collect(1:5),seriestype=:line,xlabel=("N"),ylabel=("growth"))
+	
+
+# ╔═╡ 61fe29b8-065c-430f-a28d-b463780f8b00
+md" ## Conclusions
+
+Fitness is a term that describes the survival and reproductive output of an individual in a population relative to other members of the population. In other words, it represnets how well an organism is adapted to its environment. The fitness of an individual animal is a measure of its ability, relative to others, to leave viable offspring.
+
+##
+Fitness can fundamentally be achieved by two different strategies: long life (stability) or fast reproduction (multiplication, replication). These strategies are to some degree dependent: since no organism is immortal, a minimum amount of reproduction is needed to replace the organisms that have died; yet, in order to reproduce, the system must live long enough to reach the degree of development where it is able to reproduce. On the other hand, the two strategies cannot both be maximally pursued: the resources used for fast reproduction cannot be used for developing a system that will live long, and vice-versa. This means that all evolutionary systems are confronted with a development-reproduction trade-off: they must choose whether they invest more resources in the one or in the other.
+How much a given system will invest in one strategy at the expense of the other one depends on the selective environment. In biology, this is called r-K selection: in an r-situation, organisms will invest in quick reproduction, in a K-situation they will rather invest in prolonged development and long life. Typical examples of r-species are mice, rabbits, weeds and bacteria, which have a lot of offspring, but a short life expectancy. Examples of organisms undergoing K-selection are tortoises, elephants, people, and sequoia trees: their offspring are few but long-lived. In summary, r-selection is selection for quantity, K-selection for quality of offspring.
+##
+| r-organisms          | K-organisms | 
+|--------------|:-----:|
+| short-lived |  long-lived | 
+| small      |  Large |  
+| weak      |  strong or well-protected |  
+| waste a lot of energy      |  energy efficient |  
+| less intelligent, experienced...      |  intelligent, experienced... |
+|have large litters| have small litters|
+|reproduce at an early age|reproduce at a late age|
+|fast maturation|slow maturation|
+|little care for offspring|much care for offspring|
+|strong sex drive|weak sex drive|
+|small size at birth|large size at birth|
+
+"
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -630,7 +824,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 DifferentialEquations = "~7.7.0"
-Plots = "~1.38.5"
+Plots = "~1.38.6"
 PlutoUI = "~0.7.50"
 """
 
@@ -640,7 +834,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "327dd4d7cc8897d09e64be7b62b44238f24b914d"
+project_hash = "955567cca946300dd400659439c359fe1a067d33"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -666,9 +860,9 @@ version = "0.2.0"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "ec9c36854b569323551a6faf2f31fda15e3459a7"
+git-tree-sha1 = "a89acc90c551067cd84119ff018619a1a76c6277"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.2.0"
+version = "7.2.1"
 
 [[deps.ArrayInterfaceCore]]
 deps = ["LinearAlgebra", "SnoopPrecompile", "SparseArrays", "SuiteSparse"]
@@ -801,9 +995,9 @@ version = "0.3.0"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
-git-tree-sha1 = "61fdd77467a5c3ad071ef8277ac6bd6af7dd4c04"
+git-tree-sha1 = "7a60c856b9fa189eb34f5f8a6f6b5529b7942957"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.6.0"
+version = "4.6.1"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -911,9 +1105,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "fb372fc76a20edda014dfc2cdb33f23ef80feda6"
+git-tree-sha1 = "da9e1a9058f8d3eec3a8c9fe4faacfb89180066b"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.85"
+version = "0.25.86"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -1368,9 +1562,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LinearSolve]]
 deps = ["ArrayInterface", "DocStringExtensions", "FastLapackInterface", "GPUArraysCore", "IterativeSolvers", "KLU", "Krylov", "KrylovKit", "LinearAlgebra", "Preferences", "RecursiveFactorization", "Reexport", "SciMLBase", "SciMLOperators", "Setfield", "SnoopPrecompile", "SparseArrays", "Sparspak", "SuiteSparse", "UnPack"]
-git-tree-sha1 = "d1fce810e9a4213607f0182cf25ffd6ce13e19b6"
+git-tree-sha1 = "fd65db5fff7238ba4c0b7a61de7e81748d73fa14"
 uuid = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-version = "1.37.0"
+version = "1.38.0"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
@@ -1534,9 +1728,9 @@ version = "1.4.1"
 
 [[deps.OrdinaryDiffEq]]
 deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "ExponentialUtilities", "FastBroadcast", "FastClosures", "FiniteDiff", "ForwardDiff", "FunctionWrappersWrappers", "IfElse", "LinearAlgebra", "LinearSolve", "Logging", "LoopVectorization", "MacroTools", "MuladdMacro", "NLsolve", "NonlinearSolve", "Polyester", "PreallocationTools", "Preferences", "RecursiveArrayTools", "Reexport", "SciMLBase", "SciMLNLSolve", "SimpleNonlinearSolve", "SnoopPrecompile", "SparseArrays", "SparseDiffTools", "StaticArrayInterface", "StaticArrays", "TruncatedStacktraces", "UnPack"]
-git-tree-sha1 = "5370a27bf89e6ac04517c6b9778295cdb7a411f8"
+git-tree-sha1 = "d875f5fa389e8a35fb2ae8f39326cc97815d1075"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "6.48.0"
+version = "6.49.0"
 
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1557,9 +1751,9 @@ version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "6f4fbcd1ad45905a5dee3f4256fabb49aa2110c6"
+git-tree-sha1 = "478ac6c952fddd4399e71d4779797c538d0ff2bf"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.7"
+version = "2.5.8"
 
 [[deps.Pipe]]
 git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
@@ -1755,9 +1949,9 @@ version = "0.6.38"
 
 [[deps.SciMLBase]]
 deps = ["ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Preferences", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "SnoopPrecompile", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables", "TruncatedStacktraces"]
-git-tree-sha1 = "fe55d9f9d73fec26f64881ba8d120607c22a54b0"
+git-tree-sha1 = "fdea92555855db1d86c3638f0a789d6e0a830e67"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "1.88.0"
+version = "1.89.0"
 
 [[deps.SciMLNLSolve]]
 deps = ["DiffEqBase", "LineSearches", "NLsolve", "Reexport", "SciMLBase"]
@@ -1767,9 +1961,9 @@ version = "0.1.3"
 
 [[deps.SciMLOperators]]
 deps = ["ArrayInterface", "DocStringExtensions", "Lazy", "LinearAlgebra", "Setfield", "SparseArrays", "StaticArraysCore", "Tricks"]
-git-tree-sha1 = "8419114acbba861ac49e1ab2750bae5c5eda35c4"
+git-tree-sha1 = "e61e48ef909375203092a6e83508c8416df55a83"
 uuid = "c0aeaf25-5076-4817-a8d5-81caf7dfa961"
-version = "0.1.22"
+version = "0.2.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
@@ -1858,9 +2052,9 @@ version = "0.8.4"
 
 [[deps.StaticArrayInterface]]
 deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "Static", "SuiteSparse"]
-git-tree-sha1 = "5589ab073f8a244d2530b36478f53806f9106002"
+git-tree-sha1 = "fd5f417fd7e103c121b0a0b4a6902f03991111f4"
 uuid = "0d7ed370-da01-4f52-bd93-41d350b8b718"
-version = "1.2.1"
+version = "1.3.0"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
@@ -2002,10 +2196,10 @@ uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
 version = "0.1.6"
 
 [[deps.TruncatedStacktraces]]
-deps = ["InteractiveUtils"]
-git-tree-sha1 = "7cdbe45f0018b7f681a6b63ad1250ee6f2297a87"
+deps = ["InteractiveUtils", "MacroTools"]
+git-tree-sha1 = "f7057ba94e63b269125c0db75dcdef913d956351"
 uuid = "781d530d-4396-4725-bb49-402e4bee1e77"
-version = "1.0.0"
+version = "1.1.0"
 
 [[deps.URIs]]
 git-tree-sha1 = "074f993b0ca030848b897beff716d93aca60f06a"
@@ -2285,60 +2479,44 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─d096a6be-65a1-428d-9bfb-da7fe89f4c19
-# ╟─0ca85fbd-7b68-45e6-8433-118492920050
-# ╟─51ea04ff-c66b-46d1-9e62-b1ec3554ee8a
-# ╟─ff1f143a-77d0-43e9-8975-b7b28c6f9ae4
-# ╟─2b43b0c5-fe0b-419a-b2d9-ec349625d6df
-# ╟─617ce27f-57e2-4e8c-8fda-4029fc6a01e3
-# ╟─081daad5-b960-4c64-bdec-c0ecb0d6896b
-# ╟─4e2cead3-1c4f-48b4-8f5a-f78c4efaee2c
-# ╠═16c39710-8f90-45c8-983a-25438019d90c
-# ╠═bd8ee393-6193-4662-b199-edbe339ffc31
-# ╟─7b74322b-8481-4311-a77c-1a62cfb5b15c
-# ╠═a1ce2262-da8e-496a-81d8-10ff5246c17f
-# ╟─85defe33-1c87-4e81-a7d2-a363bee3e699
-# ╠═b043d65b-a214-482a-96cb-e8c075814490
-# ╟─842e2c41-72a3-443c-82db-ab1ff3612a12
-# ╟─86804a6f-9178-40f3-ae82-cc6723412ae8
-# ╟─7d7ff37f-c221-4067-a74c-d50603448906
-# ╠═8510e3df-ea93-4c25-ac3d-1069b067a62d
-# ╟─53d4538b-bcfb-46ec-ab6c-a57d97747e6b
-# ╠═d048e8f1-5de8-4d4f-a984-9e25d571e209
-# ╟─469df604-25da-4579-9f47-5c48e91a6288
-# ╠═31b7cdd1-c2a7-49bc-a08d-9675090030b6
-# ╠═e02d057b-32d6-457b-b00e-f9dde43bf198
-# ╠═9a56b78a-eec0-4f0f-b30d-6f4fa777e59a
-# ╟─085747be-ed2c-435e-acbb-6bec8ea005f7
-# ╠═e88fb46c-3a9f-4be3-9318-3efe50e66938
-# ╟─68f8b497-3dcd-4a4b-a4fa-8f72c85706e3
-# ╟─2a518074-ea51-457a-b309-2d7650cd3463
-# ╟─c5a658da-7953-4131-ad6f-d2ce50294982
-# ╟─f972b4da-236d-4a7c-b2d6-ba1b4dc5a7d9
-# ╟─7915360f-4bd5-40d6-9cb8-0b278c3944d6
-# ╟─d55d1137-e6f9-45ba-a68b-377d388feac9
-# ╠═b7cebd3a-c4a1-48ae-99e0-5431e2b261a2
-# ╟─d43ffd8f-1bfd-437b-81e3-0dabc6a3d081
-# ╠═db1e527b-7fdc-45cc-8c20-d106dd347103
-# ╟─bc878bca-ad29-43ca-b76c-cc710bb2aa33
-# ╠═46d6d1ea-7b07-4e65-b965-b65c8655503d
-# ╟─2d392e4f-8944-438a-a5c5-977ed95e258b
-# ╟─4a924aa1-e7f4-4664-b9e3-498d24dcffeb
-# ╟─1ede2ba1-18d6-4385-9df1-458b572e5121
-# ╟─b3171639-fd44-4aa5-8c89-7ff91ce9fc61
-# ╟─6ea8e4b3-1393-4675-86df-b32bd70bf587
-# ╟─bbe71b50-2387-4a22-898a-8140c55121e4
-# ╟─988ee18e-1dc3-4061-9cbe-96424961fbb7
-# ╠═a9357ca7-54ea-4f67-a0a8-df01d1bc4246
-# ╟─af01b6ef-bd47-4a15-8bd4-f90e214411f3
-# ╟─26c5caa7-ab30-4dc2-9eea-2e6e8316b184
-# ╟─4185a115-9871-4065-85e9-37df17d54891
-# ╟─93741ffc-2d2b-4b6a-bcb5-d0e899b0586b
-# ╟─4d9dde04-0476-448e-ad6c-a8374b35568f
-# ╟─7f608559-6b37-4246-afa6-60cfda53d321
-# ╟─80f0dfcf-b202-47e0-b7af-c0d8f3c7deb8
-# ╟─7c850679-a706-4d27-b6a2-d5a078c38bb7
-# ╟─43b4f6a3-8cff-4198-a0dd-409643f2059f
-# ╟─8b7117ed-e4e5-4111-bd04-078d7baf9320
+# ╟─62c492eb-eedb-4452-a0f1-7bf5e93a8e69
+# ╟─73941e4a-7d10-4728-8ec2-9d9e2ddc552e
+# ╟─313ee9bf-1a07-4445-958e-d1dad4847476
+# ╟─7ba042d6-107d-4188-a877-c7f7d7b35c46
+# ╟─4b516468-55ff-492b-a026-61154c8062a0
+# ╟─51945b7a-f1ac-423b-affd-f1676987de7b
+# ╟─1c24a2f1-2b15-48e6-b0d8-c3278103036d
+# ╟─85bc871e-6067-4a1d-bbb9-e3a9b0dfbd85
+# ╟─a0c679f9-d9f9-4d63-b506-ca6f7ee533c4
+# ╠═e1601070-d88e-4515-8ad7-af810d98e46d
+# ╟─25caf1e9-788d-41a2-add3-f0cb451420aa
+# ╟─8c2e51c1-e0b2-4f79-9a49-8690e6bcc98b
+# ╟─f48bcf9b-2881-4bf2-b07f-d0015b210bda
+# ╟─5b2cc001-ba95-4691-aba9-049b12e9ab65
+# ╟─5a387568-2284-4d4e-85fc-f106db7377c9
+# ╠═d22b66c2-c7f4-4cf6-90eb-fb6e186128ff
+# ╟─ded83bd0-647a-4e98-b177-59cd78fc27de
+# ╟─27dc30f0-b6a7-44be-b9dd-e02348aec72b
+# ╟─b8ed2a50-9e98-4359-8f9e-f6198e436de2
+# ╟─0c3783c3-1fe1-40bd-be8a-13a82e646ef7
+# ╟─c871a80d-113c-47ee-8292-3a857752b094
+# ╟─4cf4d8e3-0dec-4e7e-a7f6-f2221796127a
+# ╟─aff292c9-1ccb-4f8a-81b7-08240a035486
+# ╟─c8e7329b-7389-454d-bd88-1da6ebab0477
+# ╟─a7a0e5f7-a0dc-41d7-a532-0a75799351b4
+# ╟─81d67196-5ceb-49c7-9104-1d2b8b40bf4c
+# ╟─7defd5c3-ae8e-4b54-b732-f9d5e99690f3
+# ╠═b3165ad4-1f3b-408c-aa13-5bac4ee9af9a
+# ╟─6563e669-e9f1-467a-bebe-a73ff5868f5f
+# ╟─f92ddb90-623c-461f-864e-14848af39278
+# ╟─42765413-115e-4655-841a-38b8b1959af4
+# ╟─f1e307d4-b410-43b6-99d1-3fa52a4573ba
+# ╠═cfa43b87-e62d-426f-a014-ff65f3ff6e9e
+# ╠═1c9a5031-5e1a-4866-9971-0096d5bc5cc5
+# ╟─a5cd8ccb-790a-48ba-8ec0-65274cc67e54
+# ╟─888555ab-1561-47a1-8374-19762761d6c1
+# ╠═62ba4586-6eea-4b6a-b350-3997179c95d7
+# ╠═96b05778-c4bf-47cf-9c62-514c7440ee42
+# ╟─61fe29b8-065c-430f-a28d-b463780f8b00
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.27
+# v0.19.20
 
 using Markdown
 using InteractiveUtils
@@ -14,612 +14,234 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ d096a6be-65a1-428d-9bfb-da7fe89f4c19
-
+# ╔═╡ 9e643389-d8ab-44ad-8382-59260c1200c9
 	using  PlutoUI,Plots, DifferentialEquations
 
-# ╔═╡ 0ca85fbd-7b68-45e6-8433-118492920050
-begin
-	struct Foldable{C}
-	    title::String
-	    content::C
-	end
-	
-	function Base.show(io, mime::MIME"text/html", fld::Foldable)
-	    write(io,"<details><summary>$(fld.title)</summary><p>")
-	    show(io, mime, fld.content)
-	    write(io,"</p></details>")
-	end
-end
-
-# ╔═╡ 51ea04ff-c66b-46d1-9e62-b1ec3554ee8a
-html"<button onclick='present()'>present</button>"
-
-# ╔═╡ ff1f143a-77d0-43e9-8975-b7b28c6f9ae4
-md" # 3. Population dynamics in complex systems
-
-A key aspect of complex systems is their dynamics, how they change in time. The core idea is to try to define a set of equations that capture their evolution in time. These mathematical models are abstract description of a concrete system using mathematical concepts and language. 
-
-What type of models do we want? Very realistic models with many interactions or simpified models?
-
-Simple models can be much easily analyzed and understood mathematically. Models with many variables become obscure and do not provide much information of the experiment. Our idea is to generate models that can reproduce the core properties and features of a given experiment. Simple models with few equations are therefore, much more difficult to generate than models with many interactions. 
-##
-So, when we try to capture the change in the state of a given system overtime, we have to include the temporal variable. This is why, our basic tool from now own will be some sort of differential equation, that camputes how the system changes between two different time points.  
-##
-*Models are useful when they are wrong*
-
-"
-
-# ╔═╡ 2b43b0c5-fe0b-419a-b2d9-ec349625d6df
-md"
-##
-
-We will start with a very simple system of just one species that is proliferating and/or dying. In these type of models, the number of individuals in the population at a given time in the future will depend on the number of individuals in the past. This is the tipical situation of bacterias proliferating. 
-"
-
-# ╔═╡ 617ce27f-57e2-4e8c-8fda-4029fc6a01e3
-Resource("https://i.ibb.co/hLbYxCg/bacteria-in-a-petri-dish-compressed.jpg")
-
-# ╔═╡ 081daad5-b960-4c64-bdec-c0ecb0d6896b
+# ╔═╡ c1b8a324-d3b9-11ed-2326-5bd8248b4877
 md"
 
 
-## 3.1 Unconstrained growth 
+## 4.1 Discrete models of stem cells
 
-The most basic approach to population growth is to begin with the assumption that every individual produces two offspring in its lifetime, then dies, which would double the population size each generation. The same approach is for cells that divide and produce two identical cells, such as bacteria.
+Stem cells are a remarkable type of cells with the ability to differentiate into various specialized cell types in the body. They play a crucial role in the development, growth, and repair of tissues and organs.
 
-Stem cells also undergo a similar type of scheme: during the early stages of development, they undergo a phase of proliferation that expands the population, in a process that called proliferative divisions. Later on, they start to differentiate to produce the different types of progeny. A very important question in develpmental biology is to understand how these populations grow in time and how this growth may be affected by external stimuly. 
+Stem cells have the ability to self-renew and generate new stem cells or to differentiate into specialized cells. The study of the mechanisms that set and regulate this balance s one of the most actives areas of research in modern biology. 
+
+We will try now to develop a very simple model of stem cells that are proliferating from a initial population $P_0$ with constant cell cycle $T$, which is the time that a cell takes to divide. This way our intial state is $P(T=0)=P_0$
 
 ##
-A first simplified population approach is to assume a constant relative growth rate. In a discrete model, this rate would represent growth over time intervals of some fixed length. We can do that easily in the context of discrete __Difference Equations__ , which are simply recursive relations that describe the evolution of a quantity or a population whose changes are measured over discrete time intervals (days, for instance). This difference equations allow us to calculate the next value of a quantity based on the previous value
+
+After a cell cycle length interval '∆t = T ', all cell will divide resulting in a number of new cells '∆P'. If we measure the amount of cells just after this firts cell cycte '∆t=T' we have.  
 
 ```math
-p_{t+1} = f(p_t)
+P(2T) = 2 \cdot P(T)
 ```
+which is basically the same situation of unrestricted growth in bacterial populations, bny with a fixed $r=2$.
 
-In other words, the output that we obtain from a difference equation will become our input when we calculate the next term of the recursion. Consider as an example the growth of a population of cells with an initial number of $p(t=0)=p_0$. 
-##
-
-After a given time interval '∆t', a percentage of the population will reproduce, resulting in a number of new cells '∆p'. This number of newly produced cells has to be  proportional to the initial number of cells 'p(0)' (if a population of 20,000 cells produces 1200 new cells in 1 h, then a 4-fold bigger population of 80,000  will produce 4 times as many, i.e., 4800, new cells in 1 h). We can write this proportionality as a discrete system in the following way
-
-```math
-p_{t+1} = r \cdot p_t
-```
-
-where $p_t$ is the population at the start of hour $n$, $p_{t+1}$ is the number of cells at the end of the time interval, and $r$ is a fixed growth factor. Here, each term $p_t$ is simply multiplied by $r$ to produce the next term. Because the newly produced cells always add to the population, i.e. the number of cells in the system increases, it is straightforward to see that the number of cells in the system at succesive time intervals will be
-
-```math
-\begin{align} 
-p_0\\
-p_1 &=r \cdot p_0 \\
-p_2 &=r \cdot p_1 = r^2 \cdot p_0 \\
-p_3 &=r \cdot p_2 = r^3 \cdot p_0 \\
-···\\
-\end{align}
-```
 ##
 So, in general 
 
 ```math
-p_{t}=r^t \cdot p_0
+P(nT)=2^{nT} \cdot P_0
 ```
 
-The factor $r$ exceeds unity by the relative growth rate. For example, if the population increases by $6\%$ each hour then $r = 1.06$. In general, with a positive relative growth rate, the solution to is an exponential function with base $r > 1$
+##
+
+## 4.2 Discrete models of stem cells with quiescence
+
+Sometimes, stem cells enter into a state of cell cycle arrest or dormancy, where they remain metabolically active but temporarily halt their cell division. Quiescence is an important mechanism for stem cells to maintain their long-term self-renewal capacity and ensure that a pool of stem cells survive from embryogenesis into adulthood. This way, stem cells can exit quiescence in response to tissue damage, injury, or certain signals from the niche, such as growth factors or inflammation. This exit from quiescence triggers stem cell activation and subsequent proliferation or differentiation to repair and regenerate damaged tissues.
+
+
+In the next section, we will incorporate into our model the fact that in a population of stem cells, not all of then divide, but that there is a certain population that can remain in quiescence. For instance if we have a population of cells where half are cycling and the other half are quiescent. 
+
+```math
+P(2T)=2 \cdot \frac{P(T)}{2} +  \frac{P(T)}{2}
+```
+
+In this simple situation we will have
+
+```math
+P(2T)=P_T +  \frac{P(T)}{2}= \frac{3}{2} P(T)
+```
+and for $n$ steps:
+
+
+```math
+P(nT)=(\frac{3}{2})^{nT} P_0
+```
+
+##
+
+What if now is not half of the population, but a fixed percentage of quiescence?, To do this, we introduce the concept of growth fraction, $\gamma$, which refers to the ratio of cells in a population that are actively cycling. This way, the system becomes:
+
+
+```math
+P(2T)=2 \cdot P(T) \cdot \gamma +  P(T) \cdot (1-\gamma)
+```
+
+
+```math
+P(2T)=2 \cdot P(T) \cdot \gamma +  P(T) - P(T)  \cdot  \gamma = P(T) (2 \cdot \gamma +  1 -  \gamma ) = P(T)(1+\gamma)
+```
+
+and in general 
+
+```math
+P(nT)= P_0(1+\gamma)^{nT}
+```
+
+
 
 "
 
-# ╔═╡ 4e2cead3-1c4f-48b4-8f5a-f78c4efaee2c
+# ╔═╡ 2d14d119-5d42-4a43-9174-36fe6be37331
 begin
-	r_slide = @bind r html"<input type=range min=0.1 max=2 step=0.1>"
+	gamma_slide = @bind gamma html"<input type=range min=0.0 max=1 step=0.1>"
 	
 	md"""
 	##
-	**Move the slider to set the growth rate in the population**
+	**Move the slider to set the growth fraction in the population**
 	
-	value of r: $(r_slide)
+	value of gamma: $(gamma_slide)
 	
 	"""
 end
 
-# ╔═╡ 16c39710-8f90-45c8-983a-25438019d90c
-time=collect(1:0.1:10);
-
-# ╔═╡ bd8ee393-6193-4662-b199-edbe339ffc31
-plot(time,r .^(time),ylims = (0,10),title=("Unconstrained growth, r=$r"))
-
-# ╔═╡ 7b74322b-8481-4311-a77c-1a62cfb5b15c
-md"
-
-## 3.2 Constrained growth 
-
-Although the unconstrained model might be fairly accurate in the short term, this type of exponential growth is not realistic in the long term. For instance, there will be potentially a limitation in environmental factors (size, nutrients...). A simple approximation but much more realistic, it is to assume that $r$ changes with the population size. 
-
-```math
-p_{t+1} = r(p_t) \cdot p_t
-```
-
-where the function $r(p)$ is set to decrease as the population p increases. From a mathematical standpoint, it is natural to begin an investigation of such models by considering the case of a linear function r(p).
-
-##
-
-Lets think of a population that initially grows with very little environmental constraint ($r>1$), a situation that might arise when a few members of a new species are introduced into an environment rich in nutrients and habitable area. Over time the population will increase until it approaches some maximum sustainable size, eventually reaching an equilibrium ($r=1$).
-
-As a starting point, we need to introduce the growth factor in consitions of no restrictions (the rate of generation of new individuals per unit of time with no restrictions) r(0).
-
-Next, we introduce the concept of carrying capacity _K_, which represents the maximum population size that a particular environment can support. This means that when the system reaches its carrying capacity, it stops growing, and reaches an equilibrium. In othger words, r(K) = 1
-##
-As an example, lets plot the linear dependence $r(p_t)$ for values of $r(0) = 1.1$ and $K=50$.
-"
-
-# ╔═╡ a1ce2262-da8e-496a-81d8-10ff5246c17f
+# ╔═╡ 9e5c9221-0bcc-4d7e-9e4a-6e8492ad8df7
 begin
-	plot([0,50],[1.1,1],line = (:line, 4))
-	title!("r for constrained growth")
-	xlabel!("Number of cells")
-	ylabel!("r")
+	time=collect(1:0.1:5);
+	plot(time,2 .^(time),ylims = (0,10),label=("all cycling"),title=("Unconstrained growth with quiescence"))
+	plot!(time,(1+gamma) .^(time),ylims = (0,10),label=("gamma = $gamma"),title=("Unconstrained growth with quiescence"))
 end
 
-# ╔═╡ 85defe33-1c87-4e81-a7d2-a363bee3e699
-md"
-##
-The slope of the previous line is:
+# ╔═╡ 2d125528-1b11-41be-a249-5314da13d9d8
+md"## Constrained growth with quiescence
+
+When the density of cells in a population increases, proliferating cells can enter a state of quiescence as a response to maintain tissue homeostasis and prevent uncontrolled growth. This phenomenon is known as contact inhibition. 
+
+If we want to introduce this idea of quiescence via contact inhibition, we can use teh same approach as the logistic growth, when division rate of teh bacteria was reducing as we approach the carrying capacity of the system.
+
+Now, cells do not stop because they run our of food, they stop dividing because they run out of available space. To introduce thsi in our model, we can start by making the growth fraction $\gamma$ dependent on the amount of cells:
 
 ```math
-Slope=\frac{1-1.1}{50-0}=\frac{- 0.1}{50}=- 2 \cdot 10^{-3}\\
-
-```
-Therefore, the function takes $r(p)$the form
-
-```math
-r(p) = r(0) + slope \cdot p = 1.1 - 2 \cdot 10^{-3} p
+P(T)=P_0 \cdot (1+\gamma(P(T)))^T 
 ```
 
-and the difference equation is now
-```math
-p_{t+1} = p_{t} (1.1 -2 \cdot 10^{-3} p_{t})  = 
-```
-##
 "
 
-# ╔═╡ b043d65b-a214-482a-96cb-e8c075814490
-growth_factor(p) = 1.10 - 0.002 * p
+# ╔═╡ ea28a5b0-21c4-4585-9306-1ab5495b5adc
+md"a first approach will be, equivalently to the logistic model, to define a linear dependence of the identity of cells as cycling or quiescence, depending on the nuber of cells in the system. "
 
-# ╔═╡ 842e2c41-72a3-443c-82db-ab1ff3612a12
-begin
-	plot([0,50],[growth_factor(0),growth_factor(50)],line = (:line, 4))
-	title!("r for constrained growth")
-	xlabel!("Number of cells")
-	ylabel!("r")
-end
+# ╔═╡ 34062729-0c2f-489b-9e67-42698026d9f9
+growth_factor(P,K) = 1.0 - 1/K * P
 
-# ╔═╡ 86804a6f-9178-40f3-ae82-cc6723412ae8
-function constrained_growth_generic(p, r, K; dt=0.01)
+# ╔═╡ 05798137-3947-444f-948b-2fb152b2b8bd
+md"
+```math
+P(nT)=P_0 \cdot (2.0 - \frac{P(nT)}{K})^{nT} 
+```
+"
+
+# ╔═╡ 804b1db3-9441-4cd6-872d-7f40a4609817
+function constrained_growth_generic(P, K; dt=1)
 traj = []
-	slope= (1-r)/K
-for t in 1:100 # arbitrary, just leave enough for it to reach a steady state given the dt
+	#slope= (1-r)/K
+for t in 1:10 # arbitrary, just leave enough for it to reach a steady state given the dt
 	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
 #	p = p * (r + slope * p)
-p = p * r * (1 - p/K + p/(r*K)) 
-push!(traj,p)
+	#P += dt * (P * ((2.0 - P/K)-1))
+	P = P * (2.0 - P/K)
+   #P = P * r * (1 - P/K + P/(r*K)) 
+push!(traj,P)
 end
 return traj#[end-20:end] # this is sampling from the steady state
 end
 
-# ╔═╡ 7d7ff37f-c221-4067-a74c-d50603448906
+# ╔═╡ 835cbcf6-f604-4172-8f71-f7e5496de990
 begin
-	rrrr_slide = @bind rrrr html"<input type=range min=0.1 max=1.7 step=0.1>"
+	K_slide = @bind K html"<input type=range min=0.0 max=100 step=0.1>"
 	
 	md"""
 	##
-	**Move the slider to set the growth rate in the population**
+	**Move the slider to set the carrying capacity**
 	
-	value of r: $(rrrr_slide)
+	value of K: $(K_slide)
 	
 	"""
 end
 
-# ╔═╡ 8510e3df-ea93-4c25-ac3d-1069b067a62d
-plot([1:100],constrained_growth_generic(5, rrrr,50; dt=0.01),ylims = (0,55),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 53d4538b-bcfb-46ec-ab6c-a57d97747e6b
-md"
-## 
->
-> __Task 1__: Suppose the population of cells in a tumor grows according to the logistic differential, where time interval is one week:
->
->```math
->P_{t+1}= 2 P_t - (0.002  P_{t}^{2})
->```
->
->(a) If $P_0$=100, Calculate the population after 3 weeks. find $\lim_{t \to  \infty}  P_t$. Is the solution curve increasing or decreasing? Justify your answer. Sketch the graph of $P_t$.
->
->(b) If $P_0$=300, Calculate the population after 3 weeks. find $\lim_{t \to \infty}  P_t$. Is the solution curve increasing or decreasing? Justify your answer. Sketch the graph of $P_t$.
->
->
->(c) How many cells are in the tumour when the population is growing the fastest? Justify your answer. 
-
-
-"
-
-# ╔═╡ d048e8f1-5de8-4d4f-a984-9e25d571e209
-p0=Int(100);p1 = p0 * (2 - 0.002 * p0);p2 = p1 * (2 - 0.002 * p1);p3 = p2 * (2 - 0.002 * p2);
-
-# ╔═╡ 469df604-25da-4579-9f47-5c48e91a6288
-Foldable("Solution 1a:", md"The number of cells after n=3 is $p3. The limit is the carrying capacity.
-
-So, rewriting the equation:
-
-```math
-P_{t+1}= 2 P_t - (0.002  P_{t}^{2})= P_t (2 - 0.002  P_{t}) = P_t (r(0) + \frac{1-r(0)}{K} P_t )
-```
-
-so $r(0)=2$ and 
-```math
-\frac{1-r(0)}{K}= - 0.002 \\
-```
-```math
-\frac{r(0)-1}{0.002}= K
-```
-so K = 500. The system is increasing because the number of cells after n=3 is below the carrying capacity.
-")
-
-# ╔═╡ 31b7cdd1-c2a7-49bc-a08d-9675090030b6
-function constrained_growth_1a(p, r, slope,time)
-traj = []
-for t in 1:time  
-p = p * (r + slope * p)
-push!(traj,p)
-end
-return traj
-end
-
-# ╔═╡ e02d057b-32d6-457b-b00e-f9dde43bf198
-plot([1:10],constrained_growth_1a(100, 2 ,-0.002,10),ylims = (0,500),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 9a56b78a-eec0-4f0f-b30d-6f4fa777e59a
-p00=Int(300);p11 = p00 * (2 - 0.002 * p00);p22 = p11 * (2 - 0.002 * p11);p33 = p22 * (2 - 0.002 * p22);
-
-# ╔═╡ 085747be-ed2c-435e-acbb-6bec8ea005f7
-Foldable("Solution 1b:", md"The number of cells after n=3 is $p33. Again, the system is increasing because the number of cells after n=3 is below the carrying capacity.
-")
-
-# ╔═╡ e88fb46c-3a9f-4be3-9318-3efe50e66938
-plot([1:10],constrained_growth_1a(300, 2 ,-0.002,10),ylims = (0,500),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-# ╔═╡ 68f8b497-3dcd-4a4b-a4fa-8f72c85706e3
-Foldable("Solution 1c:", md"The maximum growth occurs at:
-
-```math
-P_{t+1} - P_{t}= max = P_{t} * (2 - 0.002  * P_{t}) - P_{t}
-```
-```math
-P_{t+1} - P_{t}= max =  2 P_{t} - 0.002  * P_{t}^2 - P_{t} = P_{t} - 0.002  * P_{t}^2
-```
-so, taking the derivative of this function
-
-```math
-1 - 0.004  * P_{t} = 0 => P_{t} =\frac{1}{0.004}= 250
-```
-
-which corresponds to half of the carrying capacity.
-
-")
-
-# ╔═╡ 2a518074-ea51-457a-b309-2d7650cd3463
-
-	plot([1:10],constrained_growth_1a(10, 2 ,-0.002,10),ylims = (0,600),xlabel=("Time"),ylabel=("Number of cells"),title=("Constrained growth, r=$rrrr"))
-
-
-
-# ╔═╡ c5a658da-7953-4131-ad6f-d2ce50294982
-md" 
-## 
-
-> __Task 2:__(a) Write the logistic discrete equation for an initial population of bacteria of 1e2 cells that is dividing every hour in a flask with limited to 1e6 cells. 
->
->(b) Update the previous equation to include the fact that in average, only 50% of the cells are cycling. 
->
->(c) Update the equation in (b) to include the fact that in average, cells have a probability of dying of 10%
->
->(d) Update the equation in (b) to include the fact that in average, the newborn cells have a probability of dying of 10%, and the noncycling cells have a probability of dying of 20%. 
-
-
-"
-
-# ╔═╡ f972b4da-236d-4a7c-b2d6-ba1b4dc5a7d9
-md" 
- (a) Solution: the intial r=2, and it goes to 1 when p=10^6
-
-The linear function r is thus determined to be
-
-```math
-Slope=\frac{1 - 2}{10^6-0}=\frac{- 1}{10^6}\\
-```
-Therefore, the function takes the form
-
-```math
-r(p) = 2 - \frac{p}{10^6}
-```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t}(2 - \frac{p_{t}}{10^6} )  = 
-```
-
-
-"
-
-# ╔═╡ 7915360f-4bd5-40d6-9cb8-0b278c3944d6
+# ╔═╡ f2c140df-b8bc-45c9-b171-ecbb3c08ea62
 begin
-	growth_factor2(p) = 2 -  p / 1E6
-	plot([0,1E6],[growth_factor2(0),growth_factor2(1E6)],line = (:line, 4))
-	title!("r for Exercise 2a")
+	#K=100
+	plot([0,K],[growth_factor(0,K),growth_factor(K,K)],line = (:line, 4))
+	title!("r for constrained growth")
 	xlabel!("Number of cells")
-	ylabel!("r")
-	
+	ylabel!("pp")
 end
 
-# ╔═╡ d55d1137-e6f9-45ba-a68b-377d388feac9
-function constrained_growth_4(p, r; dt=0.01)
-traj = []
-for t in 1:50 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = p * (2 - p/ 1E6)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
+# ╔═╡ cb6cded2-d68d-4918-a01b-7360183cbb9a
+plot([1:10],constrained_growth_generic(2,K; dt=1),ylims = (0,100),xlabel=("n (units of cell cycle)"),ylabel=("Number of cells"),title=("Constrained growth, K=$K"))
 
-# ╔═╡ b7cebd3a-c4a1-48ae-99e0-5431e2b261a2
-pp1=plot([1:50],constrained_growth_4(1, r; dt=0.01),ylims = (0,50000+1E6),xlabel=("Time"),ylabel=("Number of cells"),label=("100% proliferating"),title=("Constrained growth, r=2"))
+# ╔═╡ a362f508-3d2b-4ea8-8467-7c0dc880022a
+md" which is again similar to the logistic solution, but now, instead of modulating the cell cycle from an initial value to a very long value, we are modulating the number of cells that are actively cycling, wich is more realistic. 
 
-# ╔═╡ d43ffd8f-1bfd-437b-81e3-0dabc6a3d081
- md"
- ## 
-(b) Solution: so, now on average, from 100 cells, only 50 cells proliferate. This is a common biological phenomena called _quiescence_, by which some cells in a population decide not to cycle and rest. Sometimes thsi rest can last years (adult stem cells). 
- 
-In our system, now after one hour, you have 50 new cells + the previous 100 cells. This means that, in unrestricted conditions $r_0$=1.5
-
-
-
- The linear function r is thus determined to be
+To obtain a analytical solution, we again have to write everyting as a continuum. 
 
 ```math
-Slope=\frac{1 - 1.5}{10^6-0}=\frac{- 0.5}{10^6}=- 0.5 \cdot 10^{-6}\\
-```
-Therefore, the function takes the form
-
-```math
-r(p) = 1.5 - 0.5 \cdot 10^{-6} p
-```
-
-and the difference equation is now
-```math
-p_{t+1} = p_{t} (1.5 - 0.5 \cdot 10^{-6} p_{t})  = 
-```
-
-
-```math
-p_{t+1}= p_{t} (1.5- \frac{p_{t}}{2\cdot10^6})
-```
-"
-
-# ╔═╡ db1e527b-7fdc-45cc-8c20-d106dd347103
-begin
-	growth_factor3(p) = 1.5 -  0.5 * p / 1E6
-	plot([0,1E6],[growth_factor3(0),growth_factor3(1E6)],line = (:line, 4))
-	title!("r for Exercise 2b")
-	xlabel!("Number of cells")
-	ylabel!("r")
-	
-end
-
-# ╔═╡ bc878bca-ad29-43ca-b76c-cc710bb2aa33
-function constrained_growth_5(p, r; dt=0.01)
-traj = []
-for t in 1:50 # arbitrary, just leave enough for it to reach a steady state given the dt
-	#p += dt * (p * ((1.10 - 0.002 * p) - 1))	
-	p = p * (1.5 - p/ 2E6)
-	#p = p * r; #p = p * r; 
-push!(traj,p)
-end
-return traj#[end-20:end] # this is sampling from the steady state
-end
-
-# ╔═╡ 46d6d1ea-7b07-4e65-b965-b65c8655503d
-begin
-show(pp1);
-plot!([1:50],constrained_growth_5(1, r; dt=0.01),ylims = (0,50000+1E6),xlabel=("Time"),ylabel=("Number of cells"),label=("50% proliferating"),title=("Constrained growth"));
-end
-
-# ╔═╡ 2d392e4f-8944-438a-a5c5-977ed95e258b
-md"so, you can see that you reach the same final point, but later in time, "
-
-# ╔═╡ 4a924aa1-e7f4-4664-b9e3-498d24dcffeb
-md" d)  If counting all cells, 10% died, it means that, if we start with 100, we generate 150. Then 10% of the cells die, so in the first iteration with no restrictions you produce 135, this means an r=1.35."
-
-# ╔═╡ 1ede2ba1-18d6-4385-9df1-458b572e5121
-md" d)  if from the newborn cells, only 90% survive, this means that if we start with 100 cells, and 50% proliferate, we obtain 50 new cells. Now, from these new 50 cells, only 45 cell survive. from 50 cells that are non cycling, we have to remove the 20%, so we have 40 cells. In total, from 100 cells, you have 50 mothers, 45 daugthers, and 40 noncycling, so 135 in total. this gives an r=1.35"
-
-# ╔═╡ b3171639-fd44-4aa5-8c89-7ff91ce9fc61
-md" ## 3.3 Equilibrium in the logistic map
-
-A more common way of finding the equation for the logistic growth model is its dimensionless form. 
-
-```math
-x_{t+1} =   x_{t} \cdot r (1 - x_{t}) 
-```
-
-When we find the equilibrium points of our difference equation, we can move into the study of stability analysis, which explores the behavior of solutions when the initial condition is close to the difference equation’s equilibrium point(s). If the initial term is close to an equilibrium point and the solution converges towards the equilibrium point, then the equilibrium point is considered a sink,
-
-condition for equilibrium is that the next point is equial to the previous time point
-
-```math
-x = r \cdot x (1 − x)
+\begin{align*}
+\frac{\mathrm{d} N}{\mathrm{d} t}= \frac{log(2)}{T} N(1 -\frac{N}{K}) \tag{17}
+\end{align*}
 ```
 ##
 
-Solving for $x$, we find that the
-equilibrium points are $x=0$ and 
+similarly to the logistic growth models, we obtain the solution 
 
 ```math
-\begin{align}
-1 &= r (1 − x) \\
-1 &= r − r x\\
-r x  &= r - 1\\
-x  &= \frac{r - 1}{r}\\
-\end{align}
+\begin{align*}
+N = \frac{K N_0}{N_0 +(K-N_0) e^{- log(2) \frac{t}{T}}} \tag{34}
+\end{align*}
 ```
 
-where r>1.We will refer to $x = 0$ as the zero equilibrium, and $x  = \frac{r - 1}{r}$ as the positive equilibrium. Now that we established where the equilibrium points are located, we can examine what happens when we modify the constant r, and the initial value of the sequence. When 0 < r ≤ 1, we will only have one equilibrium point, x = 0. Moreover, the recursive sequence will converge to x = 0. 
 
-Now move the slider in the
- next plot to see what happens for higher values of r:
 
+A good experiment will be to test if the dependence of the growth fraction with the density is linear or is more complex than that. 
 
 "
 
-# ╔═╡ 6ea8e4b3-1393-4675-86df-b32bd70bf587
-logimap(x, r) = r*x*(1-x)
-
-# ╔═╡ 988ee18e-1dc3-4061-9cbe-96424961fbb7
+# ╔═╡ 4901d712-e06b-4e78-a6cd-8d425d8aa8d1
 begin
-	rrrrr_slide = @bind rrrrr html"<input type=range min=0.9 max=4.0 step=0.1>"
-	
+	N₀_slide = @bind N₀ html"<input type=range min=1 max=200 step=10>"
+
+	TTT_slide = @bind TTT html"<input type=range min=5 max=15 step=1>"
+
+	KKK_slide = @bind KKK html"<input type=range min=0.0 max=100 step=0.1>"
 	md"""
-	##
-	**Move the slider to set the growth rate of the population**
+	**Set the initial number of cells**
 	
-	value of r: $(rrrrr_slide)
-	
+	value of N₀: $(N₀_slide)
+	value of T: $(TTT_slide)
+	value of K: $(KKK_slide)
 	"""
 end
 
-# ╔═╡ bbe71b50-2387-4a22-898a-8140c55121e4
-begin
-	x = 0.001;	 logi = Float64[]
-	for t in time
-		    x = logimap(x, rrrrr)
-		    push!(logi, x)
-		end
+# ╔═╡ 498e24f7-2b01-4231-8d20-392d01f8eee4
+function logistic_growth_continuous(N₀,K,t,T)
+	#μ=log(2)/T
+    #N₀ .* exp.(μ .* t)
+	N₀.* K  ./ (N₀ .+(K .- N₀) .* exp.(-log(2) .* t ./T))
 end
 
-# ╔═╡ a9357ca7-54ea-4f67-a0a8-df01d1bc4246
-plot(time,logi, xlims=(0,10),ylims=(0.0,1.0),xlabel="Time",ylabel="Number of individuals in population",title=("Constrained growth, r=$rrrrr"),leg=false)
+# ╔═╡ 2bef6fa6-a514-41d9-a5d3-9d1d68d77c28
+plot(collect(0:1:100),logistic_growth_continuous(N₀,KKK,collect(0:1:100),TTT),label="T= $TTT",seriestype=:line,xlabel=("Time"),ylabel=("Number of cells"),ylims = (0,100))
 
-# ╔═╡ af01b6ef-bd47-4a15-8bd4-f90e214411f3
-md" ##
-As seen from the plot above, now we have three cases:
+# ╔═╡ c3f2bdb8-350a-483b-86a6-56b911d89fd7
+md"this way, when the carrying capacity is very high, the number of cells doubles every cell cycle. "
 
-- With r < 1.0, the system converges to 0:
+# ╔═╡ 244806f5-6488-4f17-be01-92f2c63f06c6
+logistic_growth_continuous(10,100000000,10,10)
 
-- With 1.0 < r < 3.0  the system converges to a fixed value above  0
-
-- With 3.0 < r < 3.6  something else happens, the system becomes periodic
-
-- With r > 3.6 we get chaos
-
-Chaos is a property of a complex system whose behaviour is so unpredictable as to appear random, due to great sensitivity to small changes in conditions.
-
-In the logistic map, if we adjust the growth rate parameter beyond 3.5, we see the onset of chaos. A chaotic system has a strange attractor, around which the system oscillates forever, never repeating itself or settling into a steady state of behavior. It never hits the same point twice and its structure has a fractal form, meaning the same patterns exist at every scale no matter how much you zoom into it.
-
-To show this more clearly, let’s run the logistic model again, this time for 200 generations across 1,000 growth rates between 0.0 to 4.0. . This time we’ll have 1,000 so we’ll need to visualize it in a different way, using something called a bifurcation diagram:
-
-
-
-##
-Let's now produce a useful visualizations that will allow us to characterize the behaviour of the logistic map. It is called a _bifurcation plot_, and it is generated ploting the steady state values of teh system for diferent parameter values. The following code generates the bifurcation plot for the logistic map with r∈[1,4].
-
-"
-
-# ╔═╡ 26c5caa7-ab30-4dc2-9eea-2e6e8316b184
-begin
-	#  bifurcation plot with animation
-	p = plot([],zeros(0),leg=false)
-	xlims!((1.0,4.0))
-	ylims!((0.0,1.0))
-	anim = Animation()
-	T = 1000 # number of iterations
-	M = 300  # pick last M points
-	for γ in 1.0:0.01:4.0
-	    pts = []
-	    x = 0.1         # arbitrary initial value
-	    for t = 1:T     # mapping
-	        push!(pts, x)
-	        x = γ * x * (1.0 - x)
-	    end
-	    p=scatter!(p,γ*ones(M),pts[T-M:T],label=nothing,ms=0.5,c=:black)
-	    frame(anim)
-	end
-	gif(anim, "Logistic-bifur.gif", fps=25)
-end
-
-# ╔═╡ 4185a115-9871-4065-85e9-37df17d54891
-md"
-
-In these type of plots, we can see points where the steady state solution goes from one to two solutions. These points are called _bifurcations_, and in this particular case, _perid doubling bifurcations_, since the pediod of oscillation duplicates as we crossed one of thsi points. To understand better how this chaoting behavior emerges, we will now plot the first and second values predicted by the logistic equation "
-
-# ╔═╡ 93741ffc-2d2b-4b6a-bcb5-d0e899b0586b
-x_1=collect(0:0.05:1);
-
-# ╔═╡ 4d9dde04-0476-448e-ad6c-a8374b35568f
-begin
-	rrrrrr_slide = @bind rrrrrr html"<input type=range min=0.9 max=4.0 step=0.1>"
-	
-	md"""
-	##
-	**Set the growth rate?**
-	
-	value of r: $(rrrrrr_slide)
-	
-	"""
-end
-
-# ╔═╡ 7f608559-6b37-4246-afa6-60cfda53d321
-begin
-	p3_=plot(x_1, x_1,xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="initial")
-	plot!(x_1, rrrrrr .* x_1 .* (1 .− x_1),xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="first")
-	
-	plot!(x_1, rrrrrr .^2  .* (1 .− x_1) .* x_1 .* (1 .- (rrrrrr .* x_1) .+ (rrrrrr .* x_1 .^2) ),xlabel=("p_current"),ylims = (0,1),ylabel=("p_next"),title=("Constrained growth, r=$rrrrrr"),label="second")
-end
-
-# ╔═╡ 80f0dfcf-b202-47e0-b7af-c0d8f3c7deb8
-md"now we will plot on top of this, the first time points of the simulation of the population growth. Thsi type of plot is called a _Verhulst diagram_."
-
-# ╔═╡ 7c850679-a706-4d27-b6a2-d5a078c38bb7
-begin
-	# Verhulst diagram 
-	#gr(size=(600, 500))
-	p3_
-	#p2 = plot([0, 1], [0, 1], label="", linecolor="black")
-	anim2 = Animation()
-	#γ = 3.9
-	x_initial = 0.1
-	for t = 1:10
-	    x_new = rrrrrr * x_initial * (1.0 - x_initial)
-	    push!(p3_, [x_initial, x_initial], [x_initial, x_new])   # vertical
-	    push!(p3_, [x_initial, x_new], [x_new, x_new])  # horizontal
-	    frame(anim2)
-	    x_initial = x_new
-	end
-	gif(anim2, "LogisticmapVerhulst.gif", fps=15)
-end
-
-# ╔═╡ 43b4f6a3-8cff-4198-a0dd-409643f2059f
-md" ## 3.4 Conclusions: 
-Chaos is not just a cool mathematical idea. It is everywhere in the nature. So, learning how to deal with chaotic data allows us to understand and interact with the physical world better.
-Apart from displaying interesting bifurcation patterns as shown above, another important characteristic of a chaotic system is it’s exponentially sentitive to small perturbations. A small drift in the initial state will cause increasing and significant divergence, a phenomenon termed “the butterfly effect”.
-
-Edward Lorenz, the father of chaos theory, described chaos as:
-
-_when the present determines the future, but the approximate present does not approximately determine the future_
-
-
-"
-
-# ╔═╡ 8b7117ed-e4e5-4111-bd04-078d7baf9320
-Resource("https://i.ibb.co/QnW9TjW/X-Next-5-1024x666.jpg",:width => 800)
+# ╔═╡ 9617adbc-4f8d-4cd9-bbf4-096997f8f1a5
+md"a good experiment will be to monitor if in 3D the rate of quiescence is linear with the number of cells, or it is more complex than that."
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -630,7 +252,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
 DifferentialEquations = "~7.7.0"
-Plots = "~1.38.5"
+Plots = "~1.38.9"
 PlutoUI = "~0.7.50"
 """
 
@@ -640,7 +262,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "327dd4d7cc8897d09e64be7b62b44238f24b914d"
+project_hash = "2a2a7e4b117068d15848b4899e40ec014ccc6fd8"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -666,9 +288,9 @@ version = "0.2.0"
 
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "ec9c36854b569323551a6faf2f31fda15e3459a7"
+git-tree-sha1 = "38911c7737e123b28182d89027f4216cfc8a9da7"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "7.2.0"
+version = "7.4.3"
 
 [[deps.ArrayInterfaceCore]]
 deps = ["LinearAlgebra", "SnoopPrecompile", "SparseArrays", "SuiteSparse"]
@@ -687,9 +309,9 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.BandedMatrices]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "SnoopPrecompile", "SparseArrays"]
-git-tree-sha1 = "ee75410471c18f40d57eb53840bc705a74566f23"
+git-tree-sha1 = "6ef8fc1d77b60f41041d59ce61ef9eb41ed97a83"
 uuid = "aae01518-5342-5314-be14-df237901396f"
-version = "0.17.16"
+version = "0.17.18"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -801,9 +423,9 @@ version = "0.3.0"
 
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
-git-tree-sha1 = "61fdd77467a5c3ad071ef8277ac6bd6af7dd4c04"
+git-tree-sha1 = "7a60c856b9fa189eb34f5f8a6f6b5529b7942957"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.6.0"
+version = "4.6.1"
 
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -848,10 +470,10 @@ deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
 [[deps.DelayDiffEq]]
-deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "LinearAlgebra", "Logging", "OrdinaryDiffEq", "Printf", "RecursiveArrayTools", "Reexport", "SciMLBase", "SimpleNonlinearSolve", "UnPack"]
-git-tree-sha1 = "dde3fa2cfc91fb5d39ba2a7dc7e4383e0a6665b3"
+deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "LinearAlgebra", "Logging", "OrdinaryDiffEq", "Printf", "RecursiveArrayTools", "Reexport", "SciMLBase", "SimpleNonlinearSolve", "SimpleUnPack"]
+git-tree-sha1 = "89f3fbfe78f9d116d1ed0721d65b0b2cf9b36169"
 uuid = "bcd4f6db-9728-5f36-b5f7-82caef46ccdb"
-version = "5.41.0"
+version = "5.42.0"
 
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
@@ -865,15 +487,15 @@ version = "0.4.0"
 
 [[deps.DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "DataStructures", "Distributions", "DocStringExtensions", "EnumX", "FastBroadcast", "ForwardDiff", "FunctionWrappers", "FunctionWrappersWrappers", "LinearAlgebra", "Logging", "Markdown", "MuladdMacro", "Parameters", "PreallocationTools", "Printf", "RecursiveArrayTools", "Reexport", "Requires", "SciMLBase", "Setfield", "SparseArrays", "Static", "StaticArraysCore", "Statistics", "Tricks", "TruncatedStacktraces", "ZygoteRules"]
-git-tree-sha1 = "a057a5fe2a6a05f28ef1092d5974a0c2986be23c"
+git-tree-sha1 = "117b2d02e737aeefd58cd4a4803abecadd37c8cc"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.121.1"
+version = "6.122.2"
 
 [[deps.DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "Markdown", "NLsolve", "Parameters", "RecipesBase", "RecursiveArrayTools", "SciMLBase", "StaticArraysCore"]
-git-tree-sha1 = "b497f63a13fe37e03ed7ac72d71b72aad17b46c4"
+git-tree-sha1 = "63b6be7b396ad395825f3cc48c56b53bfaf7e69d"
 uuid = "459566f4-90b8-5000-8ac3-15dfb0a30def"
-version = "2.26.0"
+version = "2.26.1"
 
 [[deps.DiffEqNoiseProcess]]
 deps = ["DiffEqBase", "Distributions", "GPUArraysCore", "LinearAlgebra", "Markdown", "Optim", "PoissonRandom", "QuadGK", "Random", "Random123", "RandomNumbers", "RecipesBase", "RecursiveArrayTools", "Requires", "ResettableStacks", "SciMLBase", "StaticArrays", "Statistics"]
@@ -901,9 +523,9 @@ version = "7.7.0"
 
 [[deps.Distances]]
 deps = ["LinearAlgebra", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "3258d0659f812acde79e8a74b11f17ac06d0ca04"
+git-tree-sha1 = "49eba9ad9f7ead780bfb7ee319f962c811c6d3b2"
 uuid = "b4f34e82-e78d-54a5-968a-f98e89d6e8f7"
-version = "0.10.7"
+version = "0.10.8"
 
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
@@ -911,9 +533,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "fb372fc76a20edda014dfc2cdb33f23ef80feda6"
+git-tree-sha1 = "13027f188d26206b9e7b863036f87d2f2e7d013a"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.85"
+version = "0.25.87"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -950,9 +572,9 @@ uuid = "d4d017d3-3776-5f7e-afef-a10c40355c18"
 version = "1.24.0"
 
 [[deps.ExprTools]]
-git-tree-sha1 = "56559bbef6ca5ea0c0818fa5c90320398a6fbf8d"
+git-tree-sha1 = "c1d06d129da9f55715c6c212866f5b1bddc5fa00"
 uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
-version = "0.1.8"
+version = "0.1.9"
 
 [[deps.FFMPEG]]
 deps = ["FFMPEG_jll"]
@@ -988,15 +610,15 @@ uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
 [[deps.FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays", "Statistics"]
-git-tree-sha1 = "d3ba08ab64bdfd27234d3f61956c966266757fe6"
+git-tree-sha1 = "7072f1e3e5a8be51d525d64f63d3ec1287ff2790"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.13.7"
+version = "0.13.11"
 
 [[deps.FiniteDiff]]
 deps = ["ArrayInterface", "LinearAlgebra", "Requires", "Setfield", "SparseArrays", "StaticArrays"]
-git-tree-sha1 = "ed1b56934a2f7a65035976985da71b6a65b4f2cf"
+git-tree-sha1 = "03fcb1c42ec905d15b305359603888ec3e65f886"
 uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
-version = "2.18.0"
+version = "2.19.0"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -1063,15 +685,15 @@ version = "0.1.4"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
-git-tree-sha1 = "660b2ea2ec2b010bb02823c6d0ff6afd9bdc5c16"
+git-tree-sha1 = "0635807d28a496bb60bc15f465da0107fb29649c"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.71.7"
+version = "0.72.0"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt5Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "d5e1fd17ac7f3aa4c5287a61ee28d4f8b8e98873"
+git-tree-sha1 = "99e248f643b052a77d2766fe1a16fb32b661afd4"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.71.7+0"
+version = "0.72.0+0"
 
 [[deps.GenericSchur]]
 deps = ["LinearAlgebra", "Printf"]
@@ -1127,10 +749,10 @@ uuid = "3e5b6fbb-0976-4d2c-9146-d79de83f2fb0"
 version = "0.1.14"
 
 [[deps.HypergeometricFunctions]]
-deps = ["DualNumbers", "LinearAlgebra", "OpenLibm_jll", "SpecialFunctions", "Test"]
-git-tree-sha1 = "709d864e3ed6e3545230601f94e11ebc65994641"
+deps = ["DualNumbers", "LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
+git-tree-sha1 = "d926e9c297ef4607866e8ef5df41cde1a642917f"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
-version = "0.3.11"
+version = "0.3.14"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
@@ -1217,9 +839,9 @@ version = "2.1.91+0"
 
 [[deps.JumpProcesses]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "FunctionWrappers", "Graphs", "LinearAlgebra", "Markdown", "PoissonRandom", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SciMLBase", "StaticArrays", "TreeViews", "UnPack"]
-git-tree-sha1 = "7af8d30e281ce558807917b69ba16575d05f412b"
+git-tree-sha1 = "740c685ba3d7f218663436b2152041563c19db6e"
 uuid = "ccbc3e58-028d-4f4c-8cd5-9ae44345cda5"
-version = "9.5.1"
+version = "9.6.1"
 
 [[deps.KLU]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse_jll"]
@@ -1367,10 +989,10 @@ deps = ["Libdl", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LinearSolve]]
-deps = ["ArrayInterface", "DocStringExtensions", "FastLapackInterface", "GPUArraysCore", "IterativeSolvers", "KLU", "Krylov", "KrylovKit", "LinearAlgebra", "Preferences", "RecursiveFactorization", "Reexport", "SciMLBase", "SciMLOperators", "Setfield", "SnoopPrecompile", "SparseArrays", "Sparspak", "SuiteSparse", "UnPack"]
-git-tree-sha1 = "d1fce810e9a4213607f0182cf25ffd6ce13e19b6"
+deps = ["ArrayInterface", "DocStringExtensions", "EnumX", "FastLapackInterface", "GPUArraysCore", "IterativeSolvers", "KLU", "Krylov", "KrylovKit", "LinearAlgebra", "Preferences", "RecursiveFactorization", "Reexport", "SciMLBase", "SciMLOperators", "Setfield", "SnoopPrecompile", "SparseArrays", "Sparspak", "SuiteSparse", "UnPack"]
+git-tree-sha1 = "1d3e720d603557d697fedc036bd1af43fe7b3474"
 uuid = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-version = "1.37.0"
+version = "1.41.1"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
@@ -1389,9 +1011,9 @@ version = "1.0.0"
 
 [[deps.LoopVectorization]]
 deps = ["ArrayInterface", "ArrayInterfaceCore", "CPUSummary", "ChainRulesCore", "CloseOpenIntervals", "DocStringExtensions", "ForwardDiff", "HostCPUFeatures", "IfElse", "LayoutPointers", "LinearAlgebra", "OffsetArrays", "PolyesterWeave", "SIMDTypes", "SLEEFPirates", "SnoopPrecompile", "SpecialFunctions", "Static", "StaticArrayInterface", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "2acf6874142d05d5d1ad49e8d3786b8cd800936d"
+git-tree-sha1 = "a282dbdbc2860134d6809acd951543ce359bcf15"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.152"
+version = "0.12.155"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -1470,10 +1092,10 @@ uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.2.0"
 
 [[deps.NonlinearSolve]]
-deps = ["ArrayInterface", "DiffEqBase", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "RecursiveArrayTools", "Reexport", "SciMLBase", "SimpleNonlinearSolve", "SnoopPrecompile", "SparseArrays", "SparseDiffTools", "StaticArraysCore", "UnPack"]
-git-tree-sha1 = "3f856788ba532419c07ba2e0dc37b06e5d784992"
+deps = ["ArrayInterface", "DiffEqBase", "EnumX", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "RecursiveArrayTools", "Reexport", "SciMLBase", "SimpleNonlinearSolve", "SnoopPrecompile", "SparseArrays", "SparseDiffTools", "StaticArraysCore", "UnPack"]
+git-tree-sha1 = "a6000c813371cd3cd9cbbdf8a356fc3a97138d92"
 uuid = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
-version = "1.5.0"
+version = "1.6.0"
 
 [[deps.OffsetArrays]]
 deps = ["Adapt"]
@@ -1528,15 +1150,15 @@ uuid = "91d4177d-7536-5919-b921-800302f37372"
 version = "1.3.2+0"
 
 [[deps.OrderedCollections]]
-git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
+git-tree-sha1 = "d321bf2de576bf25ec4d3e4360faca399afca282"
 uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
-version = "1.4.1"
+version = "1.6.0"
 
 [[deps.OrdinaryDiffEq]]
-deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "ExponentialUtilities", "FastBroadcast", "FastClosures", "FiniteDiff", "ForwardDiff", "FunctionWrappersWrappers", "IfElse", "LinearAlgebra", "LinearSolve", "Logging", "LoopVectorization", "MacroTools", "MuladdMacro", "NLsolve", "NonlinearSolve", "Polyester", "PreallocationTools", "Preferences", "RecursiveArrayTools", "Reexport", "SciMLBase", "SciMLNLSolve", "SimpleNonlinearSolve", "SnoopPrecompile", "SparseArrays", "SparseDiffTools", "StaticArrayInterface", "StaticArrays", "TruncatedStacktraces", "UnPack"]
-git-tree-sha1 = "5370a27bf89e6ac04517c6b9778295cdb7a411f8"
+deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DocStringExtensions", "ExponentialUtilities", "FastBroadcast", "FastClosures", "FiniteDiff", "ForwardDiff", "FunctionWrappersWrappers", "IfElse", "LinearAlgebra", "LinearSolve", "Logging", "LoopVectorization", "MacroTools", "MuladdMacro", "NLsolve", "NonlinearSolve", "Polyester", "PreallocationTools", "Preferences", "RecursiveArrayTools", "Reexport", "SciMLBase", "SciMLNLSolve", "SimpleNonlinearSolve", "SimpleUnPack", "SnoopPrecompile", "SparseArrays", "SparseDiffTools", "StaticArrayInterface", "StaticArrays", "TruncatedStacktraces"]
+git-tree-sha1 = "9fb1f72106bfa1370006b90771cfbcce6c7468b6"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "6.48.0"
+version = "6.49.4"
 
 [[deps.PCRE2_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1557,9 +1179,9 @@ version = "0.12.3"
 
 [[deps.Parsers]]
 deps = ["Dates", "SnoopPrecompile"]
-git-tree-sha1 = "6f4fbcd1ad45905a5dee3f4256fabb49aa2110c6"
+git-tree-sha1 = "478ac6c952fddd4399e71d4779797c538d0ff2bf"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "2.5.7"
+version = "2.5.8"
 
 [[deps.Pipe]]
 git-tree-sha1 = "6842804e7867b115ca9de748a0cf6b364523c16d"
@@ -1591,9 +1213,9 @@ version = "1.3.4"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "Preferences", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SnoopPrecompile", "SparseArrays", "Statistics", "StatsBase", "UUIDs", "UnicodeFun", "Unzip"]
-git-tree-sha1 = "da1d3fb7183e38603fcdd2061c47979d91202c97"
+git-tree-sha1 = "186d38ea29d5c4f238b2d9fe6e1653264101944b"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.38.6"
+version = "1.38.9"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -1603,9 +1225,9 @@ version = "0.7.50"
 
 [[deps.PoissonRandom]]
 deps = ["Random"]
-git-tree-sha1 = "45f9da1ceee5078267eb273d065e8aa2f2515790"
+git-tree-sha1 = "a0f1159c33f846aa77c3f30ebbc69795e5327152"
 uuid = "e409e4f3-bfea-5376-8464-e040bb5c01ab"
-version = "0.4.3"
+version = "0.4.4"
 
 [[deps.Polyester]]
 deps = ["ArrayInterface", "BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "ManualMemory", "PolyesterWeave", "Requires", "Static", "StaticArrayInterface", "StrideArraysCore", "ThreadingUtilities"]
@@ -1649,9 +1271,9 @@ version = "5.15.3+2"
 
 [[deps.QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
-git-tree-sha1 = "786efa36b7eff813723c4849c90456609cf06661"
+git-tree-sha1 = "6ec7ac8412e83d57e313393220879ede1740f9ee"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.8.1"
+version = "2.8.2"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -1686,10 +1308,10 @@ uuid = "01d81517-befc-4cb6-b9ec-a95719d0359c"
 version = "0.6.11"
 
 [[deps.RecursiveArrayTools]]
-deps = ["Adapt", "ArrayInterface", "ChainRulesCore", "DocStringExtensions", "FillArrays", "GPUArraysCore", "IteratorInterfaceExtensions", "LinearAlgebra", "RecipesBase", "Requires", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables", "ZygoteRules"]
-git-tree-sha1 = "3dcb2a98436389c0aac964428a5fa099118944de"
+deps = ["Adapt", "ArrayInterface", "DocStringExtensions", "GPUArraysCore", "IteratorInterfaceExtensions", "LinearAlgebra", "RecipesBase", "Requires", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables"]
+git-tree-sha1 = "140cddd2c457e4ebb0cdc7c2fd14a7fbfbdf206e"
 uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
-version = "2.38.0"
+version = "2.38.3"
 
 [[deps.RecursiveFactorization]]
 deps = ["LinearAlgebra", "LoopVectorization", "Polyester", "SnoopPrecompile", "StrideArraysCore", "TriangularSolve"]
@@ -1734,9 +1356,9 @@ version = "0.4.0+0"
 
 [[deps.RuntimeGeneratedFunctions]]
 deps = ["ExprTools", "SHA", "Serialization"]
-git-tree-sha1 = "50314d2ef65fce648975a8e80ae6d8409ebbf835"
+git-tree-sha1 = "f139e81a81e6c29c40f1971c9e5309b09c03f2c3"
 uuid = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
-version = "0.5.5"
+version = "0.5.6"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -1755,27 +1377,27 @@ version = "0.6.38"
 
 [[deps.SciMLBase]]
 deps = ["ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Preferences", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "SnoopPrecompile", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables", "TruncatedStacktraces"]
-git-tree-sha1 = "fe55d9f9d73fec26f64881ba8d120607c22a54b0"
+git-tree-sha1 = "392d3e28b05984496af37100ded94dc46fa6c8de"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "1.88.0"
+version = "1.91.7"
 
 [[deps.SciMLNLSolve]]
 deps = ["DiffEqBase", "LineSearches", "NLsolve", "Reexport", "SciMLBase"]
-git-tree-sha1 = "66c7f901dbcad51791136e2d90ee67240256ecde"
+git-tree-sha1 = "2e1606c282fae6bd9aed4f159695774a44b9c75f"
 uuid = "e9a6253c-8580-4d32-9898-8661bb511710"
-version = "0.1.3"
+version = "0.1.4"
 
 [[deps.SciMLOperators]]
 deps = ["ArrayInterface", "DocStringExtensions", "Lazy", "LinearAlgebra", "Setfield", "SparseArrays", "StaticArraysCore", "Tricks"]
-git-tree-sha1 = "8419114acbba861ac49e1ab2750bae5c5eda35c4"
+git-tree-sha1 = "e61e48ef909375203092a6e83508c8416df55a83"
 uuid = "c0aeaf25-5076-4817-a8d5-81caf7dfa961"
-version = "0.1.22"
+version = "0.2.0"
 
 [[deps.Scratch]]
 deps = ["Dates"]
-git-tree-sha1 = "f94f779c94e58bf9ea243e77a37e16d9de9126bd"
+git-tree-sha1 = "30449ee12237627992a99d5e30ae63e4d78cd24a"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
-version = "1.1.1"
+version = "1.2.0"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1803,15 +1425,20 @@ version = "1.1.0"
 
 [[deps.SimpleNonlinearSolve]]
 deps = ["ArrayInterface", "DiffEqBase", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "Reexport", "Requires", "SciMLBase", "SnoopPrecompile", "StaticArraysCore"]
-git-tree-sha1 = "326789bbaa1b65b809bd4596b74e4fc3be5af6ac"
+git-tree-sha1 = "54c78ac3cc0343a16785adabe5bbf4063c737967"
 uuid = "727e6d20-b764-4bd8-a329-72de5adea6c7"
-version = "0.1.13"
+version = "0.1.14"
 
 [[deps.SimpleTraits]]
 deps = ["InteractiveUtils", "MacroTools"]
 git-tree-sha1 = "5d7e3f4e11935503d3ecaf7186eac40602e7d231"
 uuid = "699a6c99-e7fa-54fc-8d76-47d257e15c1d"
 version = "0.9.4"
+
+[[deps.SimpleUnPack]]
+git-tree-sha1 = "58e6353e72cde29b90a69527e56df1b5c3d8c437"
+uuid = "ce78b400-467f-4804-87d8-8f486da07d0a"
+version = "1.1.0"
 
 [[deps.SnoopPrecompile]]
 deps = ["Preferences"]
@@ -1852,21 +1479,21 @@ version = "2.2.0"
 
 [[deps.Static]]
 deps = ["IfElse"]
-git-tree-sha1 = "d0435ba43ab5ad1cbb5f0d286ca4ba67029ed3ee"
+git-tree-sha1 = "08be5ee09a7632c32695d954a602df96a877bf0d"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
-version = "0.8.4"
+version = "0.8.6"
 
 [[deps.StaticArrayInterface]]
 deps = ["ArrayInterface", "Compat", "IfElse", "LinearAlgebra", "Requires", "SnoopPrecompile", "SparseArrays", "Static", "SuiteSparse"]
-git-tree-sha1 = "5589ab073f8a244d2530b36478f53806f9106002"
+git-tree-sha1 = "fd5f417fd7e103c121b0a0b4a6902f03991111f4"
 uuid = "0d7ed370-da01-4f52-bd93-41d350b8b718"
-version = "1.2.1"
+version = "1.3.0"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
-git-tree-sha1 = "2d7d9e1ddadc8407ffd460e24218e37ef52dd9a3"
+git-tree-sha1 = "b8d897fe7fa688e93aef573711cb207c08c9e11e"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.5.16"
+version = "1.5.19"
 
 [[deps.StaticArraysCore]]
 git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
@@ -1879,9 +1506,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
-git-tree-sha1 = "f9af7f195fb13589dd2e2d57fdb401717d2eb1f6"
+git-tree-sha1 = "45a7769a04a3cf80da1c1c7c60caf932e6f4c9f7"
 uuid = "82ae8749-77ed-4fe6-ae5f-f523153014b0"
-version = "1.5.0"
+version = "1.6.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
@@ -1897,21 +1524,21 @@ version = "1.3.0"
 
 [[deps.SteadyStateDiffEq]]
 deps = ["DiffEqBase", "DiffEqCallbacks", "LinearAlgebra", "NLsolve", "Reexport", "SciMLBase"]
-git-tree-sha1 = "8998e426c1d49ef92d4c60cc81acb90ddf92c610"
+git-tree-sha1 = "04a7d0bb1c824857ba0bb0c17bc5950dccbfdd5d"
 uuid = "9672c7b4-1e72-59bd-8a11-6ac3964bc41f"
-version = "1.13.0"
+version = "1.14.0"
 
 [[deps.StochasticDiffEq]]
 deps = ["Adapt", "ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqNoiseProcess", "DocStringExtensions", "FillArrays", "FiniteDiff", "ForwardDiff", "JumpProcesses", "LevyArea", "LinearAlgebra", "Logging", "MuladdMacro", "NLsolve", "OrdinaryDiffEq", "Random", "RandomNumbers", "RecursiveArrayTools", "Reexport", "SciMLBase", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
-git-tree-sha1 = "c6b4b802d4d830e0e958f5f2098d8dea0a935f4b"
+git-tree-sha1 = "073da86200349ddf4ef8bc3e3f3acd62e1d554f7"
 uuid = "789caeaf-c7a9-5a7d-9973-96adeb23e2a0"
-version = "6.58.0"
+version = "6.60.0"
 
 [[deps.StrideArraysCore]]
 deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "ManualMemory", "SIMDTypes", "Static", "StaticArrayInterface", "ThreadingUtilities"]
-git-tree-sha1 = "2842f1dbd12d59f2728ba79f4002cd6b61808f8b"
+git-tree-sha1 = "f859ab67ca232b777a03a6cee588c1c15f7ec40a"
 uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
-version = "0.4.8"
+version = "0.4.9"
 
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
@@ -1924,9 +1551,9 @@ version = "5.10.1+0"
 
 [[deps.Sundials]]
 deps = ["CEnum", "DataStructures", "DiffEqBase", "Libdl", "LinearAlgebra", "Logging", "Reexport", "SciMLBase", "SnoopPrecompile", "SparseArrays", "Sundials_jll"]
-git-tree-sha1 = "c033830e3c6fb4260243fc907b1e7e93421e7ae8"
+git-tree-sha1 = "a4e8491c163d74fb92905c6443e59558f5e609a4"
 uuid = "c3572dad-4567-51f8-b174-8c6c989267f4"
-version = "4.15.1"
+version = "4.16.0"
 
 [[deps.Sundials_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "OpenBLAS_jll", "Pkg", "SuiteSparse_jll"]
@@ -1953,9 +1580,9 @@ version = "1.0.1"
 
 [[deps.Tables]]
 deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "OrderedCollections", "TableTraits", "Test"]
-git-tree-sha1 = "c79322d36826aa2f4fd8ecfa96ddb47b174ac78d"
+git-tree-sha1 = "1544b926975372da01227b382066ab70e574a3ec"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
@@ -1997,15 +1624,15 @@ uuid = "d5829a12-d9aa-46ab-831f-fb7c9ab06edf"
 version = "0.1.19"
 
 [[deps.Tricks]]
-git-tree-sha1 = "6bac775f2d42a611cdfcd1fb217ee719630c4175"
+git-tree-sha1 = "aadb748be58b492045b4f56166b5188aa63ce549"
 uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.6"
+version = "0.1.7"
 
 [[deps.TruncatedStacktraces]]
-deps = ["InteractiveUtils"]
-git-tree-sha1 = "7cdbe45f0018b7f681a6b63ad1250ee6f2297a87"
+deps = ["InteractiveUtils", "MacroTools", "Preferences"]
+git-tree-sha1 = "7bc1632a4eafbe9bd94cf1a784a9a4eb5e040a91"
 uuid = "781d530d-4396-4725-bb49-402e4bee1e77"
-version = "1.0.0"
+version = "1.3.0"
 
 [[deps.URIs]]
 git-tree-sha1 = "074f993b0ca030848b897beff716d93aca60f06a"
@@ -2037,9 +1664,9 @@ version = "0.2.0"
 
 [[deps.VectorizationBase]]
 deps = ["ArrayInterface", "CPUSummary", "HostCPUFeatures", "IfElse", "LayoutPointers", "Libdl", "LinearAlgebra", "SIMDTypes", "Static", "StaticArrayInterface"]
-git-tree-sha1 = "952ba509a61d1ebb26381ac459c5c6e838ed43c4"
+git-tree-sha1 = "b182207d4af54ac64cbc71797765068fdeff475d"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
-version = "0.21.60"
+version = "0.21.64"
 
 [[deps.VertexSafeGraphs]]
 deps = ["Graphs"]
@@ -2209,10 +1836,10 @@ uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
 version = "1.5.4+0"
 
 [[deps.ZygoteRules]]
-deps = ["MacroTools"]
-git-tree-sha1 = "8c1a8e4dfacb1fd631745552c8db35d0deb09ea0"
+deps = ["ChainRulesCore", "MacroTools"]
+git-tree-sha1 = "977aed5d006b840e2e40c0b48984f7463109046d"
 uuid = "700de1a5-db45-46bc-99cf-38207098b444"
-version = "0.2.2"
+version = "0.2.3"
 
 [[deps.fzf_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2285,60 +1912,24 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─d096a6be-65a1-428d-9bfb-da7fe89f4c19
-# ╟─0ca85fbd-7b68-45e6-8433-118492920050
-# ╟─51ea04ff-c66b-46d1-9e62-b1ec3554ee8a
-# ╟─ff1f143a-77d0-43e9-8975-b7b28c6f9ae4
-# ╟─2b43b0c5-fe0b-419a-b2d9-ec349625d6df
-# ╟─617ce27f-57e2-4e8c-8fda-4029fc6a01e3
-# ╟─081daad5-b960-4c64-bdec-c0ecb0d6896b
-# ╟─4e2cead3-1c4f-48b4-8f5a-f78c4efaee2c
-# ╠═16c39710-8f90-45c8-983a-25438019d90c
-# ╠═bd8ee393-6193-4662-b199-edbe339ffc31
-# ╟─7b74322b-8481-4311-a77c-1a62cfb5b15c
-# ╠═a1ce2262-da8e-496a-81d8-10ff5246c17f
-# ╟─85defe33-1c87-4e81-a7d2-a363bee3e699
-# ╠═b043d65b-a214-482a-96cb-e8c075814490
-# ╟─842e2c41-72a3-443c-82db-ab1ff3612a12
-# ╟─86804a6f-9178-40f3-ae82-cc6723412ae8
-# ╟─7d7ff37f-c221-4067-a74c-d50603448906
-# ╠═8510e3df-ea93-4c25-ac3d-1069b067a62d
-# ╟─53d4538b-bcfb-46ec-ab6c-a57d97747e6b
-# ╠═d048e8f1-5de8-4d4f-a984-9e25d571e209
-# ╟─469df604-25da-4579-9f47-5c48e91a6288
-# ╠═31b7cdd1-c2a7-49bc-a08d-9675090030b6
-# ╠═e02d057b-32d6-457b-b00e-f9dde43bf198
-# ╠═9a56b78a-eec0-4f0f-b30d-6f4fa777e59a
-# ╟─085747be-ed2c-435e-acbb-6bec8ea005f7
-# ╠═e88fb46c-3a9f-4be3-9318-3efe50e66938
-# ╟─68f8b497-3dcd-4a4b-a4fa-8f72c85706e3
-# ╟─2a518074-ea51-457a-b309-2d7650cd3463
-# ╟─c5a658da-7953-4131-ad6f-d2ce50294982
-# ╟─f972b4da-236d-4a7c-b2d6-ba1b4dc5a7d9
-# ╟─7915360f-4bd5-40d6-9cb8-0b278c3944d6
-# ╟─d55d1137-e6f9-45ba-a68b-377d388feac9
-# ╠═b7cebd3a-c4a1-48ae-99e0-5431e2b261a2
-# ╟─d43ffd8f-1bfd-437b-81e3-0dabc6a3d081
-# ╠═db1e527b-7fdc-45cc-8c20-d106dd347103
-# ╟─bc878bca-ad29-43ca-b76c-cc710bb2aa33
-# ╠═46d6d1ea-7b07-4e65-b965-b65c8655503d
-# ╟─2d392e4f-8944-438a-a5c5-977ed95e258b
-# ╟─4a924aa1-e7f4-4664-b9e3-498d24dcffeb
-# ╟─1ede2ba1-18d6-4385-9df1-458b572e5121
-# ╟─b3171639-fd44-4aa5-8c89-7ff91ce9fc61
-# ╟─6ea8e4b3-1393-4675-86df-b32bd70bf587
-# ╟─bbe71b50-2387-4a22-898a-8140c55121e4
-# ╟─988ee18e-1dc3-4061-9cbe-96424961fbb7
-# ╠═a9357ca7-54ea-4f67-a0a8-df01d1bc4246
-# ╟─af01b6ef-bd47-4a15-8bd4-f90e214411f3
-# ╟─26c5caa7-ab30-4dc2-9eea-2e6e8316b184
-# ╟─4185a115-9871-4065-85e9-37df17d54891
-# ╟─93741ffc-2d2b-4b6a-bcb5-d0e899b0586b
-# ╟─4d9dde04-0476-448e-ad6c-a8374b35568f
-# ╟─7f608559-6b37-4246-afa6-60cfda53d321
-# ╟─80f0dfcf-b202-47e0-b7af-c0d8f3c7deb8
-# ╟─7c850679-a706-4d27-b6a2-d5a078c38bb7
-# ╟─43b4f6a3-8cff-4198-a0dd-409643f2059f
-# ╟─8b7117ed-e4e5-4111-bd04-078d7baf9320
+# ╠═9e643389-d8ab-44ad-8382-59260c1200c9
+# ╟─c1b8a324-d3b9-11ed-2326-5bd8248b4877
+# ╠═2d14d119-5d42-4a43-9174-36fe6be37331
+# ╟─9e5c9221-0bcc-4d7e-9e4a-6e8492ad8df7
+# ╟─2d125528-1b11-41be-a249-5314da13d9d8
+# ╟─ea28a5b0-21c4-4585-9306-1ab5495b5adc
+# ╠═34062729-0c2f-489b-9e67-42698026d9f9
+# ╟─f2c140df-b8bc-45c9-b171-ecbb3c08ea62
+# ╟─05798137-3947-444f-948b-2fb152b2b8bd
+# ╟─804b1db3-9441-4cd6-872d-7f40a4609817
+# ╟─835cbcf6-f604-4172-8f71-f7e5496de990
+# ╟─cb6cded2-d68d-4918-a01b-7360183cbb9a
+# ╟─a362f508-3d2b-4ea8-8467-7c0dc880022a
+# ╟─4901d712-e06b-4e78-a6cd-8d425d8aa8d1
+# ╟─498e24f7-2b01-4231-8d20-392d01f8eee4
+# ╠═2bef6fa6-a514-41d9-a5d3-9d1d68d77c28
+# ╟─c3f2bdb8-350a-483b-86a6-56b911d89fd7
+# ╠═244806f5-6488-4f17-be01-92f2c63f06c6
+# ╟─9617adbc-4f8d-4cd9-bbf4-096997f8f1a5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
